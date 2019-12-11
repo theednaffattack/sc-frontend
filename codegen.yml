@@ -1,0 +1,19 @@
+overwrite: true
+schema: "http://localhost:4000/graphql"
+documents: "./modules/gql-gen/query-documents/**/*.ts"
+generates:
+  ./modules/gql-gen/generated/fragmentTypes.ts:
+    plugins:
+      - "fragment-matcher"
+  ./modules/gql-gen/generated/apollo-graphql.tsx:
+    config:
+      withHooks: true
+      addDocBlocks: true
+      withMutationOptionsType: true
+      withResultType: true
+      withMutationFn: true
+      noNamespaces: true
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-react-apollo"
