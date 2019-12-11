@@ -1,10 +1,10 @@
-import Link from "next/link";
-import * as React from "react";
-import Layout from "../modules/site-layout/main";
-import { LoginComponent } from "../generated/apolloComponents";
-import { Flex as FlexBase } from "rebass";
+import React from "react";
+import { Button, Flex as FlexBase } from "rebass/styled-components";
 import styled from "styled-components";
 import { minHeight } from "styled-system";
+
+import Layout from "../modules/site-layout/main";
+import { LoginComponent } from "../modules/gql-gen/generated/apollo-graphql";
 
 const Flex = styled(FlexBase)`
   ${minHeight}
@@ -31,20 +31,23 @@ const ContentFlex = styled(FlexBase)`
 `;
 
 const IndexPage: React.FunctionComponent = () => {
+  const breakWidths = [1, 1, 1, "690px"];
   return (
     <Layout title="Home | Next.js + TypeScript Example">
       <Flex flexDirection="column" width={[1]}>
-        <InnerFlex flexDirection="column">
-          <ContentFlex color="black" flexDirection="column" minHeight="100vh">
-            <h1>hello Next.js 👋</h1>
-            <p>
-              <Link href="/about">
-                <a>About</a>
-              </Link>
-            </p>
+        <InnerFlex
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          minHeight="100vh"
+        >
+          <ContentFlex color="black" flexDirection="column" width={breakWidths}>
+            <h1>Welcome to Slack Clone!</h1>
+
             <LoginComponent>
               {mutate => (
-                <button
+                <Button
+                  bg="blue"
                   onClick={async () => {
                     const response = await mutate({
                       variables: {
@@ -57,13 +60,12 @@ const IndexPage: React.FunctionComponent = () => {
                   }}
                 >
                   call login mutation
-                </button>
+                </Button>
               )}
             </LoginComponent>
           </ContentFlex>
         </InnerFlex>
       </Flex>
-      {/* </Card> */}
     </Layout>
   );
 };
