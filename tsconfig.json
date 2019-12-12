@@ -23,5 +23,5 @@
     "paths": { "rebass/styled-components": ["node_modules/@types/rebass"] }
   },
   "exclude": ["node_modules"],
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "next.config.js"]
 }
