@@ -110,7 +110,7 @@ export type User = {
   firstName: Scalars['String'],
   lastName: Scalars['String'],
   email: Scalars['String'],
-  profileImageUri: Scalars['String'],
+  profileImageUri?: Maybe<Scalars['String']>,
   name: Scalars['String'],
 };
 
@@ -165,7 +165,7 @@ export type LoginMutation = (
   { __typename?: 'Mutation' }
   & { login: Maybe<(
     { __typename?: 'User' }
-    & Pick<User, 'id' | 'firstName' | 'lastName' | 'email' | 'name'>
+    & Pick<User, 'id' | 'firstName' | 'lastName' | 'email' | 'name' | 'profileImageUri'>
   )> }
 );
 
@@ -403,6 +403,7 @@ export const LoginDocument = gql`
     lastName
     email
     name
+    profileImageUri
   }
 }
     `;
