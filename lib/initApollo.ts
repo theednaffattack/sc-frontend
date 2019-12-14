@@ -75,7 +75,6 @@ function create(
     fetch
   });
 
-  console.log("CAN I SEE MY ENV VARS?", getEnvVars.WEBSOCKET_URL);
   // Create a WebSocket link:
   const wsLink = isBrowser
     ? new WebSocketLink({
