@@ -9,11 +9,13 @@ import { theme } from "../modules/site-layout/theme";
 class MyApp extends App<any> {
   render() {
     const { Component, pageProps, apolloClient } = this.props;
+    const getLayout = Component.getLayout || ((page: any) => page);
+    const title = Component.title || "Fake test title";
     return (
       <ApolloProvider client={apolloClient}>
         <GlobalStyles />
         <ThemeProvider theme={theme}>
-          <Component {...pageProps} />
+          {getLayout(<Component title={title} {...pageProps} />)}
         </ThemeProvider>
       </ApolloProvider>
     );
