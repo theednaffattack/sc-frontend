@@ -1,6 +1,4 @@
 import Router from "next/router";
-// import { ParsedUrlQueryInput } from "querystring";
-
 // import { MyContext } from "../../types/types";
 
 // interface RedirectOptions {
