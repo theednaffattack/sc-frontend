@@ -32,36 +32,31 @@ const Header: React.FunctionComponent<HeaderProps> = () => {
         style={{ border: "2px white dashed" }}
       >
         <nav>
-          <MyLink shade="dark" prefetch href="/" name="home">
+          <MyLink shade="dark" href="/" name="home">
             <a>Home</a>
           </MyLink>{" "}
           |{" "}
-          <MyLink shade="dark" prefetch href="/cars" name="cars">
+          <MyLink shade="dark" href="/cars" name="cars">
             <a>Cars</a>
           </MyLink>{" "}
           |{" "}
-          <MyLink shade="dark" prefetch href="/login" name="login">
+          <MyLink shade="dark" href="/login" name="login">
             <a>Login</a>
           </MyLink>{" "}
           |{" "}
-          <MyLink shade="dark" prefetch href="/register" name="register">
+          <MyLink shade="dark" href="/register" name="register">
             <a>Register</a>
           </MyLink>{" "}
           |{" "}
-          <MyLink shade="dark" prefetch href="/hello" name="hello">
+          <MyLink shade="dark" href="/hello" name="hello">
             <a>Hello</a>
           </MyLink>{" "}
           |{" "}
-          <MyLink
-            shade="dark"
-            prefetch
-            href="/forgot-password"
-            name="forgot-password"
-          >
+          <MyLink shade="dark" href="/forgot-password" name="forgot-password">
             <a>Forgot Password</a>
           </MyLink>{" "}
           |{" "}
-          <MyLink shade="dark" prefetch href="/logout" name="logout">
+          <MyLink shade="dark" href="/logout" name="logout">
             <a>Logout</a>
           </MyLink>
         </nav>
