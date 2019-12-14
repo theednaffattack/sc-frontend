@@ -13,13 +13,58 @@ export type Scalars = {
   Boolean: boolean,
   Int: number,
   Float: number,
-  /** The `Upload` scalar type represents a file upload. */
-  Upload: any,
+  /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
+  DateTime: any,
 };
 
 export type ChangePasswordInput = {
   password: Scalars['String'],
   token: Scalars['String'],
+};
+
+
+export type EditUserInput = {
+  firstName: Scalars['String'],
+  lastName: Scalars['String'],
+  email: Scalars['String'],
+};
+
+export type GetAllMyMessagesInput = {
+  user: Scalars['String'],
+};
+
+export type GetMessagesFromUserInput = {
+  sentBy: Scalars['String'],
+  user: Scalars['String'],
+};
+
+export type Image = {
+   __typename?: 'Image',
+  id: Scalars['ID'],
+  uri: Scalars['String'],
+  message?: Maybe<Message>,
+  user: User,
+};
+
+export type ImageSubInput = {
+  filename: Scalars['String'],
+  filetype: Scalars['String'],
+};
+
+export type Message = {
+   __typename?: 'Message',
+  id: Scalars['ID'],
+  created_at?: Maybe<Scalars['DateTime']>,
+  updated_at?: Maybe<Scalars['DateTime']>,
+  message: Scalars['String'],
+  images?: Maybe<Array<Maybe<Image>>>,
+  sentBy: User,
+  user: User,
+};
+
+export type MessageOutput = {
+   __typename?: 'MessageOutput',
+  message: Scalars['String'],
 };
 
 export type Mutation = {
@@ -32,7 +77,9 @@ export type Mutation = {
   login?: Maybe<User>,
   logout: Scalars['Boolean'],
   register: User,
-  addProfilePicture: Scalars['Boolean'],
+  addProfilePicture: UploadProfilePictueReturnType,
+  editUserInfo: User,
+  signS3: SignedS3Payload,
 };
 
 
@@ -73,7 +120,17 @@ export type MutationRegisterArgs = {
 
 
 export type MutationAddProfilePictureArgs = {
-  picture: Scalars['Upload']
+  data: UploadProfilePictureInput
+};
+
+
+export type MutationEditUserInfoArgs = {
+  data: EditUserInput
+};
+
+
+export type MutationSignS3Args = {
+  files: Array<ImageSubInput>
 };
 
 export type PasswordInput = {
@@ -94,6 +151,14 @@ export type Query = {
    __typename?: 'Query',
   me?: Maybe<User>,
   helloWorld: Scalars['String'],
+  getAllMyMessages?: Maybe<User>,
+  getListToCreateThread?: Maybe<TransUserReturn>,
+  getMyMessagesFromUser?: Maybe<Array<Message>>,
+};
+
+
+export type QueryGetMyMessagesFromUserArgs = {
+  input: GetMessagesFromUserInput
 };
 
 export type RegisterInput = {
@@ -103,6 +168,35 @@ export type RegisterInput = {
   email: Scalars['String'],
 };
 
+export type SignedS3Payload = {
+   __typename?: 'SignedS3Payload',
+  signatures: Array<SignedS3SubPayload>,
+};
+
+export type SignedS3SubPayload = {
+   __typename?: 'SignedS3SubPayload',
+  url: Scalars['String'],
+  signedRequest: Scalars['String'],
+};
+
+export type TransUserReturn = {
+   __typename?: 'TransUserReturn',
+  id: Scalars['ID'],
+  firstName: Scalars['String'],
+  lastName: Scalars['String'],
+  thoseICanMessage?: Maybe<Array<User>>,
+};
+
+export type UploadProfilePictueReturnType = {
+   __typename?: 'UploadProfilePictueReturnType',
+  message: Scalars['String'],
+  profileImgUrl: Scalars['String'],
+};
+
+export type UploadProfilePictureInput = {
+  user: Scalars['ID'],
+  image?: Maybe<Scalars['String']>,
+};
 
 export type User = {
    __typename?: 'User',
@@ -110,9 +204,85 @@ export type User = {
   firstName: Scalars['String'],
   lastName: Scalars['String'],
   email: Scalars['String'],
+  images?: Maybe<Array<Maybe<Image>>>,
+  mappedMessages: Array<Message>,
+  followers?: Maybe<Array<Maybe<User>>>,
+  following?: Maybe<Array<Maybe<User>>>,
   profileImageUri?: Maybe<Scalars['String']>,
   name: Scalars['String'],
+  messages?: Maybe<Array<Message>>,
+  sent_messages?: Maybe<Array<Message>>,
 };
+
+export type SignS3MutationVariables = {
+  files: Array<ImageSubInput>
+};
+
+
+export type SignS3Mutation = (
+  { __typename?: 'Mutation' }
+  & { signS3: (
+    { __typename?: 'SignedS3Payload' }
+    & { signatures: Array<(
+      { __typename?: 'SignedS3SubPayload' }
+      & Pick<SignedS3SubPayload, 'url' | 'signedRequest'>
+    )> }
+  ) }
+);
+
+export type GetAllMyMessagesQueryVariables = {};
+
+
+export type GetAllMyMessagesQuery = (
+  { __typename?: 'Query' }
+  & { getAllMyMessages: Maybe<(
+    { __typename?: 'User' }
+    & Pick<User, 'id' | 'firstName' | 'lastName'>
+    & { mappedMessages: Array<(
+      { __typename?: 'Message' }
+      & Pick<Message, 'id' | 'created_at' | 'updated_at' | 'message'>
+      & { sentBy: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'firstName' | 'lastName'>
+      ), user: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'firstName' | 'lastName'>
+      ) }
+    )> }
+  )> }
+);
+
+export type GetListToCreateThreadQueryVariables = {};
+
+
+export type GetListToCreateThreadQuery = (
+  { __typename?: 'Query' }
+  & { getListToCreateThread: Maybe<(
+    { __typename?: 'TransUserReturn' }
+    & Pick<TransUserReturn, 'id' | 'firstName'>
+    & { thoseICanMessage: Maybe<Array<(
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'firstName' | 'lastName'>
+    )>> }
+  )> }
+);
+
+export type GetMyMessagesFromUserQueryVariables = {
+  input: GetMessagesFromUserInput
+};
+
+
+export type GetMyMessagesFromUserQuery = (
+  { __typename?: 'Query' }
+  & { getMyMessagesFromUser: Maybe<Array<(
+    { __typename?: 'Message' }
+    & Pick<Message, 'id' | 'message' | 'created_at'>
+    & { sentBy: (
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'firstName' | 'lastName'>
+    ) }
+  )>> }
+);
 
 export type ChangePasswordMutationVariables = {
   data: ChangePasswordInput
@@ -145,6 +315,19 @@ export type LogoutMutation = (
   & Pick<Mutation, 'logout'>
 );
 
+export type AddProfilePictureMutationVariables = {
+  data: UploadProfilePictureInput
+};
+
+
+export type AddProfilePictureMutation = (
+  { __typename?: 'Mutation' }
+  & { addProfilePicture: (
+    { __typename?: 'UploadProfilePictueReturnType' }
+    & Pick<UploadProfilePictueReturnType, 'message' | 'profileImgUrl'>
+  ) }
+);
+
 export type ConfirmUserMutationVariables = {
   token: Scalars['String']
 };
@@ -153,6 +336,19 @@ export type ConfirmUserMutationVariables = {
 export type ConfirmUserMutation = (
   { __typename?: 'Mutation' }
   & Pick<Mutation, 'confirmUser'>
+);
+
+export type EditUserInfoMutationVariables = {
+  data: EditUserInput
+};
+
+
+export type EditUserInfoMutation = (
+  { __typename?: 'Mutation' }
+  & { editUserInfo: (
+    { __typename?: 'User' }
+    & Pick<User, 'firstName' | 'lastName' | 'email' | 'name' | 'id' | 'profileImageUri'>
+  ) }
 );
 
 export type LoginMutationVariables = {
@@ -202,6 +398,237 @@ export type HelloWorldQuery = (
 );
 
 
+export const SignS3Document = gql`
+    mutation SignS3($files: [ImageSubInput!]!) {
+  signS3(files: $files) {
+    signatures {
+      url
+      signedRequest
+    }
+  }
+}
+    `;
+export type SignS3MutationFn = ApolloReactCommon.MutationFunction<SignS3Mutation, SignS3MutationVariables>;
+export type SignS3ComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<SignS3Mutation, SignS3MutationVariables>, 'mutation'>;
+
+    export const SignS3Component = (props: SignS3ComponentProps) => (
+      <ApolloReactComponents.Mutation<SignS3Mutation, SignS3MutationVariables> mutation={SignS3Document} {...props} />
+    );
+    
+export type SignS3Props<TChildProps = {}> = ApolloReactHoc.MutateProps<SignS3Mutation, SignS3MutationVariables> | TChildProps;
+export function withSignS3<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  SignS3Mutation,
+  SignS3MutationVariables,
+  SignS3Props<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, SignS3Mutation, SignS3MutationVariables, SignS3Props<TChildProps>>(SignS3Document, {
+      alias: 'signS3',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useSignS3Mutation__
+ *
+ * To run a mutation, you first call `useSignS3Mutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignS3Mutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signS3Mutation, { data, loading, error }] = useSignS3Mutation({
+ *   variables: {
+ *      files: // value for 'files'
+ *   },
+ * });
+ */
+export function useSignS3Mutation(baseOptions?: ApolloReactHooks.MutationHookOptions<SignS3Mutation, SignS3MutationVariables>) {
+        return ApolloReactHooks.useMutation<SignS3Mutation, SignS3MutationVariables>(SignS3Document, baseOptions);
+      }
+export type SignS3MutationHookResult = ReturnType<typeof useSignS3Mutation>;
+export type SignS3MutationResult = ApolloReactCommon.MutationResult<SignS3Mutation>;
+export type SignS3MutationOptions = ApolloReactCommon.BaseMutationOptions<SignS3Mutation, SignS3MutationVariables>;
+export const GetAllMyMessagesDocument = gql`
+    query GetAllMyMessages {
+  getAllMyMessages {
+    id
+    firstName
+    lastName
+    mappedMessages {
+      id
+      created_at
+      updated_at
+      message
+      sentBy {
+        id
+        firstName
+        lastName
+      }
+      user {
+        id
+        firstName
+        lastName
+      }
+    }
+  }
+}
+    `;
+export type GetAllMyMessagesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GetAllMyMessagesQuery, GetAllMyMessagesQueryVariables>, 'query'>;
+
+    export const GetAllMyMessagesComponent = (props: GetAllMyMessagesComponentProps) => (
+      <ApolloReactComponents.Query<GetAllMyMessagesQuery, GetAllMyMessagesQueryVariables> query={GetAllMyMessagesDocument} {...props} />
+    );
+    
+export type GetAllMyMessagesProps<TChildProps = {}> = ApolloReactHoc.DataProps<GetAllMyMessagesQuery, GetAllMyMessagesQueryVariables> | TChildProps;
+export function withGetAllMyMessages<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GetAllMyMessagesQuery,
+  GetAllMyMessagesQueryVariables,
+  GetAllMyMessagesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GetAllMyMessagesQuery, GetAllMyMessagesQueryVariables, GetAllMyMessagesProps<TChildProps>>(GetAllMyMessagesDocument, {
+      alias: 'getAllMyMessages',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGetAllMyMessagesQuery__
+ *
+ * To run a query within a React component, call `useGetAllMyMessagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllMyMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllMyMessagesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAllMyMessagesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetAllMyMessagesQuery, GetAllMyMessagesQueryVariables>) {
+        return ApolloReactHooks.useQuery<GetAllMyMessagesQuery, GetAllMyMessagesQueryVariables>(GetAllMyMessagesDocument, baseOptions);
+      }
+export function useGetAllMyMessagesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetAllMyMessagesQuery, GetAllMyMessagesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GetAllMyMessagesQuery, GetAllMyMessagesQueryVariables>(GetAllMyMessagesDocument, baseOptions);
+        }
+export type GetAllMyMessagesQueryHookResult = ReturnType<typeof useGetAllMyMessagesQuery>;
+export type GetAllMyMessagesLazyQueryHookResult = ReturnType<typeof useGetAllMyMessagesLazyQuery>;
+export type GetAllMyMessagesQueryResult = ApolloReactCommon.QueryResult<GetAllMyMessagesQuery, GetAllMyMessagesQueryVariables>;
+export const GetListToCreateThreadDocument = gql`
+    query GetListToCreateThread {
+  getListToCreateThread {
+    id
+    firstName
+    thoseICanMessage {
+      id
+      firstName
+      lastName
+    }
+  }
+}
+    `;
+export type GetListToCreateThreadComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GetListToCreateThreadQuery, GetListToCreateThreadQueryVariables>, 'query'>;
+
+    export const GetListToCreateThreadComponent = (props: GetListToCreateThreadComponentProps) => (
+      <ApolloReactComponents.Query<GetListToCreateThreadQuery, GetListToCreateThreadQueryVariables> query={GetListToCreateThreadDocument} {...props} />
+    );
+    
+export type GetListToCreateThreadProps<TChildProps = {}> = ApolloReactHoc.DataProps<GetListToCreateThreadQuery, GetListToCreateThreadQueryVariables> | TChildProps;
+export function withGetListToCreateThread<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GetListToCreateThreadQuery,
+  GetListToCreateThreadQueryVariables,
+  GetListToCreateThreadProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GetListToCreateThreadQuery, GetListToCreateThreadQueryVariables, GetListToCreateThreadProps<TChildProps>>(GetListToCreateThreadDocument, {
+      alias: 'getListToCreateThread',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGetListToCreateThreadQuery__
+ *
+ * To run a query within a React component, call `useGetListToCreateThreadQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetListToCreateThreadQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetListToCreateThreadQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetListToCreateThreadQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetListToCreateThreadQuery, GetListToCreateThreadQueryVariables>) {
+        return ApolloReactHooks.useQuery<GetListToCreateThreadQuery, GetListToCreateThreadQueryVariables>(GetListToCreateThreadDocument, baseOptions);
+      }
+export function useGetListToCreateThreadLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetListToCreateThreadQuery, GetListToCreateThreadQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GetListToCreateThreadQuery, GetListToCreateThreadQueryVariables>(GetListToCreateThreadDocument, baseOptions);
+        }
+export type GetListToCreateThreadQueryHookResult = ReturnType<typeof useGetListToCreateThreadQuery>;
+export type GetListToCreateThreadLazyQueryHookResult = ReturnType<typeof useGetListToCreateThreadLazyQuery>;
+export type GetListToCreateThreadQueryResult = ApolloReactCommon.QueryResult<GetListToCreateThreadQuery, GetListToCreateThreadQueryVariables>;
+export const GetMyMessagesFromUserDocument = gql`
+    query GetMyMessagesFromUser($input: GetMessagesFromUserInput!) {
+  getMyMessagesFromUser(input: $input) {
+    id
+    message
+    created_at
+    sentBy {
+      id
+      firstName
+      lastName
+    }
+  }
+}
+    `;
+export type GetMyMessagesFromUserComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GetMyMessagesFromUserQuery, GetMyMessagesFromUserQueryVariables>, 'query'> & ({ variables: GetMyMessagesFromUserQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const GetMyMessagesFromUserComponent = (props: GetMyMessagesFromUserComponentProps) => (
+      <ApolloReactComponents.Query<GetMyMessagesFromUserQuery, GetMyMessagesFromUserQueryVariables> query={GetMyMessagesFromUserDocument} {...props} />
+    );
+    
+export type GetMyMessagesFromUserProps<TChildProps = {}> = ApolloReactHoc.DataProps<GetMyMessagesFromUserQuery, GetMyMessagesFromUserQueryVariables> | TChildProps;
+export function withGetMyMessagesFromUser<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GetMyMessagesFromUserQuery,
+  GetMyMessagesFromUserQueryVariables,
+  GetMyMessagesFromUserProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GetMyMessagesFromUserQuery, GetMyMessagesFromUserQueryVariables, GetMyMessagesFromUserProps<TChildProps>>(GetMyMessagesFromUserDocument, {
+      alias: 'getMyMessagesFromUser',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGetMyMessagesFromUserQuery__
+ *
+ * To run a query within a React component, call `useGetMyMessagesFromUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetMyMessagesFromUserQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetMyMessagesFromUserQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useGetMyMessagesFromUserQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetMyMessagesFromUserQuery, GetMyMessagesFromUserQueryVariables>) {
+        return ApolloReactHooks.useQuery<GetMyMessagesFromUserQuery, GetMyMessagesFromUserQueryVariables>(GetMyMessagesFromUserDocument, baseOptions);
+      }
+export function useGetMyMessagesFromUserLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetMyMessagesFromUserQuery, GetMyMessagesFromUserQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GetMyMessagesFromUserQuery, GetMyMessagesFromUserQueryVariables>(GetMyMessagesFromUserDocument, baseOptions);
+        }
+export type GetMyMessagesFromUserQueryHookResult = ReturnType<typeof useGetMyMessagesFromUserQuery>;
+export type GetMyMessagesFromUserLazyQueryHookResult = ReturnType<typeof useGetMyMessagesFromUserLazyQuery>;
+export type GetMyMessagesFromUserQueryResult = ApolloReactCommon.QueryResult<GetMyMessagesFromUserQuery, GetMyMessagesFromUserQueryVariables>;
 export const ChangePasswordDocument = gql`
     mutation ChangePassword($data: ChangePasswordInput!) {
   changePassword(data: $data) {
@@ -348,6 +775,56 @@ export function useLogoutMutation(baseOptions?: ApolloReactHooks.MutationHookOpt
 export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export type LogoutMutationResult = ApolloReactCommon.MutationResult<LogoutMutation>;
 export type LogoutMutationOptions = ApolloReactCommon.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
+export const AddProfilePictureDocument = gql`
+    mutation AddProfilePicture($data: UploadProfilePictureInput!) {
+  addProfilePicture(data: $data) {
+    message
+    profileImgUrl
+  }
+}
+    `;
+export type AddProfilePictureMutationFn = ApolloReactCommon.MutationFunction<AddProfilePictureMutation, AddProfilePictureMutationVariables>;
+export type AddProfilePictureComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<AddProfilePictureMutation, AddProfilePictureMutationVariables>, 'mutation'>;
+
+    export const AddProfilePictureComponent = (props: AddProfilePictureComponentProps) => (
+      <ApolloReactComponents.Mutation<AddProfilePictureMutation, AddProfilePictureMutationVariables> mutation={AddProfilePictureDocument} {...props} />
+    );
+    
+export type AddProfilePictureProps<TChildProps = {}> = ApolloReactHoc.MutateProps<AddProfilePictureMutation, AddProfilePictureMutationVariables> | TChildProps;
+export function withAddProfilePicture<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AddProfilePictureMutation,
+  AddProfilePictureMutationVariables,
+  AddProfilePictureProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, AddProfilePictureMutation, AddProfilePictureMutationVariables, AddProfilePictureProps<TChildProps>>(AddProfilePictureDocument, {
+      alias: 'addProfilePicture',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAddProfilePictureMutation__
+ *
+ * To run a mutation, you first call `useAddProfilePictureMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddProfilePictureMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addProfilePictureMutation, { data, loading, error }] = useAddProfilePictureMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useAddProfilePictureMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<AddProfilePictureMutation, AddProfilePictureMutationVariables>) {
+        return ApolloReactHooks.useMutation<AddProfilePictureMutation, AddProfilePictureMutationVariables>(AddProfilePictureDocument, baseOptions);
+      }
+export type AddProfilePictureMutationHookResult = ReturnType<typeof useAddProfilePictureMutation>;
+export type AddProfilePictureMutationResult = ApolloReactCommon.MutationResult<AddProfilePictureMutation>;
+export type AddProfilePictureMutationOptions = ApolloReactCommon.BaseMutationOptions<AddProfilePictureMutation, AddProfilePictureMutationVariables>;
 export const ConfirmUserDocument = gql`
     mutation ConfirmUser($token: String!) {
   confirmUser(token: $token)
@@ -395,6 +872,60 @@ export function useConfirmUserMutation(baseOptions?: ApolloReactHooks.MutationHo
 export type ConfirmUserMutationHookResult = ReturnType<typeof useConfirmUserMutation>;
 export type ConfirmUserMutationResult = ApolloReactCommon.MutationResult<ConfirmUserMutation>;
 export type ConfirmUserMutationOptions = ApolloReactCommon.BaseMutationOptions<ConfirmUserMutation, ConfirmUserMutationVariables>;
+export const EditUserInfoDocument = gql`
+    mutation EditUserInfo($data: EditUserInput!) {
+  editUserInfo(data: $data) {
+    firstName
+    lastName
+    email
+    name
+    id
+    profileImageUri
+  }
+}
+    `;
+export type EditUserInfoMutationFn = ApolloReactCommon.MutationFunction<EditUserInfoMutation, EditUserInfoMutationVariables>;
+export type EditUserInfoComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<EditUserInfoMutation, EditUserInfoMutationVariables>, 'mutation'>;
+
+    export const EditUserInfoComponent = (props: EditUserInfoComponentProps) => (
+      <ApolloReactComponents.Mutation<EditUserInfoMutation, EditUserInfoMutationVariables> mutation={EditUserInfoDocument} {...props} />
+    );
+    
+export type EditUserInfoProps<TChildProps = {}> = ApolloReactHoc.MutateProps<EditUserInfoMutation, EditUserInfoMutationVariables> | TChildProps;
+export function withEditUserInfo<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  EditUserInfoMutation,
+  EditUserInfoMutationVariables,
+  EditUserInfoProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, EditUserInfoMutation, EditUserInfoMutationVariables, EditUserInfoProps<TChildProps>>(EditUserInfoDocument, {
+      alias: 'editUserInfo',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useEditUserInfoMutation__
+ *
+ * To run a mutation, you first call `useEditUserInfoMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditUserInfoMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editUserInfoMutation, { data, loading, error }] = useEditUserInfoMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useEditUserInfoMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<EditUserInfoMutation, EditUserInfoMutationVariables>) {
+        return ApolloReactHooks.useMutation<EditUserInfoMutation, EditUserInfoMutationVariables>(EditUserInfoDocument, baseOptions);
+      }
+export type EditUserInfoMutationHookResult = ReturnType<typeof useEditUserInfoMutation>;
+export type EditUserInfoMutationResult = ApolloReactCommon.MutationResult<EditUserInfoMutation>;
+export type EditUserInfoMutationOptions = ApolloReactCommon.BaseMutationOptions<EditUserInfoMutation, EditUserInfoMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($email: String!, $password: String!) {
   login(email: $email, password: $password) {
