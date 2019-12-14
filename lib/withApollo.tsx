@@ -77,8 +77,8 @@ export default (App: any) => {
           },
           getEnvVars: {
             WEBSOCKET_URL: process.env.WEBSOCKET_URL || "WEBSOCKET_URL missing",
-            GRAPHQL_URL: process.env.GRAPHQL_ENDPOINT
-              ? process.env.GRAPHQL_ENDPOINT
+            GRAPHQL_URL: process.env.GRAPHQL_URL
+              ? process.env.GRAPHQL_URL
               : "GRAPHQL_URL missing",
             PRODUCTION_CLIENT_DOMAIN:
               process.env.PRODUCTION_CLIENT_DOMAIN ||
