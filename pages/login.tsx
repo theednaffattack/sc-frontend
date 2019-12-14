@@ -23,7 +23,7 @@ interface ILoginPage {
 const LoginPage: ILoginPage = ({ referer }) => <Login referer={referer} />;
 
 LoginPage.getInitialProps = async ({ referer }: NextContext) => {
-  let setReferer = referer === undefined ? "/the login page" : referer;
+  let setReferer = referer === undefined ? "/login" : referer;
   return { referer: setReferer };
 };
 
