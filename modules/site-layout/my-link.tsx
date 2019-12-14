@@ -10,7 +10,6 @@ interface MyLinkProps {
   href: string;
   name: string;
   shade?: string | undefined;
-  prefetch?: boolean;
 }
 
 const StyledLink = styled.a<IStyledLinkProps>`
@@ -25,11 +24,10 @@ const StyledLink = styled.a<IStyledLinkProps>`
 const MyLink: React.FunctionComponent<MyLinkProps> = ({
   href,
   name,
-  prefetch,
   shade
   // theme
 }) => (
-  <Link href={href} prefetch={prefetch ? true : false} passHref>
+  <Link href={href} passHref>
     <StyledLink shade={shade ? shade : undefined}>{name}</StyledLink>
   </Link>
 );
