@@ -1,10 +1,10 @@
 import React from "react";
-import { Button, Flex as FlexBase } from "rebass/styled-components";
+import { Flex as FlexBase } from "rebass/styled-components";
 import styled from "styled-components";
 import { minHeight } from "styled-system";
+import Link from "next/link";
 
-import Layout from "../modules/site-layout/main";
-import { LoginComponent } from "../modules/gql-gen/generated/apollo-graphql";
+import Layout from "../modules/site-layout/main-v2";
 
 const Flex = styled(FlexBase)`
   ${minHeight}
@@ -44,25 +44,9 @@ const IndexPage: React.FunctionComponent = () => {
           <ContentFlex color="black" flexDirection="column" width={breakWidths}>
             <h1>Welcome to Slack Clone!</h1>
 
-            <LoginComponent>
-              {mutate => (
-                <Button
-                  bg="blue"
-                  onClick={async () => {
-                    const response = await mutate({
-                      variables: {
-                        email: "test@test.com",
-                        password: "password"
-                      }
-                    });
-
-                    console.log(response);
-                  }}
-                >
-                  call login mutation
-                </Button>
-              )}
-            </LoginComponent>
+            <Link href="/login" as="/login">
+              <a>login</a>
+            </Link>
           </ContentFlex>
         </InnerFlex>
       </Flex>
