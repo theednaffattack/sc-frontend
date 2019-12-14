@@ -32,19 +32,6 @@ export default (App: any) => {
     };
 
     static async getInitialProps(ctx: any) {
-      console.log("PROCESS.ENV CHECK", process.env.GRAPHQL_ENDPOINT);
-      console.log("WITH APOLLO GETINITIALPROPS RUNNING, ENV VARS = ", {
-        getEnvVars: {
-          WEBSOCKET_URL: process.env.WEBSOCKET_URL || "WEBSOCKET_URL missing",
-          GRAPHQL_URL: process.env.GRAPHQL_ENDPOINT,
-          PRODUCTION_CLIENT_DOMAIN:
-            process.env.PRODUCTION_CLIENT_DOMAIN ||
-            "PRODUCTION_CLIENT_DOMAIN missing",
-          PRODUCTION_SERVER_DOMAIN:
-            process.env.PRODUCTION_SERVER_DOMAIN ||
-            "PRODUCTION_SERVER_DOMAIN missing"
-        }
-      });
       let referer: NextContext["referer"];
       if (!isBrowser) {
         // on the server we get request headers so attach
@@ -64,8 +51,6 @@ export default (App: any) => {
         router,
         ctx: { req, res }
       } = ctx;
-
-      console.log("VIEW PARSE COOKIES", parseCookies(req).scg);
 
       const apollo = initApollo(
         {},
@@ -152,7 +137,6 @@ export default (App: any) => {
       // After that rendering is done using Next's normal rendering pipeline
       this.apolloClient = initApollo(props.apolloState, {
         getToken: () => {
-          console.log("VIEW PARSE COOKIE", parseCookies().token);
           return parseCookies().token;
         },
         getReferer: () => {
@@ -187,8 +171,6 @@ export default (App: any) => {
     // New: Method to redirect the user when the event is called
     syncLogout(event: any) {
       if (event.key === "logout") {
-        console.log("logged out from storage!");
-
         this.apolloClient.mutate({
           mutation: LogoutDocument
         });
