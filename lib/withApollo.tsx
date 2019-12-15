@@ -13,7 +13,6 @@ import initApollo from "./initApollo";
 import { isBrowser } from "./isBrowser";
 import redirect from "./redirect";
 import { LogoutDocument } from "../modules/gql-gen/generated/apollo-graphql";
-import { NextContext } from "../typings/NextContext";
 
 function parseCookies(req?: any, options = {}) {
   return cookie.parse(
@@ -21,8 +20,6 @@ function parseCookies(req?: any, options = {}) {
     options
   );
 }
-
-let refererInfo: string;
 
 export default (App: any) => {
   return class WithData extends React.Component<any, object> {
@@ -32,19 +29,26 @@ export default (App: any) => {
     };
 
     static async getInitialProps(ctx: any) {
-      let referer: NextContext["referer"];
-      if (!isBrowser) {
+      // let referer: NextContext["referer"];
+      if (
+        !isBrowser &&
+        ctx &&
+        ctx.ctx &&
+        ctx.ctx.req &&
+        ctx.ctx.req.headers &&
+        ctx.ctx.req.headers["user-agent"]
+      ) {
         // on the server we get request headers so attach
-        // the referer to apollo context
-        referer =
-          ctx && ctx.ctx && ctx.ctx.req && ctx.ctx.req.headers
-            ? ctx.ctx.req.headers.referer
-            : "";
-        ctx.ctx.referer = referer;
+        // the user-agent & referer to apollo context which...
+        // resides on Next Context (ctx.ctx)
+        ctx.ctx.referer = ctx.router.asPath;
+        ctx.ctx.userAgent = ctx.ctx.req.headers["user-agent"];
       } else {
-        // since we're only using referer for `/login` redirects
-        // we can set it to login. A better solution is needed
-        referer = "/unknown";
+        // console.log("VIEW CTX.CTX WITHAPOLLO", ctx);
+        // console.log("VIEW CTX.HEADERS", ctx.ctx.req.headers);
+        // console.log("VIEW ROUTER", ctx.router);
+        ctx.ctx.referer = ctx.router.asPath;
+        ctx.ctx.userAgent = window.navigator.userAgent;
       }
       const {
         Component,
@@ -56,10 +60,6 @@ export default (App: any) => {
         {},
         {
           getToken: () => parseCookies(req).scg,
-          getReferer: () => {
-            refererInfo = req.headers.referer;
-            return refererInfo;
-          },
           getEnvVars: {
             WEBSOCKET_URL: process.env.WEBSOCKET_URL || "WEBSOCKET_URL missing",
             GRAPHQL_URL: process.env.GRAPHQL_URL
@@ -67,10 +67,10 @@ export default (App: any) => {
               : "GRAPHQL_URL missing",
             PRODUCTION_CLIENT_DOMAIN:
               process.env.PRODUCTION_CLIENT_DOMAIN ||
-              "PRODUCTION_CLIENT_DOMAIN missing",
+              "PRODUCTION_CLIENT_DOMAIN is missing",
             PRODUCTION_SERVER_DOMAIN:
               process.env.PRODUCTION_SERVER_DOMAIN ||
-              "PRODUCTION_SERVER_DOMAIN missing"
+              "PRODUCTION_SERVER_DOMAIN is missing"
           }
         }
       );
@@ -106,7 +106,7 @@ export default (App: any) => {
           // Handle them in components via the data.error prop:
           // https://www.apollographql.com/docs/react/api/react-apollo.html#graphql-query-data-error
           if (error.message.includes("Not authenticated")) {
-            redirect(ctx.ctx, "/login", referer);
+            redirect(ctx.ctx, "/login", ctx.ctx.referer);
           } else {
             console.error("Error while running `getDataFromTree`", error);
           }
@@ -138,9 +138,6 @@ export default (App: any) => {
       this.apolloClient = initApollo(props.apolloState, {
         getToken: () => {
           return parseCookies().token;
-        },
-        getReferer: () => {
-          return this.props.pageProps.referer;
         },
         getEnvVars: {
           WEBSOCKET_URL: process.env.WEBSOCKET_URL!,
