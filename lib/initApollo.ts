@@ -59,15 +59,14 @@ interface EnvVars {
   PRODUCTION_CLIENT_DOMAIN: string;
 }
 
-interface Options {
+interface InitApolloOptions {
   getToken: () => string;
-  getReferer: () => string;
   getEnvVars: EnvVars;
 }
 
 function create(
   initialState: any,
-  { getToken, getReferer, getEnvVars }: Options
+  { getToken, getEnvVars }: InitApolloOptions
 ): ApolloClient<NormalizedCacheObject> {
   const httpLink = new HttpLink({
     uri: getEnvVars.GRAPHQL_URL, // Server URL (must be absolute)
@@ -110,9 +109,7 @@ function create(
       graphQLErrors.map(({ message, locations, path }) => {
         let authErrorMessage = "Not authenticated";
         if (isBrowser && message.includes(authErrorMessage)) {
-          Router.replace(
-            `/login?referer=${getReferer()}&message=${authErrorMessage}`
-          );
+          Router.replace(`/login?message=${authErrorMessage}`);
         } else {
           console.log(
             `[GraphQL error]: Message: ${message}, Location: ${JSON.stringify(
@@ -150,7 +147,10 @@ function create(
   });
 }
 
-export default function initApollo(initialState: any, options: Options) {
+export default function initApollo(
+  initialState: any,
+  options: InitApolloOptions
+) {
   // Make sure to create a new client for every server-side request so that data
   // isn't shared between connections (which would be bad)
   if (!isBrowser) {
