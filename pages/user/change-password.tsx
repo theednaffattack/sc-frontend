@@ -49,7 +49,7 @@ const ChangePassword: ChangePasswordProps = ({ token }) => {
 
                   console.log({ response });
 
-                  Router.push("/");
+                  Router.push("/profile");
                 } catch (error) {
                   const displayErrors: { [key: string]: string } = {};
 
