@@ -58,6 +58,10 @@ const Header: React.FunctionComponent<HeaderProps> = () => {
           |{" "}
           <MyLink shade="dark" href="/logout" name="logout">
             <a>Logout</a>
+          </MyLink>{" "}
+          |{" "}
+          <MyLink shade="dark" href="/user/profile" name="profile">
+            <a>Profile</a>
           </MyLink>
         </nav>
       </FlexHeader>
