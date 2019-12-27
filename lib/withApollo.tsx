@@ -21,15 +21,27 @@ function parseCookies(req?: any, options = {}) {
   );
 }
 
+interface WithDataState {
+  hocLogin: boolean;
+}
+
+const initialLoginState = false;
+
 export default (App: any) => {
-  return class WithData extends React.Component<any, object> {
+  return class WithData extends React.Component<any, WithDataState> {
     static displayName = `WithData(${App.displayName})`;
     static propTypes = {
       apolloState: PropTypes.object.isRequired
     };
 
     static async getInitialProps(ctx: any) {
+      const {
+        Component,
+        router,
+        ctx: { req, res }
+      } = ctx;
       // let referer: NextContext["referer"];
+
       if (
         !isBrowser &&
         ctx &&
@@ -43,23 +55,19 @@ export default (App: any) => {
         // resides on Next Context (ctx.ctx)
         ctx.ctx.referer = ctx.router.asPath;
         ctx.ctx.userAgent = ctx.ctx.req.headers["user-agent"];
+        // can i attach token?
+        ctx.ctx.token = parseCookies(req).scg;
       } else {
-        // console.log("VIEW CTX.CTX WITHAPOLLO", ctx);
-        // console.log("VIEW CTX.HEADERS", ctx.ctx.req.headers);
-        // console.log("VIEW ROUTER", ctx.router);
+        // otherwise use the router path and window info
         ctx.ctx.referer = ctx.router.asPath;
         ctx.ctx.userAgent = window.navigator.userAgent;
       }
-      const {
-        Component,
-        router,
-        ctx: { req, res }
-      } = ctx;
 
       const apollo = initApollo(
         {},
         {
           getToken: () => parseCookies(req).scg,
+          // getToken: () => token,
           getEnvVars: {
             WEBSOCKET_URL: process.env.WEBSOCKET_URL || "WEBSOCKET_URL missing",
             GRAPHQL_URL: process.env.GRAPHQL_URL
@@ -122,7 +130,8 @@ export default (App: any) => {
 
       return {
         ...appProps,
-        apolloState
+        apolloState,
+        token: ctx.ctx.token
       };
     }
 
@@ -132,6 +141,8 @@ export default (App: any) => {
       super(props);
 
       this.syncLogout = this.syncLogout.bind(this);
+      this.hocLogin = this.hocLogin.bind(this);
+      this.hocLogout = this.hocLogout.bind(this);
 
       // `getDataFromTree` renders the component first, the client is passed off as a property.
       // After that rendering is done using Next's normal rendering pipeline
@@ -146,6 +157,16 @@ export default (App: any) => {
           PRODUCTION_CLIENT_DOMAIN: process.env.PRODUCTION_CLIENT_DOMAIN!
         }
       });
+
+      this.state = { hocLogin: initialLoginState };
+    }
+
+    hocLogin() {
+      this.setState({ hocLogin: true });
+    }
+
+    hocLogout() {
+      this.setState({ hocLogin: false });
     }
 
     // New: Add event listener when a restricted Page Component mounts
@@ -171,13 +192,22 @@ export default (App: any) => {
         this.apolloClient.mutate({
           mutation: LogoutDocument
         });
-
+        this.hocLogout();
         Router.push("/login");
       }
     }
 
     render() {
-      return <App {...this.props} apolloClient={this.apolloClient} />;
+      return (
+        <App
+          {...this.props}
+          hocLoginState={this.state.hocLogin}
+          hocLogin={this.hocLogin}
+          hocLogout={this.hocLogout}
+          apolloClient={this.apolloClient}
+          // token={parseCookies().token}
+        />
+      );
     }
   };
 };
