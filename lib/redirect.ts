@@ -8,7 +8,6 @@ import Router from "next/router";
 // }
 
 export default (context: any, target: string, originalTarget?: string) => {
-  let myQuery;
   let pathname;
   if (originalTarget) {
     pathname = originalTarget;
@@ -18,13 +17,11 @@ export default (context: any, target: string, originalTarget?: string) => {
   if (context && context.res) {
     // server
     // 303: "See other"
-    context.res.writeHead(303, { Location: target });
+    context.res.writeHead(303, { Location: pathname });
     context.res.end();
   } else {
+    const pathnameIncludesLogin = pathname.includes("/login");
     // In the browser, we just pretend like this never even happened ;)
-    Router.replace({
-      pathname: pathname,
-      query: myQuery || null
-    });
+    Router.replace(pathname, pathnameIncludesLogin ? "/login" : pathname);
   }
 };
