@@ -1,9 +1,8 @@
 import { FieldProps } from "formik";
 import React, { DetailedHTMLProps, InputHTMLAttributes } from "react";
-import { Text } from "rebass";
 
 import { IInputFieldProps } from "./types";
-import { InputB } from "../primitives/styled-rebass";
+import { InputB, Text } from "../primitives/styled-rebass";
 
 type InputProps = DetailedHTMLProps<
   InputHTMLAttributes<HTMLInputElement>,
