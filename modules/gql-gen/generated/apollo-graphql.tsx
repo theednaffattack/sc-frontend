@@ -19,7 +19,7 @@ export type Scalars = {
 
 export type ChangePasswordInput = {
   password: Scalars['String'],
-  token: Scalars['String'],
+  token?: Maybe<Scalars['String']>,
 };
 
 
@@ -71,7 +71,8 @@ export type Mutation = {
    __typename?: 'Mutation',
   createProduct: Product,
   createUser: User,
-  changePassword?: Maybe<User>,
+  changePasswordFromContextUserid?: Maybe<User>,
+  changePasswordFromToken?: Maybe<User>,
   confirmUser: Scalars['Boolean'],
   forgotPassword: Scalars['Boolean'],
   login?: Maybe<User>,
@@ -93,7 +94,12 @@ export type MutationCreateUserArgs = {
 };
 
 
-export type MutationChangePasswordArgs = {
+export type MutationChangePasswordFromContextUseridArgs = {
+  data: PasswordInput
+};
+
+
+export type MutationChangePasswordFromTokenArgs = {
   data: ChangePasswordInput
 };
 
@@ -284,19 +290,6 @@ export type GetMyMessagesFromUserQuery = (
   )>> }
 );
 
-export type ChangePasswordMutationVariables = {
-  data: ChangePasswordInput
-};
-
-
-export type ChangePasswordMutation = (
-  { __typename?: 'Mutation' }
-  & { changePassword: Maybe<(
-    { __typename?: 'User' }
-    & Pick<User, 'id' | 'firstName' | 'lastName' | 'email' | 'name'>
-  )> }
-);
-
 export type ForgotPasswordMutationVariables = {
   email: Scalars['String']
 };
@@ -326,6 +319,32 @@ export type AddProfilePictureMutation = (
     { __typename?: 'UploadProfilePictueReturnType' }
     & Pick<UploadProfilePictueReturnType, 'message' | 'profileImgUrl'>
   ) }
+);
+
+export type ChangePasswordFromContextUseridMutationVariables = {
+  data: PasswordInput
+};
+
+
+export type ChangePasswordFromContextUseridMutation = (
+  { __typename?: 'Mutation' }
+  & { changePasswordFromContextUserid: Maybe<(
+    { __typename?: 'User' }
+    & Pick<User, 'id' | 'firstName' | 'lastName' | 'email' | 'name'>
+  )> }
+);
+
+export type ChangePasswordFromTokenMutationVariables = {
+  data: ChangePasswordInput
+};
+
+
+export type ChangePasswordFromTokenMutation = (
+  { __typename?: 'Mutation' }
+  & { changePasswordFromToken: Maybe<(
+    { __typename?: 'User' }
+    & Pick<User, 'id' | 'firstName' | 'lastName' | 'email' | 'name'>
+  )> }
 );
 
 export type ConfirmUserMutationVariables = {
@@ -629,59 +648,6 @@ export function useGetMyMessagesFromUserLazyQuery(baseOptions?: ApolloReactHooks
 export type GetMyMessagesFromUserQueryHookResult = ReturnType<typeof useGetMyMessagesFromUserQuery>;
 export type GetMyMessagesFromUserLazyQueryHookResult = ReturnType<typeof useGetMyMessagesFromUserLazyQuery>;
 export type GetMyMessagesFromUserQueryResult = ApolloReactCommon.QueryResult<GetMyMessagesFromUserQuery, GetMyMessagesFromUserQueryVariables>;
-export const ChangePasswordDocument = gql`
-    mutation ChangePassword($data: ChangePasswordInput!) {
-  changePassword(data: $data) {
-    id
-    firstName
-    lastName
-    email
-    name
-  }
-}
-    `;
-export type ChangePasswordMutationFn = ApolloReactCommon.MutationFunction<ChangePasswordMutation, ChangePasswordMutationVariables>;
-export type ChangePasswordComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ChangePasswordMutation, ChangePasswordMutationVariables>, 'mutation'>;
-
-    export const ChangePasswordComponent = (props: ChangePasswordComponentProps) => (
-      <ApolloReactComponents.Mutation<ChangePasswordMutation, ChangePasswordMutationVariables> mutation={ChangePasswordDocument} {...props} />
-    );
-    
-export type ChangePasswordProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ChangePasswordMutation, ChangePasswordMutationVariables> | TChildProps;
-export function withChangePassword<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
-  ChangePasswordMutation,
-  ChangePasswordMutationVariables,
-  ChangePasswordProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, ChangePasswordMutation, ChangePasswordMutationVariables, ChangePasswordProps<TChildProps>>(ChangePasswordDocument, {
-      alias: 'changePassword',
-      ...operationOptions
-    });
-};
-
-/**
- * __useChangePasswordMutation__
- *
- * To run a mutation, you first call `useChangePasswordMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useChangePasswordMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [changePasswordMutation, { data, loading, error }] = useChangePasswordMutation({
- *   variables: {
- *      data: // value for 'data'
- *   },
- * });
- */
-export function useChangePasswordMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ChangePasswordMutation, ChangePasswordMutationVariables>) {
-        return ApolloReactHooks.useMutation<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument, baseOptions);
-      }
-export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswordMutation>;
-export type ChangePasswordMutationResult = ApolloReactCommon.MutationResult<ChangePasswordMutation>;
-export type ChangePasswordMutationOptions = ApolloReactCommon.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($email: String!) {
   forgotPassword(email: $email)
@@ -825,6 +791,112 @@ export function useAddProfilePictureMutation(baseOptions?: ApolloReactHooks.Muta
 export type AddProfilePictureMutationHookResult = ReturnType<typeof useAddProfilePictureMutation>;
 export type AddProfilePictureMutationResult = ApolloReactCommon.MutationResult<AddProfilePictureMutation>;
 export type AddProfilePictureMutationOptions = ApolloReactCommon.BaseMutationOptions<AddProfilePictureMutation, AddProfilePictureMutationVariables>;
+export const ChangePasswordFromContextUseridDocument = gql`
+    mutation ChangePasswordFromContextUserid($data: PasswordInput!) {
+  changePasswordFromContextUserid(data: $data) {
+    id
+    firstName
+    lastName
+    email
+    name
+  }
+}
+    `;
+export type ChangePasswordFromContextUseridMutationFn = ApolloReactCommon.MutationFunction<ChangePasswordFromContextUseridMutation, ChangePasswordFromContextUseridMutationVariables>;
+export type ChangePasswordFromContextUseridComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ChangePasswordFromContextUseridMutation, ChangePasswordFromContextUseridMutationVariables>, 'mutation'>;
+
+    export const ChangePasswordFromContextUseridComponent = (props: ChangePasswordFromContextUseridComponentProps) => (
+      <ApolloReactComponents.Mutation<ChangePasswordFromContextUseridMutation, ChangePasswordFromContextUseridMutationVariables> mutation={ChangePasswordFromContextUseridDocument} {...props} />
+    );
+    
+export type ChangePasswordFromContextUseridProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ChangePasswordFromContextUseridMutation, ChangePasswordFromContextUseridMutationVariables> | TChildProps;
+export function withChangePasswordFromContextUserid<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ChangePasswordFromContextUseridMutation,
+  ChangePasswordFromContextUseridMutationVariables,
+  ChangePasswordFromContextUseridProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ChangePasswordFromContextUseridMutation, ChangePasswordFromContextUseridMutationVariables, ChangePasswordFromContextUseridProps<TChildProps>>(ChangePasswordFromContextUseridDocument, {
+      alias: 'changePasswordFromContextUserid',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useChangePasswordFromContextUseridMutation__
+ *
+ * To run a mutation, you first call `useChangePasswordFromContextUseridMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangePasswordFromContextUseridMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changePasswordFromContextUseridMutation, { data, loading, error }] = useChangePasswordFromContextUseridMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useChangePasswordFromContextUseridMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ChangePasswordFromContextUseridMutation, ChangePasswordFromContextUseridMutationVariables>) {
+        return ApolloReactHooks.useMutation<ChangePasswordFromContextUseridMutation, ChangePasswordFromContextUseridMutationVariables>(ChangePasswordFromContextUseridDocument, baseOptions);
+      }
+export type ChangePasswordFromContextUseridMutationHookResult = ReturnType<typeof useChangePasswordFromContextUseridMutation>;
+export type ChangePasswordFromContextUseridMutationResult = ApolloReactCommon.MutationResult<ChangePasswordFromContextUseridMutation>;
+export type ChangePasswordFromContextUseridMutationOptions = ApolloReactCommon.BaseMutationOptions<ChangePasswordFromContextUseridMutation, ChangePasswordFromContextUseridMutationVariables>;
+export const ChangePasswordFromTokenDocument = gql`
+    mutation ChangePasswordFromToken($data: ChangePasswordInput!) {
+  changePasswordFromToken(data: $data) {
+    id
+    firstName
+    lastName
+    email
+    name
+  }
+}
+    `;
+export type ChangePasswordFromTokenMutationFn = ApolloReactCommon.MutationFunction<ChangePasswordFromTokenMutation, ChangePasswordFromTokenMutationVariables>;
+export type ChangePasswordFromTokenComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ChangePasswordFromTokenMutation, ChangePasswordFromTokenMutationVariables>, 'mutation'>;
+
+    export const ChangePasswordFromTokenComponent = (props: ChangePasswordFromTokenComponentProps) => (
+      <ApolloReactComponents.Mutation<ChangePasswordFromTokenMutation, ChangePasswordFromTokenMutationVariables> mutation={ChangePasswordFromTokenDocument} {...props} />
+    );
+    
+export type ChangePasswordFromTokenProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ChangePasswordFromTokenMutation, ChangePasswordFromTokenMutationVariables> | TChildProps;
+export function withChangePasswordFromToken<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ChangePasswordFromTokenMutation,
+  ChangePasswordFromTokenMutationVariables,
+  ChangePasswordFromTokenProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ChangePasswordFromTokenMutation, ChangePasswordFromTokenMutationVariables, ChangePasswordFromTokenProps<TChildProps>>(ChangePasswordFromTokenDocument, {
+      alias: 'changePasswordFromToken',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useChangePasswordFromTokenMutation__
+ *
+ * To run a mutation, you first call `useChangePasswordFromTokenMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangePasswordFromTokenMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changePasswordFromTokenMutation, { data, loading, error }] = useChangePasswordFromTokenMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useChangePasswordFromTokenMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ChangePasswordFromTokenMutation, ChangePasswordFromTokenMutationVariables>) {
+        return ApolloReactHooks.useMutation<ChangePasswordFromTokenMutation, ChangePasswordFromTokenMutationVariables>(ChangePasswordFromTokenDocument, baseOptions);
+      }
+export type ChangePasswordFromTokenMutationHookResult = ReturnType<typeof useChangePasswordFromTokenMutation>;
+export type ChangePasswordFromTokenMutationResult = ApolloReactCommon.MutationResult<ChangePasswordFromTokenMutation>;
+export type ChangePasswordFromTokenMutationOptions = ApolloReactCommon.BaseMutationOptions<ChangePasswordFromTokenMutation, ChangePasswordFromTokenMutationVariables>;
 export const ConfirmUserDocument = gql`
     mutation ConfirmUser($token: String!) {
   confirmUser(token: $token)
