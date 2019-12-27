@@ -5,8 +5,15 @@ import { logout } from "../lib/logout";
 import { getLayout } from "../modules/site-layout/main-v2";
 // import { isBrowser } from "../lib/isBrowser";
 
+interface OtherLogoutProps {
+  authState: boolean;
+  hocLogout: any;
+  setAuthState: React.Dispatch<React.SetStateAction<boolean>>;
+  referer: NextContext["referer"];
+}
+
 interface LogoutProps {
-  (): null;
+  ({ authState, hocLogout, setAuthState, referer }: OtherLogoutProps): any;
 
   getInitialProps: ({
     apolloClient,
@@ -21,7 +28,9 @@ interface LogoutProps {
   title: string;
 }
 
-const Logout: LogoutProps = () => {
+const Logout: LogoutProps = ({ hocLogout, setAuthState }) => {
+  hocLogout();
+  setAuthState(false);
   return null;
 };
 
@@ -37,15 +46,14 @@ Logout.getInitialProps = async ({ apolloClient, ...ctx }: NextContext) => {
     logout();
 
     // const fullUrl = "http://192.168.1.24:3000/login";
-    const originalUrl = "/login";
+    const targetUrl = "/login?auth=false";
 
     if (
       processLogout &&
       processLogout.data &&
       processLogout.data.logout === true
     ) {
-      console.log("DOES THIS RUN ON SERVER?");
-      redirect(ctx, originalUrl);
+      redirect(ctx, targetUrl);
     }
     return {};
   } else {
