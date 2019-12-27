@@ -1,4 +1,5 @@
 import React from "react";
+import { useState } from "react";
 import Head from "next/head";
 import { Flex as FlexBase } from "rebass/styled-components";
 import { minHeight, borders } from "styled-system";
@@ -12,6 +13,7 @@ import Header from "./header";
 
 interface LayoutProps {
   title?: string;
+  hocLoginState: boolean;
 }
 
 const Flex = styled(FlexBase)`
@@ -23,16 +25,21 @@ export const breakWidths = [1, 1, 1, "960px"];
 
 const Layout: React.FunctionComponent<LayoutProps> = ({
   children,
+  hocLoginState,
   title = "This is the default title"
 }) => {
+  const initialState = true;
+  // @ts-ignore
+  const [authState, setAuthState] = useState(initialState);
+  let elementWithAuthSetter;
+  if (React.isValidElement(children)) {
+    elementWithAuthSetter = React.cloneElement(children, {
+      authState,
+      setAuthState
+    });
+  }
   return (
-    <Flex
-      // border="3px crimson solid"
-      m={[0]}
-      minHeight="100vh"
-      flexDirection="column"
-      width={[1]}
-    >
+    <Flex m={[0]} minHeight="100vh" flexDirection="column" width={[1]}>
       <Head>
         <title>{title}</title>
         <meta charSet="utf-8" />
@@ -44,15 +51,21 @@ const Layout: React.FunctionComponent<LayoutProps> = ({
         alignItems="center"
         sx={{ border: "2px white dashed" }}
       >
-        <Header />
+        <Header hocLoginState={hocLoginState} />
       </Flex>
-      <Flex flexDirection="column">{children}</Flex>
+      <Flex flexDirection="column">{elementWithAuthSetter}</Flex>
     </Flex>
   );
 };
 
 export const getLayout = (page: any) => {
-  return <Layout title={page.props.title}>{page}</Layout>;
+  console.log("VIEW GETLAYOUT PAGE (/modules/site-layout/main-v2.tsx)", page);
+
+  return (
+    <Layout hocLoginState={page.props.hocLoginState} title={page.props.title}>
+      {page}
+    </Layout>
+  );
 };
 
 export default Layout;
