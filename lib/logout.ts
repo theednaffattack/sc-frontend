@@ -6,6 +6,6 @@ export const logout = (): void => {
   if (isBrowser) {
     // To trigger the event listener we save some random data into the `logout` key
     window.localStorage.setItem("logout", now.toISOString());
-    console.log("window?", window.localStorage.getItem("logout"));
+    // console.log("window?", window.localStorage.getItem("logout"));
   }
 };
