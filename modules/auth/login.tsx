@@ -1,12 +1,12 @@
-import { Field, Formik } from "formik";
+// import { Field, Formik } from "formik";
 import React from "react";
 import {
   Button as ButtonBase,
   Flex as FlexBase,
-  Text,
+  // Text,
   Card as CardBase,
   Heading,
-  Box,
+  // Box,
   BoxProps,
   ButtonProps
 } from "rebass/styled-components";
@@ -25,13 +25,13 @@ import {
   HeightProps,
   WidthProps
 } from "styled-system";
-import Router from "next/router";
+// import Router from "next/router";
 
-import { InputField } from "../form-fields/input-field";
-import { LoginComponent, MeQuery } from "../gql-gen/generated/apollo-graphql";
-import { ME_QUERY } from "../gql-gen/query-documents/user/queries/Me";
+// import { InputField } from "../form-fields/input-field";
+// import { LoginComponent, MeQuery } from "../gql-gen/generated/apollo-graphql";
+// import { ME_QUERY } from "../gql-gen/query-documents/user/queries/Me";
+// import { Checkbox } from "./checkbox";
 import { SignUpLink } from "./sign-up-link";
-import { Checkbox } from "./checkbox";
 
 // import { ICardProps, IButtonProps } from "./types";
 import { NextContext } from "../../typings/NextContext";
@@ -49,7 +49,7 @@ export interface IButtonProps
     WidthProps,
     HeightProps {}
 
-const Button: StyledComponent<
+export const Button: StyledComponent<
   React.FunctionComponent<IButtonProps>,
   any
 > = styled(ButtonBase)`
@@ -103,11 +103,11 @@ const Card: StyledComponent<React.FunctionComponent<ICardProps>, any> = styled(
 `;
 
 interface LoginModuleProps {
-  referer: NextContext["referer"];
+  referer?: NextContext["referer"];
 }
 
 // @ts-ignore
-export default ({ referer }: LoginModuleProps) => {
+const Login: React.FunctionComponent<LoginModuleProps> = ({ children }) => {
   return (
     <Flex minHeight="100vh">
       <InnerFlex width={[1]} minHeight="100vh">
@@ -132,9 +132,9 @@ export default ({ referer }: LoginModuleProps) => {
                 Sign in
               </Heading>
             </ContentFlex>
-
+            {children}
             {/* <Text>Referer: {referer}</Text> */}
-            <LoginComponent>
+            {/* <LoginComponent>
               {login => (
                 <Formik
                   validateOnBlur={false}
@@ -198,8 +198,20 @@ export default ({ referer }: LoginModuleProps) => {
 
                     // let pathname =
                     //   referer && referer.length > 0 ? referer : "/welcome";
-
-                    Router.push("/user/profile");
+                    console.log("IS THIS SUBMITTING?", response);
+                    if (
+                      response &&
+                      response.data &&
+                      response.data.login &&
+                      response.data.login.name
+                    ) {
+                      Router.push(
+                        `/user/profile?username=${response.data.login.name}`,
+                        `/user/profile`
+                      );
+                    } else {
+                      Router.push(`/user/profile`);
+                    }
                   }}
                   initialValues={{
                     email: "",
@@ -210,6 +222,7 @@ export default ({ referer }: LoginModuleProps) => {
                   {({ handleSubmit }) => (
                     <form onSubmit={handleSubmit}>
                       <Field
+                        label="email"
                         id="email"
                         name="email"
                         placeholder="input email"
@@ -217,6 +230,7 @@ export default ({ referer }: LoginModuleProps) => {
                         component={InputField}
                       />
                       <Field
+                        label="password"
                         id="password"
                         name="password"
                         placeholder="input password"
@@ -258,6 +272,7 @@ export default ({ referer }: LoginModuleProps) => {
                 </Formik>
               )}
             </LoginComponent>
+             */}
           </Card>
           <SignUpLink width={["100%", "500px"]} />
         </ContentFlex>
@@ -265,3 +280,5 @@ export default ({ referer }: LoginModuleProps) => {
     </Flex>
   );
 };
+
+export default Login;
