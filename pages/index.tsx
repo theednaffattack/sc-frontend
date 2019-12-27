@@ -4,7 +4,8 @@ import styled from "styled-components";
 import { minHeight } from "styled-system";
 import Link from "next/link";
 
-import Layout from "../modules/site-layout/main-v2";
+import { getLayout } from "../modules/site-layout/main-v2";
+import { NextContext } from "../typings/NextContext";
 
 const Flex = styled(FlexBase)`
   ${minHeight}
@@ -30,28 +31,58 @@ const ContentFlex = styled(FlexBase)`
   ${minHeight} // opacity: 1;
 `;
 
-const IndexPage: React.FunctionComponent = () => {
+interface IndexFromHocProps {
+  hocLoginState: boolean;
+  hocLogout: any;
+  authState: boolean;
+  referer: NextContext["referer"];
+}
+
+interface IndexPageProps {
+  ({
+    hocLoginState,
+    hocLogout,
+    authState,
+    referer
+  }: IndexFromHocProps): JSX.Element;
+
+  getInitialProps: ({
+    referer
+  }: NextContext) => Promise<{ referer: NextContext["referer"] }>;
+
+  getLayout: (page: any) => JSX.Element;
+
+  title: string;
+}
+
+const IndexPage: IndexPageProps = () => {
   const breakWidths = [1, 1, 1, "690px"];
   return (
-    <Layout title="Home | Next.js + TypeScript Example">
-      <Flex flexDirection="column" width={[1]}>
-        <InnerFlex
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          minHeight="100vh"
-        >
-          <ContentFlex color="black" flexDirection="column" width={breakWidths}>
-            <h1>Welcome to Slack Clone!</h1>
-
-            <Link href="/login" as="/login">
-              <a>login</a>
-            </Link>
-          </ContentFlex>
-        </InnerFlex>
-      </Flex>
-    </Layout>
+    <Flex flexDirection="column" width={[1]}>
+      <InnerFlex
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        minHeight="100vh"
+      >
+        <ContentFlex color="black" flexDirection="column" width={breakWidths}>
+          <h1>Welcome to Slack Clone!</h1>
+          <Link href="/login" as="/login">
+            <a>login</a>
+          </Link>
+        </ContentFlex>
+      </InnerFlex>
+    </Flex>
   );
 };
+
+IndexPage.getInitialProps = async ({ referer }: NextContext) => {
+  let setReferer = referer === undefined ? "/login" : referer;
+  return { referer: setReferer };
+};
+
+IndexPage.getLayout = getLayout;
+
+IndexPage.title = "Home";
 
 export default IndexPage;
