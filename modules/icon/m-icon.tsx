@@ -1,8 +1,8 @@
 import React from "react";
+import styled from "styled-components";
 
 import paths from "./material-paths.json";
 import { MaterialIcons } from "./generated-material-icon-types";
-import styled from "styled-components";
 
 type PathInfo = keyof MaterialIcons;
 
@@ -16,6 +16,8 @@ interface IIconProps {
   height?: string;
   setColor?: React.Dispatch<React.SetStateAction<string>>;
   style?: React.CSSProperties | undefined;
+  setTranslation?: string;
+  hover?: boolean;
 }
 
 // const Link = styled.a`
@@ -37,6 +39,12 @@ const SVG = styled.svg`
   }
 `;
 
+const Path = styled.path`
+  /* &:hover {
+    fill: rebeccapurple;
+  } */
+`;
+
 const Icon: React.FunctionComponent<IIconProps> = ({
   name = "home",
   size = "1em",
@@ -44,13 +52,12 @@ const Icon: React.FunctionComponent<IIconProps> = ({
   width,
   height,
   setColor,
+  setTranslation,
   ...props
 }) => {
   let iconPaths = typedPaths[name];
 
   let length = iconPaths && iconPaths.length ? iconPaths.length : 0;
-
-  // type T01 = Array<MaterialIcons[PathInfo]>;
 
   let mappedPaths: any;
 
@@ -58,7 +65,7 @@ const Icon: React.FunctionComponent<IIconProps> = ({
     // @ts-ignore
     mappedPaths = (iconPaths as any).map((path: any, index: number) => {
       return (
-        <path
+        <Path
           key={`${path}-${index}`}
           className={name}
           data-id={name}
@@ -83,6 +90,7 @@ const Icon: React.FunctionComponent<IIconProps> = ({
         viewBox="0 0 24 24"
         onMouseEnter={() => (setColor ? setColor("crimson") : null)}
         onMouseLeave={() => (setColor ? setColor("rebeccapurple") : null)}
+        transform={setTranslation}
       >
         {/* <path d={iconPaths[0].path} /> */}
         {mappedPaths}
