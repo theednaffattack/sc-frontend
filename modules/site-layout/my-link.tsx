@@ -42,7 +42,11 @@ const MyLink: React.FunctionComponent<MyLinkProps> = ({
   return (
     <Link href={href} passHref>
       <StyledLink
-        // onClick={props.hocLogout}
+        onClick={() =>
+          props.hocLogout
+            ? props.hocLogout()
+            : console.log("props.hocLogout() is missing?")
+        }
         {...props}
         hover={hover}
         shade={shade ? shade : undefined}
