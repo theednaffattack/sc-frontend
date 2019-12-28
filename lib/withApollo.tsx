@@ -187,13 +187,17 @@ export default (App: any) => {
     }
 
     // New: Method to redirect the user when the event is called
-    syncLogout(event: any) {
+    async syncLogout(event: any) {
       if (event.key === "logout") {
-        this.apolloClient.mutate({
+        const attemptLogout = await this.apolloClient.mutate({
           mutation: LogoutDocument
         });
-        this.hocLogout();
-        Router.push("/login");
+        if (attemptLogout) {
+          this.hocLogout();
+          Router.push("/login");
+        } else {
+          throw Error("Logout error, no response from server.");
+        }
       }
     }
 
