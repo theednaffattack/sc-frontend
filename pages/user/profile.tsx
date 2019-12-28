@@ -1,3 +1,4 @@
+// import nextCookie from "next-cookies";
 import { Flex, Image, Text } from "../../modules/primitives/styled-rebass";
 import { getLayout } from "../../modules/site-layout/main-v2";
 import { NextContext } from "../../typings/NextContext";
@@ -6,6 +7,7 @@ import redirect from "../../lib/redirect";
 import Accordion from "../../modules/profile/accordion";
 import { MeComponent } from "../../modules/gql-gen/generated/apollo-graphql";
 import Icon from "../../modules/icon/m-icon";
+import Router from "next/router";
 
 type UsernameWithNextContext = {
   setAuthState?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -56,7 +58,12 @@ const AvatarStandIn: React.FunctionComponent<AvatarStandInProps> = ({
   return <Icon hover={false} name="account_circle" fill="orange" size={size} />;
 };
 
-const Profile: ProfileProps = () => {
+const Profile: ProfileProps = ({ token, hocLoginState }) => {
+  let authCheck = token || hocLoginState;
+
+  if (!authCheck) {
+    Router.push("/login", "/login");
+  }
   return (
     <MeComponent>
       {({ data: dataMe, error: errorMe, loading: loadingMe }) => {
@@ -97,8 +104,6 @@ const Profile: ProfileProps = () => {
 
 Profile.getInitialProps = async ctx => {
   let { pathname, query, referer, userAgent } = ctx;
-
-  console.log("why can't i see username?", query.username);
 
   if (!ctx.token && !isBrowser) {
     console.log("SSR redirect");
