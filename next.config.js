@@ -17,6 +17,9 @@ module.exports = phase => {
   // when `next build` or `npm run build` is used
   const isStaging = PHASE_PRODUCTION_BUILD && process.env.STAGING === "1";
 
+  const devPrefix = "http";
+  const prodPrefix = "https";
+
   console.log(
     `isDev:${isDev}  isProd:${isProd}   isStaging:${isStaging}, graphQlPort: ${process.env.GRAPHQL_PORT}`
   );
@@ -24,9 +27,9 @@ module.exports = phase => {
   const env = {
     GRAPHQL_URL: (() => {
       if (isDev)
-        return `http://${clientIpAddress}:${process.env.GRAPHQL_PORT}/graphql`;
+        return `${devPrefix}://${clientIpAddress}:${process.env.GRAPHQL_PORT}/graphql`;
       if (isProd) {
-        return `https://${process.env.PRODUCTION_SERVER_DOMAIN}/graphql`;
+        return `${prodPrefix}://${process.env.PRODUCTION_SERVER_DOMAIN}/graphql`;
       }
       if (isStaging)
         return `https://${process.env.STAGING_SERVER_DOMAIN}/graphql`;
