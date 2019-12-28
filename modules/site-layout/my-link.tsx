@@ -13,14 +13,13 @@ interface MyLinkProps extends SpaceProps {
   name: string;
   shade?: string | undefined;
   hover?: boolean;
+  hocLogout?: () => void;
 }
 
 const StyledLink = styled.a<IStyledLinkProps & SpaceProps>`
   ${space}
   text-decoration: none;
   border-bottom: 2px transparent solid;
-  padding-bottom: 8px;
-
   color: ${(props: any) =>
     props.shade === "dark" ? props.theme.colors.text : "white"};
 
@@ -42,7 +41,12 @@ const MyLink: React.FunctionComponent<MyLinkProps> = ({
   // const [hovering, setHovering] = useState<boolean>(initialState);
   return (
     <Link href={href} passHref>
-      <StyledLink {...props} hover={hover} shade={shade ? shade : undefined}>
+      <StyledLink
+        // onClick={props.hocLogout}
+        {...props}
+        hover={hover}
+        shade={shade ? shade : undefined}
+      >
         {children}
       </StyledLink>
     </Link>
