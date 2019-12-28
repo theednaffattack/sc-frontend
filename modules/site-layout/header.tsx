@@ -4,18 +4,28 @@ import styled from "styled-components";
 
 import { Flex, Image } from "../primitives/styled-rebass";
 import MyLink from "./my-link";
-import { width, WidthProps, borders, BordersProps } from "styled-system";
+import {
+  width,
+  WidthProps,
+  borders,
+  BordersProps,
+  minHeight,
+  MinHeightProps
+} from "styled-system";
 
 interface HeaderProps {
   hocLoginState: boolean;
+  hocLogout: () => void;
+  token?: string;
 }
 
-const Nav = styled.nav<WidthProps & BordersProps>`
+const Nav = styled.nav<WidthProps & BordersProps & MinHeightProps>`
   color: #ccc;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
+  ${minHeight}
   ${width}
   ${borders}
 `;
@@ -33,9 +43,15 @@ const RenderHiddenLinks = () => {
   );
 };
 
-const RenderLogout = () => {
+interface RenderLogoutProps {
+  hocLogout?: () => void;
+}
+
+const RenderLogout: React.FunctionComponent<RenderLogoutProps> = ({
+  hocLogout
+}) => {
   return (
-    <MyLink shade="dark" href="/logout" name="logout">
+    <MyLink hocLogout={hocLogout} shade="dark" href="/logout" name="logout">
       Logout
     </MyLink>
   );
@@ -84,18 +100,26 @@ const RenderForgotPassword: React.FunctionComponent<RenderForgotPasswordProps> =
   );
 };
 
-const Header: React.FunctionComponent<HeaderProps> = ({ hocLoginState }) => {
+const Header: React.FunctionComponent<HeaderProps> = ({
+  hocLoginState,
+  hocLogout,
+  token
+}) => {
   const breakWidths = [1, 1, 1, "690px"];
   return (
     <Flex flexDirection="column">
-      <Nav width={breakWidths} style={{ minHeight: "58px" }}>
+      <Nav minHeight="58px" width={breakWidths}>
         <MyLink shade="dark" href="/" name="home">
           Home
         </MyLink>{" "}
-        {hocLoginState === true ? "" : <RenderHiddenLinks />}
-        {hocLoginState === true ? "" : <RenderForgotPassword />}
-        {hocLoginState === true ? <RenderLogout /> : ""}
-        {hocLoginState === true ? <RenderAvatarLink /> : ""}
+        {token || hocLoginState === true ? "" : <RenderHiddenLinks />}
+        {token || hocLoginState === true ? "" : <RenderForgotPassword />}
+        {token || hocLoginState === true ? (
+          <RenderLogout hocLogout={hocLogout} />
+        ) : (
+          ""
+        )}
+        {token || hocLoginState === true ? <RenderAvatarLink /> : ""}
       </Nav>
     </Flex>
   );
