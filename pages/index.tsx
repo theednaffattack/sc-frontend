@@ -28,7 +28,7 @@ const InnerFlex = styled(FlexBase)`
 `;
 
 const ContentFlex = styled(FlexBase)`
-  ${minHeight} // opacity: 1;
+  ${minHeight}
 `;
 
 interface IndexFromHocProps {
