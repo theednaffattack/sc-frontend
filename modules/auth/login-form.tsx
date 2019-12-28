@@ -14,12 +14,10 @@ interface LoginFormProps {
   hocLogin: any;
   hocLogout: any;
   hocLoginState: boolean;
-  setAuthState: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
-  hocLogin,
-  setAuthState
+  hocLogin
 }) => {
   return (
     <LoginComponent>
@@ -91,14 +89,13 @@ export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
               response.data.login.name
             ) {
               hocLogin();
-              setAuthState(true);
 
               Router.push(
                 `/user/profile?username=${response.data.login.name}`,
                 `/user/profile`
               );
             } else {
-              setAuthState(true);
+              hocLogin();
 
               Router.push(`/user/profile`);
             }
