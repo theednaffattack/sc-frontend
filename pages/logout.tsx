@@ -1,5 +1,5 @@
-import { LogoutDocument } from "../modules/gql-gen/generated/apollo-graphql";
-import redirect from "../lib/redirect";
+// import { LogoutDocument } from "../modules/gql-gen/generated/apollo-graphql";
+// import redirect from "../lib/redirect";
 import { NextContext } from "../typings/NextContext";
 import { logout } from "../lib/logout";
 import { getLayout } from "../modules/site-layout/main-v2";
@@ -28,37 +28,39 @@ interface LogoutProps {
   title: string;
 }
 
-const Logout: LogoutProps = ({ hocLogout, setAuthState }) => {
+const Logout: LogoutProps = ({ hocLogout }) => {
   hocLogout();
-  setAuthState(false);
   return null;
 };
 
-Logout.getInitialProps = async ({ apolloClient, ...ctx }: NextContext) => {
-  if (apolloClient) {
-    let processLogout = await apolloClient.mutate({
-      mutation: LogoutDocument
-    });
+Logout.getInitialProps = async () => {
+  logout();
 
-    // await apolloClient.resetStore();
-    await apolloClient.clearStore();
+  return {};
+  // if (apolloClient) {
+  //   let processLogout = await apolloClient.mutate({
+  //     mutation: LogoutDocument
+  //   });
 
-    logout();
+  //   // await apolloClient.resetStore();
+  //   await apolloClient.clearStore();
 
-    // const fullUrl = "http://192.168.1.24:3000/login";
-    const targetUrl = "/login?auth=false";
+  //   logout();
 
-    if (
-      processLogout &&
-      processLogout.data &&
-      processLogout.data.logout === true
-    ) {
-      redirect(ctx, targetUrl);
-    }
-    return {};
-  } else {
-    throw Error("No initial props");
-  }
+  //   // const fullUrl = "http://192.168.1.24:3000/login";
+  //   const targetUrl = "/login?auth=false";
+
+  //   if (
+  //     processLogout &&
+  //     processLogout.data &&
+  //     processLogout.data.logout === true
+  //   ) {
+  //     redirect(ctx, targetUrl);
+  //   }
+  //   return {};
+  // } else {
+  //   throw Error("No initial props");
+  // }
 };
 
 Logout.getLayout = getLayout;
