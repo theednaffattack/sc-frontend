@@ -19,7 +19,7 @@ class MyApp extends App<any> {
     } = this.props;
     const getLayout = Component.getLayout || ((page: any) => page);
     const title = Component.title || "Fake test title";
-    console.log("VIEW THIS.PROPS (/pages/_app.tsx)", this.props);
+
     return (
       <ApolloProvider client={apolloClient}>
         <GlobalStyles />
