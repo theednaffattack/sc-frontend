@@ -30,14 +30,11 @@ const Nav = styled.nav<WidthProps & BordersProps & MinHeightProps>`
   ${borders}
 `;
 
-const RenderHiddenLinks = () => {
+const RenderLoginLink = () => {
   return (
     <>
       <MyLink shade="dark" href="/login" name="login">
         Login
-      </MyLink>
-      <MyLink shade="dark" href="/register" name="register">
-        Register
       </MyLink>
     </>
   );
@@ -51,7 +48,7 @@ const RenderLogout: React.FunctionComponent<RenderLogoutProps> = ({
   hocLogout
 }) => {
   return (
-    <MyLink hocLogout={hocLogout} shade="dark" href="/logout" name="logout">
+    <MyLink hocLogout={hocLogout} shade="dark" href="/logout" name="/logout">
       Logout
     </MyLink>
   );
@@ -90,36 +87,34 @@ const RenderAvatarLink = () => {
 //   );
 // };
 
-interface RenderForgotPasswordProps {}
+// interface RenderForgotPasswordProps {}
 
-const RenderForgotPassword: React.FunctionComponent<RenderForgotPasswordProps> = () => {
-  return (
-    <MyLink shade="dark" href="/forgot-password" name="forgot-password">
-      Forgot Password
-    </MyLink>
-  );
-};
+// const RenderForgotPassword: React.FunctionComponent<RenderForgotPasswordProps> = () => {
+//   return (
+//     <MyLink shade="dark" href="/forgot-password" name="forgot-password">
+//       Forgot Password
+//     </MyLink>
+//   );
+// };
 
+// @ts-ignore
 const Header: React.FunctionComponent<HeaderProps> = ({
   hocLoginState,
   hocLogout,
   token
 }) => {
   const breakWidths = [1, 1, 1, "690px"];
+
+  const isAuthenticated = token || hocLoginState === true;
+
   return (
     <Flex flexDirection="column">
       <Nav minHeight="58px" width={breakWidths}>
         <MyLink shade="dark" href="/" name="home">
           Home
         </MyLink>{" "}
-        {token || hocLoginState === true ? "" : <RenderHiddenLinks />}
-        {token || hocLoginState === true ? "" : <RenderForgotPassword />}
-        {token || hocLoginState === true ? (
-          <RenderLogout hocLogout={hocLogout} />
-        ) : (
-          ""
-        )}
-        {token || hocLoginState === true ? <RenderAvatarLink /> : ""}
+        {!isAuthenticated ? <RenderLoginLink /> : <RenderAvatarLink />}
+        {isAuthenticated ? <RenderLogout hocLogout={hocLogout} /> : ""}
       </Nav>
     </Flex>
   );
