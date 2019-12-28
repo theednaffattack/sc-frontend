@@ -10,7 +10,6 @@ interface LoginProps {
   hocLogin: any;
   hocLogout: any;
   authState: boolean;
-  setAuthState: React.Dispatch<React.SetStateAction<boolean>>;
   referer: NextContext["referer"];
 }
 
@@ -37,29 +36,14 @@ const LoginPage: ILoginPage = ({
   hocLoginState,
   hocLogout,
   authState,
-  referer,
-  setAuthState
+  referer
 }) => (
   <Login referer={referer}>
-    login state {hocLoginState.toString()}
-    <button
-      onClick={() => {
-        if (hocLoginState === true) {
-          hocLogout();
-        }
-        if (hocLoginState === false) {
-          hocLogin();
-        }
-      }}
-    >
-      logout state {hocLoginState === true ? "logout" : "login"}
-    </button>
     <LoginForm
       hocLogin={hocLogin}
       hocLogout={hocLogout}
       hocLoginState={hocLoginState}
       authState={authState}
-      setAuthState={setAuthState}
     />
   </Login>
 );
