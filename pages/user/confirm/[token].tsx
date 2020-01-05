@@ -13,11 +13,12 @@ import { NextContext } from "../../../typings/NextContext";
 export default class Confirm extends React.PureComponent {
   static title = "Confirm";
   static getLayout = getLayout;
-  static async getInitialProps({
-    query: { token },
-    apolloClient,
-    ...ctx
-  }: NextContext) {
+  static async getInitialProps(ctx: NextContext) {
+    const {
+      query: { token },
+      apolloClient
+    } = ctx;
+
     console.log("WHAT'S GOING ON?", {
       token,
       apolloClient
@@ -38,9 +39,11 @@ export default class Confirm extends React.PureComponent {
         }
       });
     }
-    if (validateToken) {
+    if (validateToken && ctx) {
       console.log("FOUND A VALID TOKEN!", validateToken);
-      redirect(ctx, "/login");
+      redirect(ctx, "/login", {
+        asPath: "/login"
+      });
     } else {
       return "soemthing went wrong, confirmation mutation";
     }
