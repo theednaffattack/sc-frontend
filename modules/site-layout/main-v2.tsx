@@ -16,7 +16,9 @@ interface LayoutProps {
   hocLoginState: boolean;
   hocLogin: () => void;
   hocLogout: () => void;
+  referer: string;
   token?: string;
+  syncLogout: () => void;
 }
 
 // const Flex = styled(FlexBase)`
@@ -30,6 +32,8 @@ const Layout: React.FunctionComponent<LayoutProps> = ({
   children,
   hocLoginState,
   hocLogout,
+  referer,
+  syncLogout,
   title = "This is the default title",
   token
 }) => {
@@ -56,9 +60,11 @@ const Layout: React.FunctionComponent<LayoutProps> = ({
           hocLogout={hocLogout}
           token={token}
           hocLoginState={hocLoginState}
+          syncLogout={syncLogout}
+          referer={referer}
         />
       </Flex>
-      <Flex width={1} flexDirection="column">
+      <Flex width={1} flexDirection="column" alignItems="center">
         {children}
       </Flex>
     </Flex>
@@ -72,6 +78,8 @@ export const getLayout = (page: any) => {
       hocLoginState={page.props.hocLoginState}
       hocLogin={page.props.hocLogin}
       hocLogout={page.props.hocLogout}
+      referer={page.props.referer}
+      syncLogout={page.props.syncLogout}
       title={page.props.title}
     >
       {page}
