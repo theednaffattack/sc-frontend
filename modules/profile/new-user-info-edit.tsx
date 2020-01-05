@@ -58,13 +58,14 @@ const NewUserInfoEdit: React.FunctionComponent<NewUserInfoEditProps> = ({
   loadingMe
   // closeModal
 }) => {
-  let email = dataMe && dataMe.me ? dataMe.me.email : "";
-  let firstName = dataMe && dataMe.me ? dataMe.me.firstName : "";
-  let lastName = dataMe && dataMe.me ? dataMe.me.lastName : "";
+  let email = dataMe?.me?.email;
+  let firstName = dataMe?.me?.firstName;
+  let lastName = dataMe?.me?.lastName;
+
   let initialFormValues = {
-    email,
-    firstName,
-    lastName
+    email: email || "",
+    firstName: firstName || "",
+    lastName: lastName || ""
   };
   return (
     <Formik
@@ -75,9 +76,9 @@ const NewUserInfoEdit: React.FunctionComponent<NewUserInfoEditProps> = ({
           await editUserInfo({
             variables: {
               data: {
-                email: data.email,
-                firstName: data.firstName,
-                lastName: data.lastName
+                email: data.email || "",
+                firstName: data.firstName || "",
+                lastName: data.lastName || ""
               }
             }
           });
@@ -173,7 +174,9 @@ const NewUserInfoEdit: React.FunctionComponent<NewUserInfoEditProps> = ({
                             firstName: values.firstName,
                             lastName: values.lastName
                           })}
-                          onClick={() => resetForm(initialFormValues)}
+                          onClick={() =>
+                            resetForm({ values: initialFormValues })
+                          }
                         >
                           reset user info
                         </Button>
