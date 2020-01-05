@@ -15,6 +15,7 @@ class MyApp extends App<any> {
       hocLogin,
       hocLogout,
       hocLoginState,
+      syncLogout,
       token
     } = this.props;
     const getLayout = Component.getLayout || ((page: any) => page);
@@ -31,6 +32,7 @@ class MyApp extends App<any> {
               hocLogin={hocLogin}
               hocLogout={hocLogout}
               hocLoginState={hocLoginState}
+              syncLogout={syncLogout}
               {...pageProps}
             />
           )}
