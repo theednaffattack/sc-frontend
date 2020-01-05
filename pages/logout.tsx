@@ -1,8 +1,9 @@
-// import { LogoutDocument } from "../modules/gql-gen/generated/apollo-graphql";
-// import redirect from "../lib/redirect";
+import { LogoutDocument } from "../modules/gql-gen/generated/apollo-graphql";
+import redirect from "../lib/redirect";
 import { NextContext } from "../typings/NextContext";
 import { logout } from "../lib/logout";
 import { getLayout } from "../modules/site-layout/main-v2";
+import { isBrowser } from "../lib/isBrowser";
 // import { isBrowser } from "../lib/isBrowser";
 
 interface OtherLogoutProps {
@@ -28,39 +29,45 @@ interface LogoutProps {
   title: string;
 }
 
-const Logout: LogoutProps = ({ hocLogout }) => {
-  hocLogout();
+const Logout: LogoutProps = () => {
   return null;
 };
 
-Logout.getInitialProps = async () => {
-  logout();
+Logout.getInitialProps = async ({ apolloClient, ...ctx }) => {
+  // logout();
 
-  return {};
-  // if (apolloClient) {
-  //   let processLogout = await apolloClient.mutate({
-  //     mutation: LogoutDocument
-  //   });
+  if (apolloClient) {
+    let processLogout = await apolloClient.mutate({
+      mutation: LogoutDocument
+    });
 
-  //   // await apolloClient.resetStore();
-  //   await apolloClient.clearStore();
+    console.log("logout?", processLogout);
 
-  //   logout();
+    // await apolloClient.resetStore();
+    await apolloClient.clearStore();
+    if (isBrowser) {
+      // hocLogout();
+      console.log("JUST BEFORE CALLING WINDOW STORAGE LOGOUT");
+      logout();
+    } else {
+    }
 
-  //   // const fullUrl = "http://192.168.1.24:3000/login";
-  //   const targetUrl = "/login?auth=false";
+    // const fullUrl = "http://192.168.1.24:3000/login";
+    const targetUrl = "/login?message=You have successfully logged out.";
 
-  //   if (
-  //     processLogout &&
-  //     processLogout.data &&
-  //     processLogout.data.logout === true
-  //   ) {
-  //     redirect(ctx, targetUrl);
-  //   }
-  //   return {};
-  // } else {
-  //   throw Error("No initial props");
-  // }
+    if (
+      processLogout &&
+      processLogout.data &&
+      processLogout.data.logout === true
+    ) {
+      console.log("BEFORE REDIRECT");
+      // hocLogout();
+      redirect(ctx, targetUrl, { asPath: "/login" });
+    }
+    return { query: ctx.query };
+  } else {
+    throw Error("No initial props");
+  }
 };
 
 Logout.getLayout = getLayout;
