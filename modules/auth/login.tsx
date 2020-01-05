@@ -35,6 +35,7 @@ import { SignUpLink } from "./sign-up-link";
 
 // import { ICardProps, IButtonProps } from "./types";
 import { NextContext } from "../../typings/NextContext";
+// import { RenderFlashMessageProps } from "pages/login";
 
 export interface ICardProps
   extends BorderRadiusProps,
@@ -103,13 +104,17 @@ const Card: StyledComponent<React.FunctionComponent<ICardProps>, any> = styled(
 `;
 
 interface LoginModuleProps {
-  referer?: NextContext["referer"];
+  referer?: NextContext["referer"] | undefined;
+  renderFlashMessage: () => void;
 }
 
 // @ts-ignore
-const Login: React.FunctionComponent<LoginModuleProps> = ({ children }) => {
+const Login: React.FunctionComponent<LoginModuleProps> = ({
+  children,
+  renderFlashMessage
+}) => {
   return (
-    <Flex minHeight="100vh">
+    <Flex width={1} minHeight="100vh">
       <InnerFlex width={[1]} minHeight="100vh">
         <ContentFlex
           mt={[0, 5, 0]}
@@ -118,6 +123,8 @@ const Login: React.FunctionComponent<LoginModuleProps> = ({ children }) => {
           justifyContent="center"
           alignItems="center"
         >
+          {renderFlashMessage()}
+
           <Card
             mx={3}
             width={1}

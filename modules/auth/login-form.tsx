@@ -2,11 +2,10 @@ import { Field, Formik } from "formik";
 import React from "react";
 import Router from "next/router";
 
-import { Box, Flex, Text } from "../primitives/styled-rebass";
+import { Flex, Text } from "../primitives/styled-rebass";
 import { LoginComponent, MeQuery } from "../gql-gen/generated/apollo-graphql";
 import { ME_QUERY } from "../gql-gen/query-documents/user/queries/Me";
 import { InputField } from "../form-fields/input-field";
-import { Checkbox } from "./checkbox";
 import { Button } from "./login";
 
 interface LoginFormProps {
@@ -14,11 +13,25 @@ interface LoginFormProps {
   hocLogin: any;
   hocLogout: any;
   hocLoginState: boolean;
+  referer?: string;
 }
 
 export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
-  hocLogin
+  hocLogin,
+  referer = `/user/profile`
 }) => {
+  // const referIsNotLogin = referer && referer.includes("/login") ? "LOGIN" : "NOT_LOGIN";
+
+  // const href = `/user/profile?username=${response.data.login.name}`;
+  // const asPath = `/user/profile`;
+
+  const defaultLoginPath = `/user/profile`;
+
+  const whenIWantToReturnToARoute =
+    referer !== "/user/profile" && !referer.includes("/login")
+      ? referer
+      : "use default";
+
   return (
     <LoginComponent>
       {login => (
@@ -82,22 +95,59 @@ export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
             // let pathname =
             //   referer && referer.length > 0 ? referer : "/welcome";
             console.log("IS THIS SUBMITTING?", response);
+            // if the user comes to login and wants to continue
+            // on their intended path...
             if (
               response &&
               response.data &&
               response.data.login &&
-              response.data.login.name
+              response.data.login.name &&
+              whenIWantToReturnToARoute !== "use default"
             ) {
               hocLogin();
 
-              Router.push(
-                `/user/profile?username=${response.data.login.name}`,
-                `/user/profile`
-              );
-            } else {
+              console.log(`SHOULD BE CUSTOM REFERER '${referer}'`, {
+                response,
+                whenIWantToReturnToARoute,
+                referer
+              });
+
+              Router.push(whenIWantToReturnToARoute, whenIWantToReturnToARoute);
+              return;
+            }
+
+            // if the user was referred by the login page (click a linkk)
+            // default behavior (and default referer variable assignment, above) is used
+            if (
+              response &&
+              response.data &&
+              response.data.login &&
+              response.data.login.name &&
+              whenIWantToReturnToARoute === "use default"
+            ) {
               hocLogin();
 
-              Router.push(`/user/profile`);
+              console.log("SHOULD BE DEFAULT '/user/profile'", {
+                response,
+                whenIWantToReturnToARoute,
+                defaultLoginPath
+              });
+
+              Router.push(defaultLoginPath, defaultLoginPath);
+              return;
+            } else {
+              console.log("LOGIN ERROR", {
+                response,
+                whenIWantToReturnToARoute,
+                referer,
+                what:
+                  response &&
+                  response.data &&
+                  response.data.login &&
+                  response.data.login.name &&
+                  whenIWantToReturnToARoute !== "use default"
+              });
+              throw Error("unable to login");
             }
           }}
           initialValues={{
@@ -124,6 +174,8 @@ export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
                 type="password"
                 component={InputField}
               />
+
+              {/*               
               <Flex my={2}>
                 <Box mr="auto">
                   <Text htmlFor="keepMeSignedIn" fontFamily="main">
@@ -141,7 +193,8 @@ export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
                     />
                   </label>
                 </Box>
-              </Flex>
+              </Flex> */}
+
               <Flex justifyContent="center">
                 <Button
                   mt={2}
