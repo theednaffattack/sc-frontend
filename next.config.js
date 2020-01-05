@@ -5,9 +5,13 @@ const {
   PHASE_PRODUCTION_BUILD
 } = require("next/constants");
 
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.BUNDLE_ANALYZE === "true"
+});
+
 // This uses phases as outlined here: https://nextjs.org/docs/#custom-configuration
 // View all constants here: https://github.com/zeit/next.js/blob/canary/packages/next/next-server/lib/constants.ts
-module.exports = phase => {
+const config = phase => {
   const clientIpAddress = internalIp.v4.sync();
   // when started in development mode `next dev` or `npm run dev` regardless of the value of STAGING environmental variable
   const isDev = phase === PHASE_DEVELOPMENT_SERVER;
@@ -24,6 +28,10 @@ module.exports = phase => {
     `isDev:${isDev}  isProd:${isProd}   isStaging:${isStaging}, graphQlPort: ${process.env.GRAPHQL_PORT}`
   );
 
+  console.log(
+    `${devPrefix}://${clientIpAddress}:${process.env.GRAPHQL_PORT}/graphql`
+  );
+
   const env = {
     GRAPHQL_URL: (() => {
       if (isDev)
@@ -37,8 +45,9 @@ module.exports = phase => {
     })(),
 
     WEBSOCKET_URL: (() => {
-      if (isDev)
+      if (isDev) {
         return `ws://${clientIpAddress}:${process.env.GRAPHQL_PORT}/subscriptions`;
+      }
       if (isProd) {
         return `wss://${process.env.PRODUCTION_CLIENT_DOMAIN}/subscriptions`;
       }
@@ -53,3 +62,7 @@ module.exports = phase => {
     env
   };
 };
+
+module.exports = phase => withBundleAnalyzer(config(phase));
+
+// module.exports = config;
