@@ -2,6 +2,7 @@ import React from "react";
 
 import { Button, Flex } from "../primitives/styled-rebass";
 import { InitialValuesProps, LoadingStateProps } from "./user-info";
+import { FormikState } from "formik";
 
 interface ButtonRowProps {
   expanded: boolean;
@@ -9,7 +10,17 @@ interface ButtonRowProps {
   handleSubmit: any;
   initialValues: InitialValuesProps;
   loadingSubmitState: LoadingStateProps;
-  resetForm: (nextValues?: InitialValuesProps) => void;
+  resetForm: (
+    nextState?:
+      | Partial<
+          FormikState<{
+            email: string;
+            firstName: string;
+            lastName: string;
+          }>
+        >
+      | undefined
+  ) => void;
   setExpanded: React.Dispatch<React.SetStateAction<boolean>>;
   setLoadingSubmitState: React.Dispatch<
     React.SetStateAction<LoadingStateProps>
@@ -54,7 +65,7 @@ const ButtonRow: React.FunctionComponent<ButtonRowProps> = ({
           <Button
             type="button"
             bg="red"
-            onClick={() => resetForm(initialValues)}
+            onClick={() => resetForm({ values: initialValues })}
           >
             reset form
           </Button>
