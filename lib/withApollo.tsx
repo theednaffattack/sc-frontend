@@ -188,16 +188,19 @@ export default (App: any) => {
 
     // New: Method to redirect the user when the event is called
     async syncLogout(event: any) {
-      if (event.key === "logout") {
+      console.log("SYNC LOGOUT CALLED!");
+      if (event && event.key === "logout") {
         const attemptLogout = await this.apolloClient.mutate({
           mutation: LogoutDocument
         });
         if (attemptLogout) {
           this.hocLogout();
-          Router.push("/login");
+          Router.push("/login?message=hello", "/login");
         } else {
           throw Error("Logout error, no response from server.");
         }
+      } else {
+        console.log("No event key?");
       }
     }
 
@@ -208,6 +211,7 @@ export default (App: any) => {
           hocLoginState={this.state.hocLogin}
           hocLogin={this.hocLogin}
           hocLogout={this.hocLogout}
+          syncLogout={this.syncLogout}
           apolloClient={this.apolloClient}
           // token={parseCookies().token}
         />
