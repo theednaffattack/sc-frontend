@@ -1,6 +1,6 @@
 import React from "react";
 import { Formik, Field } from "formik";
-import * as Yup from "yup";
+// import * as Yup from "yup";
 
 import { InputField } from "../form-fields/input-field";
 import {
@@ -16,19 +16,19 @@ import {
 } from "../primitives/styled-rebass";
 
 import { inputStyles } from "./dropzone";
-import { User, MeQueryResult } from "../gql-gen/generated/apollo-graphql";
+import { MeQueryResult } from "../gql-gen/generated/apollo-graphql";
 // import { value } from "popmotion";
 
-const UploadProfilePictureFormSchema = Yup.object().shape({
-  images: Yup.array().required("Required")
-});
+// const UploadProfilePictureFormSchema = Yup.object().shape({
+//   images: Yup.array().required("Required")
+// });
 
 export interface UploadProfilePictureFormProps {
   dataMe: MeQueryResult["data"];
   files: any[];
   handleDrop?: any;
   handlePost: any;
-  userId: User["id"];
+  userId: string;
   fileInputKey?: string;
   setPreviewImageRef?: any;
   mutationSignS3: any;
@@ -81,8 +81,8 @@ function UploadProfilePictureForm({
     user: userId
   };
   let profileImgUrl =
-    dataMe && dataMe.me && dataMe.me.profileImgUrl
-      ? dataMe.me.profileImgUrl
+    dataMe && dataMe.me && dataMe.me.profileImageUri
+      ? dataMe.me.profileImageUri
       : "";
   return (
     <Formik
@@ -90,7 +90,7 @@ function UploadProfilePictureForm({
       validateOnChange={false}
       onSubmit={handlePost}
       initialValues={inititalValuesObj}
-      validationSchema={UploadProfilePictureFormSchema}
+      // validationSchema={UploadProfilePictureFormSchema}
     >
       {({
         errors,
@@ -412,8 +412,7 @@ function UploadProfilePictureForm({
                 type="button"
                 onClick={() =>
                   resetForm({
-                    images: [],
-                    user: userId
+                    values: { images: [], user: userId }
                   })
                 }
               >
