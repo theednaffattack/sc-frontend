@@ -1,13 +1,12 @@
-// import nextCookie from "next-cookies";
-import { Flex, Image, Text } from "../../modules/primitives/styled-rebass";
+// import Router from "next/router";
+import { Flex, Image } from "../../modules/primitives/styled-rebass";
 import { getLayout } from "../../modules/site-layout/main-v2";
 import { NextContext } from "../../typings/NextContext";
 import { isBrowser } from "../../lib/isBrowser";
 import redirect from "../../lib/redirect";
 import Accordion from "../../modules/profile/accordion";
 import { MeComponent } from "../../modules/gql-gen/generated/apollo-graphql";
-import Icon from "../../modules/icon/m-icon";
-import Router from "next/router";
+import AvatarPlaceholder from "../../modules/profile/avatar-placeholder";
 
 type UsernameWithNextContext = {
   setAuthState?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -48,21 +47,15 @@ interface ProfileProps {
   title: string;
 }
 
-interface AvatarStandInProps {
-  size?: string;
-}
-
-const AvatarStandIn: React.FunctionComponent<AvatarStandInProps> = ({
-  size = "15rem"
-}) => {
-  return <Icon hover={false} name="account_circle" fill="orange" size={size} />;
-};
-
 const Profile: ProfileProps = ({ token, hocLoginState }) => {
   let authCheck = token || hocLoginState;
+  const breakWidths = [1, 1, "690px", "690px"];
+  const pxWidths = [4, 4, 4, 4];
 
   if (!authCheck) {
-    Router.push("/login", "/login");
+    console.log("authCheck", authCheck);
+    console.log("authCheck", { token, hocLoginState });
+    // Router.push("/login", "/login");
   }
   return (
     <MeComponent>
@@ -77,11 +70,11 @@ const Profile: ProfileProps = ({ token, hocLoginState }) => {
           return (
             <Flex
               flexDirection="column"
-              width={[1]}
+              width={breakWidths}
               alignItems="center"
               justifyContent="center"
+              px={pxWidths}
             >
-              <Text mb={2}>PROFILE</Text>
               {dataMe.me && dataMe.me.profileImageUri ? (
                 <Image
                   src={dataMe.me.profileImageUri}
@@ -89,7 +82,7 @@ const Profile: ProfileProps = ({ token, hocLoginState }) => {
                   sx={{ borderRadius: "50%" }}
                 />
               ) : (
-                <AvatarStandIn size="10rem" />
+                <AvatarPlaceholder size="10rem" />
               )}
               <Accordion dataMe={dataMe} />
             </Flex>
@@ -107,7 +100,7 @@ Profile.getInitialProps = async ctx => {
 
   if (!ctx.token && !isBrowser) {
     console.log("SSR redirect");
-    redirect(ctx, "/login", "/login");
+    redirect(ctx, "/login", { asPath: "/login", originalTarget: referer });
   }
 
   // let readyUsername: string | undefined;
