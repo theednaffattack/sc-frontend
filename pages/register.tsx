@@ -48,10 +48,16 @@ const Register: IRegister = () => {
                   validateOnBlur={false}
                   validateOnChange={false}
                   onSubmit={async (data, { setErrors }) => {
+                    const { email, firstName, lastName, password } = data;
                     try {
                       const response = await register({
                         variables: {
-                          data
+                          data: {
+                            email,
+                            password,
+                            firstName,
+                            lastName
+                          }
                         }
                       });
 
@@ -60,10 +66,13 @@ const Register: IRegister = () => {
                       Router.push("/check-email");
                     } catch (error) {
                       const displayErrors: { [key: string]: string } = {};
+                      console.log("VIEW ERRORS", Object.keys(error));
+                      console.log("VIEW ERRORS", error.graphQLErrors);
+                      let myErrors = error.graphQLErrors[0];
+                      // .extensions.exception
+                      //   .validationErrors;
 
-                      let myErrors =
-                        error.graphQLErrors[0].extensions.exception
-                          .validationErrors;
+                      console.log("DIG INTO ERRORS", Object.values(myErrors));
 
                       myErrors.forEach((validationError: any) => {
                         Object.values(validationError.constraints).forEach(
@@ -72,6 +81,7 @@ const Register: IRegister = () => {
                           }
                         );
                       });
+
                       return setErrors(displayErrors);
 
                       // const errors: { [key: string]: string } = {};
