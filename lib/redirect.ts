@@ -1,18 +1,26 @@
-import Router from "next/router";
+import Router, { Router as RouterType } from "next/router";
+import { NextContext } from "typings/NextContext";
 // import { MyContext } from "../../types/types";
 
-// interface RedirectOptions {
-//   query?: ParsedUrlQueryInput;
-//   referer?: string;
-//   newTarget?: string;
-// }
+interface RedirectOptions {
+  asPath?: RouterType["asPath"];
+  originalTarget?: string;
+  newTarget?: string;
+}
 
-export default (context: any, target: string, originalTarget?: string) => {
+export default (
+  context: NextContext,
+  target: string,
+  opts: RedirectOptions
+) => {
   let pathname;
-  if (originalTarget) {
-    pathname = originalTarget;
+  let asPath;
+
+  if (opts.originalTarget) {
+    pathname = opts.originalTarget;
   } else {
     pathname = target;
+    asPath = opts.asPath;
   }
   if (context && context.res) {
     // server
@@ -20,8 +28,8 @@ export default (context: any, target: string, originalTarget?: string) => {
     context.res.writeHead(303, { Location: pathname });
     context.res.end();
   } else {
-    const pathnameIncludesLogin = pathname.includes("/login");
+    // const pathnameIncludesLogin = pathname.includes("/login");
     // In the browser, we just pretend like this never even happened ;)
-    Router.replace(pathname, pathnameIncludesLogin ? "/login" : pathname);
+    Router.replace(pathname, asPath);
   }
 };
