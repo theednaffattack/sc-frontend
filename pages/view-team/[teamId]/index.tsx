@@ -15,6 +15,7 @@ import {
 } from "../../../modules/gql-gen/generated/apollo-graphql";
 import { ChannelListItemProps } from "../../../modules/grid-pieces/channel-list-item";
 import { MappedTeamsProps } from "../../../modules/grid-pieces/team-list-item";
+import { RenderChannelPanel } from "../../../modules/grid-pieces/render-channel-panel";
 
 interface PageProps extends NextContext {
   teamId: string;
@@ -84,9 +85,10 @@ const ViewTeamById: ViewTeamByIdProps = ({
 
   // GET ALL CHANNELS (NAMES, ID'S, ETC)
   let {
-    data: dataUseLoadChannelsByTeamIdQuery
-    // error: errorUseLoadChannelsByTeamIdQuery,
-    // loading: loadingUseLoadChannelsByTeamIdQuery
+    data: dataUseLoadChannelsByTeamIdQuery,
+    error: errorUseLoadChannelsByTeamIdQuery,
+    loading: loadingUseLoadChannelsByTeamIdQuery,
+    ...theRestUseLoadChannelsByTeamIdQuery
   } = useLoadChannelsByTeamIdQuery({
     variables: {
       teamId
@@ -200,6 +202,18 @@ const ViewTeamById: ViewTeamByIdProps = ({
           mappedTeams,
           mappedChannels,
           channelName,
+          renderChannelPanel: (
+            <RenderChannelPanel
+              channelId={undefined}
+              data={dataUseLoadChannelsByTeamIdQuery}
+              error={errorUseLoadChannelsByTeamIdQuery}
+              loading={loadingUseLoadChannelsByTeamIdQuery}
+              setChannelName={setChannelName}
+              setOnClickValue=""
+              teamId={teamId}
+              {...theRestUseLoadChannelsByTeamIdQuery}
+            />
+          ),
           selectedTeamName: mappedTeams[0].name,
           setChannelName,
           selectedDirectMessageInvitees,
