@@ -41,13 +41,10 @@ Logout.getInitialProps = async ({ apolloClient, ...ctx }) => {
       mutation: LogoutDocument
     });
 
-    console.log("logout?", processLogout);
-
     // await apolloClient.resetStore();
     await apolloClient.clearStore();
     if (isBrowser) {
       // hocLogout();
-      console.log("JUST BEFORE CALLING WINDOW STORAGE LOGOUT");
       logout();
     } else {
     }

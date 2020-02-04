@@ -1,7 +1,8 @@
 import React from "react";
-import { createPortal } from "react-dom";
+// import { createPortal } from "react-dom";
 
 import { Card, Flex } from "../primitives/styled-rebass";
+// import { isBrowser } from "../../lib/isBrowser";
 
 interface ModalProps {}
 
@@ -17,9 +18,29 @@ const styles: React.CSSProperties = {
   border: "3px solid grey"
 };
 
+// const Modal: React.FunctionComponent<ModalProps> = ({ children }) => {
+
+//   return createPortal(
+//     <div style={styles}>
+//       <Flex pt="115px" width={1} justifyContent="center" border="crimson">
+//         <Card
+//           width={[1, 1, "960px"]}
+//           bg="white"
+//           p={3}
+//           sx={{
+//             borderRadius: "17px"
+//           }}
+//         >
+//           {children}
+//         </Card>
+//       </Flex>
+//     </div>,
+//     modalRoot
+//   );
+// };
+
 const Modal: React.FunctionComponent<ModalProps> = ({ children }) => {
-  const modalRoot = document.getElementById("modal-root") as HTMLElement;
-  return createPortal(
+  return (
     <div style={styles}>
       <Flex pt="115px" width={1} justifyContent="center" border="crimson">
         <Card
@@ -33,8 +54,7 @@ const Modal: React.FunctionComponent<ModalProps> = ({ children }) => {
           {children}
         </Card>
       </Flex>
-    </div>,
-    modalRoot
+    </div>
   );
 };
 

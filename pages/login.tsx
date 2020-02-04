@@ -124,7 +124,6 @@ const LoginPage: ILoginPage = ({
 };
 
 LoginPage.getInitialProps = async ({ query, referer }: NextContext) => {
-  console.log("login GET INITIAL PROPS", query);
   let setReferer = referer === undefined ? "/login" : referer;
   return { referer: setReferer, query };
 };

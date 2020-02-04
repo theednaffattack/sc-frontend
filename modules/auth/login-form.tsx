@@ -18,17 +18,17 @@ interface LoginFormProps {
 
 export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
   hocLogin,
-  referer = `/user/profile`
+  referer = `/view-team`
 }) => {
   // const referIsNotLogin = referer && referer.includes("/login") ? "LOGIN" : "NOT_LOGIN";
 
   // const href = `/user/profile?username=${response.data.login.name}`;
   // const asPath = `/user/profile`;
 
-  const defaultLoginPath = `/user/profile`;
+  const defaultLoginPath = `/view-team`;
 
   const whenIWantToReturnToARoute =
-    referer !== "/user/profile" && !referer.includes("/login")
+    referer !== "/view-team" && !referer.includes("/login")
       ? referer
       : "use default";
 

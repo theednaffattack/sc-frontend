@@ -131,7 +131,8 @@ export default (App: any) => {
       return {
         ...appProps,
         apolloState,
-        token: ctx.ctx.token
+        token: ctx.ctx.token,
+        teamId: ctx.ctx.teamId
       };
     }
 

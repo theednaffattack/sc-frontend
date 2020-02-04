@@ -6,4 +6,5 @@ export interface NextContext extends NextPageContext {
   referer?: string;
   token?: string;
   userAgent?: string;
+  teamId?: string;
 }

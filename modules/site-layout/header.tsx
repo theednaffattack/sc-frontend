@@ -82,14 +82,14 @@ const RenderAvatarLink = () => {
   );
 };
 
-interface LabelProps {
-  label: string;
-}
+// interface LabelProps {
+//   label: string;
+// }
 
-function Logger(props: LabelProps) {
-  console.log(`${props.label} rendered`);
-  return null; // what is returned here is irrelevant...
-}
+// function Logger(props: LabelProps) {
+//   console.log(`${props.label} rendered`);
+//   return null; // what is returned here is irrelevant...
+// }
 
 // function Label(props: LabelProps) {
 //   return <span>{props.label}</span>;
@@ -170,16 +170,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
       : loginStatus === "i logged in another way"
       ? "okay to render"
       : "do not render";
-  console.log("WHAT IS RENDER DECISION (HEADER)?", {
-    renderDecision,
-    shouldntBeAuthed,
-    isAuthenticated,
-    loginStatus,
-    token,
-    referer,
-    getQuery,
-    hocLoginState
-  });
+
   if (renderDecision === "okay to render") {
     return (
       <Flex
@@ -204,7 +195,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
         {/* <button type="button" onClick={increment}>
           increment
         </button> */}
-        <Logger label={`counter: ${count}`} />
+        {/* <Logger label={`counter: ${count}`} /> */}
       </Flex>
     );
   }
@@ -234,7 +225,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
         {/* <button type="button" onClick={increment}>
           increment
         </button> */}
-        <Logger label={`counter: ${count}`} />
+        {/* <Logger label={`counter: ${count}`} /> */}
       </Flex>
     );
   } else {

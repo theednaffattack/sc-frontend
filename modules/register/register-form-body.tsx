@@ -53,9 +53,8 @@ function RegisterFormBody({ handleSubmit }: IRegisterFormBodyProps) {
           &nbsp;
           <Text fontFamily="montserrat">
             <LinkLink
-              to="/terms_and_conditions"
+              as="/terms_and_conditions"
               href="/terms_and_conditions"
-              name="Terms & stuff"
               color="link_color"
             >
               Terms & Stuff

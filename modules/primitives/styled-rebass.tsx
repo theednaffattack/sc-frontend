@@ -1,13 +1,15 @@
 import React, { DetailedHTMLProps, OlHTMLAttributes } from "react";
 import Link from "next/link";
 import {
-  Box,
+  Box as BoxBase,
   Button,
   Flex as FlexBase,
   Card as CardBase,
   Heading,
   Image,
-  Text
+  Text,
+  FlexProps,
+  BoxProps
 } from "rebass/styled-components";
 import {
   // backgroundColor,
@@ -15,6 +17,7 @@ import {
   boxShadow,
   borderRadius,
   color,
+  flexbox,
   maxWidth,
   minHeight,
   height,
@@ -36,38 +39,101 @@ import {
   WidthProps,
   FontSizeProps,
   BordersProps,
+  FlexboxProps,
   FontFamilyProps,
   FontWeightProps,
   LetterSpacingProps,
   BorderRadiusProps,
   HeightProps,
   BackgroundColorProps,
-  ColorProps
+  ColorProps,
+  MinHeightProps,
+  PositionProps,
+  BottomProps,
+  TopProps,
+  RightProps,
+  LeftProps,
+  OverflowProps
 } from "styled-system";
 import styled, { StyledComponent } from "styled-components";
-import IconBase from "../icon/icon";
-// import { motion } from "framer-motion";
 
-import {
-  TFlexProps,
-  TMaxFlexProps,
-  TLogoFlexProps,
-  ICardProps,
-  IAbFlexProps,
-  IMinButtonProps,
-  IFlexShadowProps,
-  IFlexUserProfileWrapProps
-} from "./types";
+import IconBase from "../icon/icon";
+import MaterialIconBase from "../icon/m-icon";
+import { TMaxFlexProps, TLogoFlexProps, ICardProps } from "./types";
+import { User } from "modules/gql-gen/generated/apollo-graphql";
 
 interface IisPartiallyActiveProps {
   isPartiallyCurrent: boolean;
 }
 
-const StyledLinkV1 = styled(Link)`
-  ${color}
-  text-decoration: none;
+interface UnstyledListProps extends SpaceProps, WidthProps {}
+
+interface StyledListProps extends SpaceProps {
+  setBackgroundColor?: string;
+  highlight?: boolean;
+}
+
+interface StyledHrProps extends SpaceProps {}
+
+export const StyledHr = styled.hr<StyledHrProps>`
+  border: 0;
+  height: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  ${space}
+`;
+
+export const UnstyledList = styled.ul<UnstyledListProps>`
+  list-style: none;
+  ${width}
+  ${space}
+`;
+
+export const StyledListItem = styled.li<StyledListProps>`
+  ${space}
+  /* height: 100%; */
+  list-style: none;
+  background-color: ${props =>
+    props.highlight ? "rgba(0,0,0,0.3)" : "transparent"};
   :hover {
-    color: crimson;
+    background-color: ${props =>
+      props.setBackgroundColor
+        ? props.setBackgroundColor
+        : "rgba(0, 0, 0, 0.3)"};
+  }
+
+  transition: 0.2s;
+`;
+
+interface StyledLinkV1Props {
+  hoverColor?: string;
+}
+
+const StyledLinkV1 = styled.a<StyledLinkV1Props>`
+  ${color}
+  width: 100%;
+  display: block;
+  text-decoration: none;
+
+  :hover {
+    color: ${props => (props.hoverColor ? props.hoverColor : "inherit")};
+    cursor: pointer;
+  }
+`;
+
+const SidebarLinkAnchor = styled.a<StyledLinkV1Props>`
+  ${color}
+  width: 100%;
+  display: block;
+  text-decoration: none;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  display: block;
+  :hover {
+    color: ${props => (props.hoverColor ? props.hoverColor : "inherit")};
+    cursor: pointer;
   }
 `;
 
@@ -184,10 +250,117 @@ export const NavLink = ({ children, href }: any) => (
   </Link>
 );
 
-export const LinkLink = ({ children, style, ...props }: any) => (
-  <StyledLinkV1 color="white" {...props}>
-    {children}
-  </StyledLinkV1>
+interface LinkLinkProps {
+  as: string;
+  href: string;
+  color?: string;
+  hoverColor?: string;
+  setOnClick?: React.Dispatch<React.SetStateAction<string>>;
+  setOnClickValue?: string;
+}
+
+interface AlternateLinkLinkProps {
+  as: string;
+  href: string;
+  color?: string;
+  hoverColor?: string;
+  setOnClick: React.Dispatch<
+    React.SetStateAction<
+      ({
+        __typename?: "User" | undefined;
+      } & Pick<User, "id" | "name">)[]
+    >
+  >;
+  setOnClickValue: ({
+    __typename?: "User" | undefined;
+  } & Pick<User, "id" | "name">)[];
+}
+
+export const LinkLink: React.FC<LinkLinkProps> = ({
+  as,
+  children,
+  color,
+  hoverColor,
+  href,
+  setOnClick,
+  setOnClickValue,
+  ...props
+}) => (
+  <Link href={href} as={as}>
+    <StyledLinkV1
+      hoverColor={hoverColor}
+      color={color ? color : "white"}
+      onClick={() => {
+        if (setOnClick && setOnClickValue) {
+          setOnClick(
+            setOnClickValue
+            // typeof setOnClickValue === "string" ? setOnClickValue : ""
+          );
+        } else {
+          console.log("onClick is not set");
+        }
+      }}
+      {...props}
+    >
+      {children}
+    </StyledLinkV1>
+  </Link>
+);
+
+export const SidebarLink: React.FC<LinkLinkProps> = ({
+  as,
+  children,
+  color,
+  hoverColor,
+  href,
+  setOnClick,
+  setOnClickValue,
+  ...props
+}) => (
+  <Link href={href} as={as}>
+    <SidebarLinkAnchor
+      hoverColor={hoverColor}
+      color={color ? color : "white"}
+      onClick={() => {
+        if (setOnClick && setOnClickValue) {
+          setOnClick(setOnClickValue);
+        } else {
+          console.log("onClick is not set");
+        }
+      }}
+      {...props}
+    >
+      {children}
+    </SidebarLinkAnchor>
+  </Link>
+);
+
+export const AltSidebarLink: React.FC<AlternateLinkLinkProps> = ({
+  as,
+  children,
+  color,
+  hoverColor,
+  href,
+  setOnClick,
+  setOnClickValue,
+  ...props
+}) => (
+  <Link href={href} as={as}>
+    <SidebarLinkAnchor
+      hoverColor={hoverColor}
+      color={color ? color : "white"}
+      onClick={() => {
+        if (setOnClick && setOnClickValue) {
+          setOnClick(setOnClickValue);
+        } else {
+          console.log("onClick is not set");
+        }
+      }}
+      {...props}
+    >
+      {children}
+    </SidebarLinkAnchor>
+  </Link>
 );
 
 interface IIconBaseProps extends SpaceProps {
@@ -196,17 +369,27 @@ interface IIconBaseProps extends SpaceProps {
   fill: string;
 }
 
+// interface MIconBaseProps extends SpaceProps {
+//   size: MaterialIconProps["size"];
+//   name: MaterialIconProps["name"];
+//   fill: MaterialIconProps["fill"];
+// }
+
+// interface MaterialBaseProps extends MaterialIconProps, SpaceProps {}
+
 export const Icon: React.FC<IIconBaseProps> = styled(IconBase)`
   ${space}
 `;
 
-export const FlexShadow: React.FC<IFlexShadowProps> = styled(FlexBase)`
-  ${boxShadow}
-`;
+// export const Material_Icon = styled(MaterialIconBase)`
+//   ${space}
+// `;
 
-export const FlexUserProfileWrap: React.FC<IFlexUserProfileWrapProps> = styled(
-  FlexBase
-)`
+// export const FlexShadow = styled<BoxShadowProps>(FlexBase)`
+//   ${boxShadow}
+// `;
+
+export const FlexUserProfileWrap = styled(FlexBase)`
 ${borderRadius}
 ${boxShadow}
 ${overflow}
@@ -215,7 +398,7 @@ ${maxWidth}
 ${borders}
 `;
 
-export const MinButton: React.FC<IMinButtonProps> = styled(Button)`
+export const MinButton = styled(Button)`
   ${minHeight}
 `;
 
@@ -223,12 +406,48 @@ export const Card: React.FC<ICardProps> = styled(CardBase)`
   ${maxWidth}
 `;
 
-export const Flex: React.FC<TFlexProps> = styled(FlexBase)`
+interface FlexMinHeightBordersProps
+  extends BordersProps,
+    FlexboxProps,
+    MinHeightProps,
+    FlexProps {}
+
+export const Flex: StyledComponent<
+  React.FunctionComponent<FlexMinHeightBordersProps>,
+  any,
+  {},
+  never
+> = styled(FlexBase)`
   ${minHeight}
   ${borders}
 `;
 
-export const AbFlex: React.FC<IAbFlexProps> = styled(FlexBase)`
+export const Box: StyledComponent<
+  React.FunctionComponent<BordersProps & BoxProps>,
+  any,
+  {},
+  never
+> = styled(BoxBase)`
+  ${borders}
+`;
+
+interface AbFlexProps
+  extends MinHeightProps,
+    BordersProps,
+    FlexProps,
+    PositionProps,
+    BottomProps,
+    TopProps,
+    RightProps,
+    LeftProps,
+    OverflowProps {}
+
+export const AbFlex: StyledComponent<
+  React.FunctionComponent<AbFlexProps>,
+  any,
+  {},
+  never
+> = styled(FlexBase)`
   ${position}
   ${top}
   ${right}
@@ -238,7 +457,12 @@ export const AbFlex: React.FC<IAbFlexProps> = styled(FlexBase)`
   ${borders}
 `;
 
-export const MaxFlex: React.FC<TMaxFlexProps> = styled(FlexBase)`
+export const MaxFlex: StyledComponent<
+  React.FunctionComponent<TMaxFlexProps>,
+  any,
+  {},
+  never
+> = styled(FlexBase)`
   ${maxHeight}
   ${maxWidth}
   ${minHeight}
@@ -246,7 +470,12 @@ export const MaxFlex: React.FC<TMaxFlexProps> = styled(FlexBase)`
   ${minWidth}
 `;
 
-export const LogoFlex: React.FC<TLogoFlexProps> = styled(FlexBase)`
+export const LogoFlex: StyledComponent<
+  React.FunctionComponent<TLogoFlexProps>,
+  any,
+  {},
+  never
+> = styled(FlexBase)`
   ${boxShadow}
   ${borderRadius}
   ${height}
@@ -320,20 +549,23 @@ export const StyledUl_v2 = styled.ul`
   overflow: hidden;
 `;
 
-export const Label = styled.label`
+interface AdditionalLabelProps {
+  bg: string;
+}
+
+export const Label = styled.label<
+  SpaceProps & BackgroundColorProps & AdditionalLabelProps
+>`
   border: none;
   display: inline-block;
   cursor: pointer;
+  ${space}
 
   box-sizing: border-box;
-  margin: 0;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 16px;
-  padding-right: 16px;
+
   font-size: inherit;
   color: white;
-  background-color: #07c;
+  background-color: ${props => (props.bg ? props.bg : "#eee")};
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -347,4 +579,103 @@ export const Label = styled.label`
   border-radius: 4px;
 `;
 
-export { Box, Button, Heading, Image, Text };
+export const TeamWrapper = styled.div`
+  grid-column: 1;
+  grid-row: 1 / 4;
+  background-color: #362234;
+  color: #958993;
+`;
+
+const channelTextColor = "#958993";
+
+export const ChannelWrapper = styled.div`
+  grid-column: 2;
+  grid-row: 1 / 4;
+  background-color: #4e3a4c;
+  color: ${channelTextColor};
+  overflow-x: hidden;
+  overflow-y: auto;
+`;
+
+export const HeaderWrapper = styled.div`
+  grid-column: 3;
+  grid-row: 1;
+  min-height: 65px;
+  background-color: #eee;
+`;
+
+export const MessageWrapper = styled.div`
+  grid-column: 3;
+  grid-row: 2;
+  /* border: 2px pink solid; */
+  overflow-y: auto;
+`;
+
+export const GridPageContainer = styled.div`
+  display: grid;
+  height: 100vh;
+  grid-template-columns: 100px 250px 1fr;
+  grid-template-rows: auto 1fr auto;
+  width: 100%;
+`;
+
+export const InputContainer = styled.div`
+  grid-column: 3;
+  grid-row: 3;
+  min-height: 65px;
+  /* background-color: pink; */
+  padding: 20px;
+  border-top: 2px #eee solid;
+`;
+
+interface ListItemProps
+  extends ColorProps,
+    BordersProps,
+    SpaceProps,
+    FlexboxProps,
+    HeightProps,
+    WidthProps {
+  highlight?: boolean;
+}
+
+// interface StyledLinkProps extends ColorProps, FontSizeProps, LineHeightProps {}
+
+export const ListItem = styled.li<ListItemProps>`
+${color}
+  ${borders}
+  ${flexbox}
+  ${height}
+  ${space}
+  ${width}
+  
+  border-style: solid;
+    border-width: thick;
+    border-color: ${props => (props.highlight ? "#767676" : "transparent")};
+  :hover{
+    border-style: solid;
+    border-width: thick;
+    border-color: #767676;
+  }
+
+  transition: 0.3s;
+`;
+
+export const ChannelMessageListItem = styled.li<ListItemProps>`
+${color}
+  ${borders}
+  ${flexbox}
+  ${height}
+  ${space}
+  ${width}
+  
+  /* border-style: solid;
+    border-width: thick;
+    border-color: ${props => (props.highlight ? "#767676" : "transparent")}; */
+  :hover{
+    background-color: #eee;
+  }
+
+  transition: 0.3s;
+`;
+
+export { Button, Heading, Image, MaterialIconBase, Text };

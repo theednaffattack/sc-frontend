@@ -5,7 +5,7 @@ interface AvatarPlacehoderProps {
   size?: string;
 }
 
-const AvatarPlaceholder: React.FunctionComponent<AvatarPlacehoderProps> = ({
+export const AvatarPlaceholder: React.FunctionComponent<AvatarPlacehoderProps> = ({
   size = "15rem"
 }) => {
   return <Icon hover={false} name="account_circle" fill="orange" size={size} />;

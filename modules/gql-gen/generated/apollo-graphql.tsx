@@ -17,19 +17,40 @@ export type Scalars = {
   DateTime: any,
 };
 
+export type AddChannelInput = {
+  teamId: Scalars['ID'],
+  name: Scalars['String'],
+};
+
+export type AddDirectMessagePayload = {
+   __typename?: 'AddDirectMessagePayload',
+  success: Scalars['Boolean'],
+  threadId: Scalars['ID'],
+  message: Message,
+  sentBy: User,
+  invitees: Array<User>,
+};
+
+export type AddDirectMessageToThreadInput = {
+  threadId: Scalars['ID'],
+  teamId: Scalars['ID'],
+  message_text: Scalars['String'],
+  invitees: Array<Scalars['String']>,
+};
+
 export type AddMessagePayload = {
    __typename?: 'AddMessagePayload',
   success: Scalars['Boolean'],
   channelId: Scalars['ID'],
   message: Message,
   user: User,
-  invitees: Array<User>,
+  invitees?: Maybe<Array<Maybe<User>>>,
 };
 
 export type AddMessageToChannelInput = {
   channelId: Scalars['ID'],
   sentTo: Scalars['String'],
-  invitees: Array<Scalars['ID']>,
+  invitees?: Maybe<Array<Maybe<Scalars['ID']>>>,
   message: Scalars['String'],
   images?: Maybe<Array<Maybe<Scalars['String']>>>,
 };
@@ -48,10 +69,17 @@ export type Channel = {
   message_count: Scalars['Int'],
   /** Determines whether this channel is viewable to the public. (default = false) */
   public?: Maybe<Scalars['Boolean']>,
-  team: Team,
-  invitees: Array<User>,
+  team: Array<Team>,
+  invitees?: Maybe<Array<Maybe<User>>>,
+  created_by: User,
   created_at?: Maybe<Scalars['DateTime']>,
   updated_at?: Maybe<Scalars['DateTime']>,
+};
+
+export type CreateDirectMessageInput = {
+  teamId: Scalars['ID'],
+  message_text: Scalars['String'],
+  invitees: Array<Scalars['String']>,
 };
 
 
@@ -117,12 +145,15 @@ export type Mutation = {
   signS3: SignedS3Payload,
   addTeamMember: Scalars['Boolean'],
   createTeam: Team,
+  teamLogin?: Maybe<User>,
   addMessageToChannel: AddMessagePayload,
   addChannelMember: Scalars['Boolean'],
   removeChannelMember: Scalars['Boolean'],
   createChannel: Channel,
   updateChannelName: Scalars['Boolean'],
   deleteChannel: Scalars['Boolean'],
+  addDirectMessageToThread: AddDirectMessagePayload,
+  createDirectMessage: AddDirectMessagePayload,
 };
 
 
@@ -193,6 +224,13 @@ export type MutationCreateTeamArgs = {
 };
 
 
+export type MutationTeamLoginArgs = {
+  email: Scalars['Int'],
+  password: Scalars['Int'],
+  teamId: Scalars['String']
+};
+
+
 export type MutationAddMessageToChannelArgs = {
   data: AddMessageToChannelInput
 };
@@ -211,7 +249,7 @@ export type MutationRemoveChannelMemberArgs = {
 
 
 export type MutationCreateChannelArgs = {
-  name: Scalars['String']
+  input: AddChannelInput
 };
 
 
@@ -224,6 +262,16 @@ export type MutationUpdateChannelNameArgs = {
 export type MutationDeleteChannelArgs = {
   channelId: Scalars['String'],
   channelName: Scalars['String']
+};
+
+
+export type MutationAddDirectMessageToThreadArgs = {
+  input: AddDirectMessageToThreadInput
+};
+
+
+export type MutationCreateDirectMessageArgs = {
+  input: CreateDirectMessageInput
 };
 
 export type PasswordInput = {
@@ -245,15 +293,24 @@ export type Query = {
   me?: Maybe<User>,
   helloWorld: Scalars['String'],
   getAllMyMessages?: Maybe<User>,
-  getListToCreateThread?: Maybe<TransUserReturn>,
+  getListToCreateThread: Array<Maybe<User>>,
   getMyMessagesFromUser?: Maybe<Array<Message>>,
   batchTeams: Array<Team>,
-  loadTeams: Array<Team>,
+  getAllTeamMembers: Array<User>,
+  getAllTeamsForUser: Array<Team>,
   teamMembers?: Maybe<Array<Maybe<User>>>,
+  getChannelName: Scalars['String'],
   getAllChannelMembers: Array<User>,
   getAllChannelMessages: Array<Message>,
-  loadChannels: Array<Channel>,
+  loadChannelsByTeamId: Array<Channel>,
   channelMembers?: Maybe<Array<Maybe<User>>>,
+  loadDirectMessagesThreadById: Thread,
+  loadDirectMessageThreadsByTeamAndUser: Array<Thread>,
+};
+
+
+export type QueryGetListToCreateThreadArgs = {
+  teamId: Scalars['String']
 };
 
 
@@ -262,8 +319,18 @@ export type QueryGetMyMessagesFromUserArgs = {
 };
 
 
+export type QueryGetAllTeamMembersArgs = {
+  teamId: Scalars['String']
+};
+
+
 export type QueryTeamMembersArgs = {
   teamIds: Array<Scalars['ID']>
+};
+
+
+export type QueryGetChannelNameArgs = {
+  channelId: Scalars['String']
 };
 
 
@@ -277,8 +344,23 @@ export type QueryGetAllChannelMessagesArgs = {
 };
 
 
+export type QueryLoadChannelsByTeamIdArgs = {
+  teamId: Scalars['String']
+};
+
+
 export type QueryChannelMembersArgs = {
   channelIds: Array<Scalars['ID']>
+};
+
+
+export type QueryLoadDirectMessagesThreadByIdArgs = {
+  threadId: Scalars['String']
+};
+
+
+export type QueryLoadDirectMessageThreadsByTeamAndUserArgs = {
+  teamId: Scalars['String']
 };
 
 export type RegisterInput = {
@@ -299,13 +381,19 @@ export type SignedS3SubPayload = {
   signedRequest: Scalars['String'],
 };
 
+export type Subscription = {
+   __typename?: 'Subscription',
+  newMessageSub: Message,
+  newDirectMessageSub: AddDirectMessagePayload,
+};
+
 export type Team = {
    __typename?: 'Team',
   id: Scalars['ID'],
   name: Scalars['String'],
   owner: User,
-  channels: Array<Channel>,
-  membersLoader: Array<User>,
+  channels: Array<Maybe<Channel>>,
+  threads: Array<Maybe<Thread>>,
 };
 
 export type Thread = {
@@ -315,17 +403,10 @@ export type Thread = {
   last_message?: Maybe<Scalars['String']>,
   message_count: Scalars['Int'],
   user: User,
+  team?: Maybe<Team>,
   invitees: Array<User>,
   created_at?: Maybe<Scalars['DateTime']>,
   updated_at?: Maybe<Scalars['DateTime']>,
-};
-
-export type TransUserReturn = {
-   __typename?: 'TransUserReturn',
-  id: Scalars['ID'],
-  firstName: Scalars['String'],
-  lastName: Scalars['String'],
-  thoseICanMessage?: Maybe<Array<User>>,
 };
 
 export type UploadProfilePictueReturnType = {
@@ -346,8 +427,9 @@ export type User = {
   lastName?: Maybe<Scalars['String']>,
   email?: Maybe<Scalars['String']>,
   teamRole: UserTeamRole,
+  channels_created?: Maybe<Channel>,
   images?: Maybe<Array<Maybe<Image>>>,
-  mappedMessages: Array<Message>,
+  mappedMessages?: Maybe<Array<Maybe<Message>>>,
   followers?: Maybe<Array<Maybe<User>>>,
   following?: Maybe<Array<Maybe<User>>>,
   threads?: Maybe<Array<Thread>>,
@@ -367,11 +449,12 @@ export type UserTeam = {
   name: Scalars['String'],
 };
 
-/** admin | owner | member */
+/** admin | owner | member | public guest */
 export enum UserTeamRole {
   Admin = 'ADMIN',
   Owner = 'OWNER',
-  Member = 'MEMBER'
+  Member = 'MEMBER',
+  PublicGuest = 'PUBLIC_GUEST'
 }
 
 export type AddChannelMemberMutationVariables = {
@@ -399,7 +482,7 @@ export type AddMessageToChannelMutation = (
 );
 
 export type CreateChannelMutationVariables = {
-  name: Scalars['String']
+  input: AddChannelInput
 };
 
 
@@ -407,7 +490,11 @@ export type CreateChannelMutation = (
   { __typename?: 'Mutation' }
   & { createChannel: (
     { __typename?: 'Channel' }
-    & Pick<Channel, 'id' | 'name'>
+    & Pick<Channel, 'id' | 'name' | 'last_message'>
+    & { invitees: Maybe<Array<Maybe<(
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'name'>
+    )>>> }
   ) }
 );
 
@@ -432,6 +519,10 @@ export type GetAllChannelMessagesQuery = (
   & { getAllChannelMessages: Array<(
     { __typename?: 'Message' }
     & Pick<Message, 'id' | 'message'>
+    & { sentBy: (
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'name'>
+    ) }
   )> }
 );
 
@@ -459,6 +550,54 @@ export type GetAllChannelMembersQuery = (
   )> }
 );
 
+export type GetChannelNameQueryVariables = {
+  channelId: Scalars['String']
+};
+
+
+export type GetChannelNameQuery = (
+  { __typename?: 'Query' }
+  & Pick<Query, 'getChannelName'>
+);
+
+export type LoadChannelsByTeamIdQueryVariables = {
+  teamId: Scalars['String']
+};
+
+
+export type LoadChannelsByTeamIdQuery = (
+  { __typename?: 'Query' }
+  & { loadChannelsByTeamId: Array<(
+    { __typename?: 'Channel' }
+    & Pick<Channel, 'id' | 'name'>
+    & { invitees: Maybe<Array<Maybe<(
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'name'>
+    )>>> }
+  )> }
+);
+
+export type NewMessageSubSubscriptionVariables = {};
+
+
+export type NewMessageSubSubscription = (
+  { __typename?: 'Subscription' }
+  & { newMessageSub: (
+    { __typename?: 'Message' }
+    & Pick<Message, 'id' | 'created_at' | 'message'>
+    & { images: Maybe<Array<Maybe<(
+      { __typename?: 'Image' }
+      & Pick<Image, 'id' | 'uri'>
+    )>>>, sentBy: (
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'name'>
+    ), user: (
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'name'>
+    ) }
+  ) }
+);
+
 export type SignS3MutationVariables = {
   files: Array<ImageSubInput>
 };
@@ -475,6 +614,53 @@ export type SignS3Mutation = (
   ) }
 );
 
+export type AddDirectMessageToThreadMutationVariables = {
+  input: AddDirectMessageToThreadInput
+};
+
+
+export type AddDirectMessageToThreadMutation = (
+  { __typename?: 'Mutation' }
+  & { addDirectMessageToThread: (
+    { __typename?: 'AddDirectMessagePayload' }
+    & Pick<AddDirectMessagePayload, 'success' | 'threadId'>
+    & { message: (
+      { __typename?: 'Message' }
+      & Pick<Message, 'id' | 'message'>
+    ), sentBy: (
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'name'>
+    ), invitees: Array<(
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'name'>
+    )> }
+  ) }
+);
+
+export type CreateDirectMessageMutationVariables = {
+  input: CreateDirectMessageInput
+};
+
+
+export type CreateDirectMessageMutation = (
+  { __typename?: 'Mutation' }
+  & { createDirectMessage: (
+    { __typename?: 'AddDirectMessagePayload' }
+    & Pick<AddDirectMessagePayload, 'success' | 'threadId'>
+    & { invitees: Array<(
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'name'>
+    )>, message: (
+      { __typename?: 'Message' }
+      & Pick<Message, 'id' | 'message'>
+      & { sentBy: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'name'>
+      ) }
+    ) }
+  ) }
+);
+
 export type GetAllMyMessagesQueryVariables = {};
 
 
@@ -483,7 +669,7 @@ export type GetAllMyMessagesQuery = (
   & { getAllMyMessages: Maybe<(
     { __typename?: 'User' }
     & Pick<User, 'id' | 'firstName' | 'lastName'>
-    & { mappedMessages: Array<(
+    & { mappedMessages: Maybe<Array<Maybe<(
       { __typename?: 'Message' }
       & Pick<Message, 'id' | 'created_at' | 'updated_at' | 'message'>
       & { sentBy: (
@@ -493,23 +679,21 @@ export type GetAllMyMessagesQuery = (
         { __typename?: 'User' }
         & Pick<User, 'id' | 'firstName' | 'lastName'>
       ) }
-    )> }
+    )>>> }
   )> }
 );
 
-export type GetListToCreateThreadQueryVariables = {};
+export type GetListToCreateThreadQueryVariables = {
+  teamId: Scalars['String']
+};
 
 
 export type GetListToCreateThreadQuery = (
   { __typename?: 'Query' }
-  & { getListToCreateThread: Maybe<(
-    { __typename?: 'TransUserReturn' }
-    & Pick<TransUserReturn, 'id' | 'firstName'>
-    & { thoseICanMessage: Maybe<Array<(
-      { __typename?: 'User' }
-      & Pick<User, 'id' | 'firstName' | 'lastName'>
-    )>> }
-  )> }
+  & { getListToCreateThread: Array<Maybe<(
+    { __typename?: 'User' }
+    & Pick<User, 'id' | 'firstName' | 'lastName'>
+  )>> }
 );
 
 export type GetMyMessagesFromUserQueryVariables = {
@@ -527,6 +711,68 @@ export type GetMyMessagesFromUserQuery = (
       & Pick<User, 'id' | 'firstName' | 'lastName'>
     ) }
   )>> }
+);
+
+export type LoadDirectMessageThreadsByTeamAndUserQueryVariables = {
+  teamId: Scalars['String']
+};
+
+
+export type LoadDirectMessageThreadsByTeamAndUserQuery = (
+  { __typename?: 'Query' }
+  & { loadDirectMessageThreadsByTeamAndUser: Array<(
+    { __typename?: 'Thread' }
+    & Pick<Thread, 'id' | 'last_message'>
+    & { invitees: Array<(
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'name'>
+    )>, messages: Maybe<Array<Maybe<(
+      { __typename?: 'Message' }
+      & Pick<Message, 'id' | 'message'>
+    )>>> }
+  )> }
+);
+
+export type LoadDirectMessagesThreadByIdQueryVariables = {
+  threadId: Scalars['String']
+};
+
+
+export type LoadDirectMessagesThreadByIdQuery = (
+  { __typename?: 'Query' }
+  & { loadDirectMessagesThreadById: (
+    { __typename?: 'Thread' }
+    & Pick<Thread, 'id'>
+    & { invitees: Array<(
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'name'>
+    )>, messages: Maybe<Array<Maybe<(
+      { __typename?: 'Message' }
+      & Pick<Message, 'id' | 'message'>
+      & { sentBy: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'name'>
+      ) }
+    )>>> }
+  ) }
+);
+
+export type NewDirectMessageSubSubscriptionVariables = {};
+
+
+export type NewDirectMessageSubSubscription = (
+  { __typename?: 'Subscription' }
+  & { newDirectMessageSub: (
+    { __typename?: 'AddDirectMessagePayload' }
+    & Pick<AddDirectMessagePayload, 'success' | 'threadId'>
+    & { message: (
+      { __typename?: 'Message' }
+      & Pick<Message, 'id' | 'message'>
+    ), sentBy: (
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'name'>
+    ) }
+  ) }
 );
 
 export type AddTeamMemberMutationVariables = {
@@ -554,16 +800,35 @@ export type CreateTeamMutation = (
 );
 
 export type GetAllTeamMembersQueryVariables = {
-  teamIds: Array<Scalars['ID']>
+  teamId: Scalars['String']
 };
 
 
 export type GetAllTeamMembersQuery = (
   { __typename?: 'Query' }
-  & { teamMembers: Maybe<Array<Maybe<(
+  & { getAllTeamMembers: Array<(
     { __typename?: 'User' }
     & Pick<User, 'id' | 'name' | 'teamRole'>
-  )>>> }
+  )> }
+);
+
+export type GetAllTeamsForUserQueryVariables = {};
+
+
+export type GetAllTeamsForUserQuery = (
+  { __typename?: 'Query' }
+  & { getAllTeamsForUser: Array<(
+    { __typename?: 'Team' }
+    & Pick<Team, 'id' | 'name'>
+    & { channels: Array<Maybe<(
+      { __typename?: 'Channel' }
+      & Pick<Channel, 'id' | 'name' | 'last_message'>
+      & { invitees: Maybe<Array<Maybe<(
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'name'>
+      )>>> }
+    )>> }
+  )> }
 );
 
 export type ForgotPasswordMutationVariables = {
@@ -791,10 +1056,15 @@ export type AddMessageToChannelMutationHookResult = ReturnType<typeof useAddMess
 export type AddMessageToChannelMutationResult = ApolloReactCommon.MutationResult<AddMessageToChannelMutation>;
 export type AddMessageToChannelMutationOptions = ApolloReactCommon.BaseMutationOptions<AddMessageToChannelMutation, AddMessageToChannelMutationVariables>;
 export const CreateChannelDocument = gql`
-    mutation CreateChannel($name: String!) {
-  createChannel(name: $name) {
+    mutation CreateChannel($input: AddChannelInput!) {
+  createChannel(input: $input) {
     id
     name
+    invitees {
+      id
+      name
+    }
+    last_message
   }
 }
     `;
@@ -830,7 +1100,7 @@ export function withCreateChannel<TProps, TChildProps = {}>(operationOptions?: A
  * @example
  * const [createChannelMutation, { data, loading, error }] = useCreateChannelMutation({
  *   variables: {
- *      name: // value for 'name'
+ *      input: // value for 'input'
  *   },
  * });
  */
@@ -893,6 +1163,10 @@ export const GetAllChannelMessagesDocument = gql`
   getAllChannelMessages(channelId: $channelId) {
     id
     message
+    sentBy {
+      id
+      name
+    }
   }
 }
     `;
@@ -1038,6 +1312,168 @@ export function useGetAllChannelMembersLazyQuery(baseOptions?: ApolloReactHooks.
 export type GetAllChannelMembersQueryHookResult = ReturnType<typeof useGetAllChannelMembersQuery>;
 export type GetAllChannelMembersLazyQueryHookResult = ReturnType<typeof useGetAllChannelMembersLazyQuery>;
 export type GetAllChannelMembersQueryResult = ApolloReactCommon.QueryResult<GetAllChannelMembersQuery, GetAllChannelMembersQueryVariables>;
+export const GetChannelNameDocument = gql`
+    query GetChannelName($channelId: String!) {
+  getChannelName(channelId: $channelId)
+}
+    `;
+export type GetChannelNameComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GetChannelNameQuery, GetChannelNameQueryVariables>, 'query'> & ({ variables: GetChannelNameQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const GetChannelNameComponent = (props: GetChannelNameComponentProps) => (
+      <ApolloReactComponents.Query<GetChannelNameQuery, GetChannelNameQueryVariables> query={GetChannelNameDocument} {...props} />
+    );
+    
+export type GetChannelNameProps<TChildProps = {}> = ApolloReactHoc.DataProps<GetChannelNameQuery, GetChannelNameQueryVariables> | TChildProps;
+export function withGetChannelName<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GetChannelNameQuery,
+  GetChannelNameQueryVariables,
+  GetChannelNameProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GetChannelNameQuery, GetChannelNameQueryVariables, GetChannelNameProps<TChildProps>>(GetChannelNameDocument, {
+      alias: 'getChannelName',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGetChannelNameQuery__
+ *
+ * To run a query within a React component, call `useGetChannelNameQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetChannelNameQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetChannelNameQuery({
+ *   variables: {
+ *      channelId: // value for 'channelId'
+ *   },
+ * });
+ */
+export function useGetChannelNameQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetChannelNameQuery, GetChannelNameQueryVariables>) {
+        return ApolloReactHooks.useQuery<GetChannelNameQuery, GetChannelNameQueryVariables>(GetChannelNameDocument, baseOptions);
+      }
+export function useGetChannelNameLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetChannelNameQuery, GetChannelNameQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GetChannelNameQuery, GetChannelNameQueryVariables>(GetChannelNameDocument, baseOptions);
+        }
+export type GetChannelNameQueryHookResult = ReturnType<typeof useGetChannelNameQuery>;
+export type GetChannelNameLazyQueryHookResult = ReturnType<typeof useGetChannelNameLazyQuery>;
+export type GetChannelNameQueryResult = ApolloReactCommon.QueryResult<GetChannelNameQuery, GetChannelNameQueryVariables>;
+export const LoadChannelsByTeamIdDocument = gql`
+    query LoadChannelsByTeamId($teamId: String!) {
+  loadChannelsByTeamId(teamId: $teamId) {
+    id
+    name
+    invitees {
+      id
+      name
+    }
+  }
+}
+    `;
+export type LoadChannelsByTeamIdComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<LoadChannelsByTeamIdQuery, LoadChannelsByTeamIdQueryVariables>, 'query'> & ({ variables: LoadChannelsByTeamIdQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const LoadChannelsByTeamIdComponent = (props: LoadChannelsByTeamIdComponentProps) => (
+      <ApolloReactComponents.Query<LoadChannelsByTeamIdQuery, LoadChannelsByTeamIdQueryVariables> query={LoadChannelsByTeamIdDocument} {...props} />
+    );
+    
+export type LoadChannelsByTeamIdProps<TChildProps = {}> = ApolloReactHoc.DataProps<LoadChannelsByTeamIdQuery, LoadChannelsByTeamIdQueryVariables> | TChildProps;
+export function withLoadChannelsByTeamId<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  LoadChannelsByTeamIdQuery,
+  LoadChannelsByTeamIdQueryVariables,
+  LoadChannelsByTeamIdProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, LoadChannelsByTeamIdQuery, LoadChannelsByTeamIdQueryVariables, LoadChannelsByTeamIdProps<TChildProps>>(LoadChannelsByTeamIdDocument, {
+      alias: 'loadChannelsByTeamId',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useLoadChannelsByTeamIdQuery__
+ *
+ * To run a query within a React component, call `useLoadChannelsByTeamIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLoadChannelsByTeamIdQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLoadChannelsByTeamIdQuery({
+ *   variables: {
+ *      teamId: // value for 'teamId'
+ *   },
+ * });
+ */
+export function useLoadChannelsByTeamIdQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<LoadChannelsByTeamIdQuery, LoadChannelsByTeamIdQueryVariables>) {
+        return ApolloReactHooks.useQuery<LoadChannelsByTeamIdQuery, LoadChannelsByTeamIdQueryVariables>(LoadChannelsByTeamIdDocument, baseOptions);
+      }
+export function useLoadChannelsByTeamIdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LoadChannelsByTeamIdQuery, LoadChannelsByTeamIdQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<LoadChannelsByTeamIdQuery, LoadChannelsByTeamIdQueryVariables>(LoadChannelsByTeamIdDocument, baseOptions);
+        }
+export type LoadChannelsByTeamIdQueryHookResult = ReturnType<typeof useLoadChannelsByTeamIdQuery>;
+export type LoadChannelsByTeamIdLazyQueryHookResult = ReturnType<typeof useLoadChannelsByTeamIdLazyQuery>;
+export type LoadChannelsByTeamIdQueryResult = ApolloReactCommon.QueryResult<LoadChannelsByTeamIdQuery, LoadChannelsByTeamIdQueryVariables>;
+export const NewMessageSubDocument = gql`
+    subscription NewMessageSub {
+  newMessageSub {
+    id
+    created_at
+    message
+    images {
+      id
+      uri
+    }
+    sentBy {
+      id
+      name
+    }
+    user {
+      id
+      name
+    }
+  }
+}
+    `;
+export type NewMessageSubComponentProps = Omit<ApolloReactComponents.SubscriptionComponentOptions<NewMessageSubSubscription, NewMessageSubSubscriptionVariables>, 'subscription'>;
+
+    export const NewMessageSubComponent = (props: NewMessageSubComponentProps) => (
+      <ApolloReactComponents.Subscription<NewMessageSubSubscription, NewMessageSubSubscriptionVariables> subscription={NewMessageSubDocument} {...props} />
+    );
+    
+export type NewMessageSubProps<TChildProps = {}> = ApolloReactHoc.DataProps<NewMessageSubSubscription, NewMessageSubSubscriptionVariables> | TChildProps;
+export function withNewMessageSub<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  NewMessageSubSubscription,
+  NewMessageSubSubscriptionVariables,
+  NewMessageSubProps<TChildProps>>) {
+    return ApolloReactHoc.withSubscription<TProps, NewMessageSubSubscription, NewMessageSubSubscriptionVariables, NewMessageSubProps<TChildProps>>(NewMessageSubDocument, {
+      alias: 'newMessageSub',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useNewMessageSubSubscription__
+ *
+ * To run a query within a React component, call `useNewMessageSubSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useNewMessageSubSubscription` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNewMessageSubSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useNewMessageSubSubscription(baseOptions?: ApolloReactHooks.SubscriptionHookOptions<NewMessageSubSubscription, NewMessageSubSubscriptionVariables>) {
+        return ApolloReactHooks.useSubscription<NewMessageSubSubscription, NewMessageSubSubscriptionVariables>(NewMessageSubDocument, baseOptions);
+      }
+export type NewMessageSubSubscriptionHookResult = ReturnType<typeof useNewMessageSubSubscription>;
+export type NewMessageSubSubscriptionResult = ApolloReactCommon.SubscriptionResult<NewMessageSubSubscription>;
 export const SignS3Document = gql`
     mutation SignS3($files: [ImageSubInput!]!) {
   signS3(files: $files) {
@@ -1090,6 +1526,130 @@ export function useSignS3Mutation(baseOptions?: ApolloReactHooks.MutationHookOpt
 export type SignS3MutationHookResult = ReturnType<typeof useSignS3Mutation>;
 export type SignS3MutationResult = ApolloReactCommon.MutationResult<SignS3Mutation>;
 export type SignS3MutationOptions = ApolloReactCommon.BaseMutationOptions<SignS3Mutation, SignS3MutationVariables>;
+export const AddDirectMessageToThreadDocument = gql`
+    mutation AddDirectMessageToThread($input: AddDirectMessageToThreadInput!) {
+  addDirectMessageToThread(input: $input) {
+    success
+    threadId
+    message {
+      id
+      message
+    }
+    sentBy {
+      id
+      name
+    }
+    invitees {
+      id
+      name
+    }
+  }
+}
+    `;
+export type AddDirectMessageToThreadMutationFn = ApolloReactCommon.MutationFunction<AddDirectMessageToThreadMutation, AddDirectMessageToThreadMutationVariables>;
+export type AddDirectMessageToThreadComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<AddDirectMessageToThreadMutation, AddDirectMessageToThreadMutationVariables>, 'mutation'>;
+
+    export const AddDirectMessageToThreadComponent = (props: AddDirectMessageToThreadComponentProps) => (
+      <ApolloReactComponents.Mutation<AddDirectMessageToThreadMutation, AddDirectMessageToThreadMutationVariables> mutation={AddDirectMessageToThreadDocument} {...props} />
+    );
+    
+export type AddDirectMessageToThreadProps<TChildProps = {}> = ApolloReactHoc.MutateProps<AddDirectMessageToThreadMutation, AddDirectMessageToThreadMutationVariables> | TChildProps;
+export function withAddDirectMessageToThread<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AddDirectMessageToThreadMutation,
+  AddDirectMessageToThreadMutationVariables,
+  AddDirectMessageToThreadProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, AddDirectMessageToThreadMutation, AddDirectMessageToThreadMutationVariables, AddDirectMessageToThreadProps<TChildProps>>(AddDirectMessageToThreadDocument, {
+      alias: 'addDirectMessageToThread',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAddDirectMessageToThreadMutation__
+ *
+ * To run a mutation, you first call `useAddDirectMessageToThreadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddDirectMessageToThreadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addDirectMessageToThreadMutation, { data, loading, error }] = useAddDirectMessageToThreadMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useAddDirectMessageToThreadMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<AddDirectMessageToThreadMutation, AddDirectMessageToThreadMutationVariables>) {
+        return ApolloReactHooks.useMutation<AddDirectMessageToThreadMutation, AddDirectMessageToThreadMutationVariables>(AddDirectMessageToThreadDocument, baseOptions);
+      }
+export type AddDirectMessageToThreadMutationHookResult = ReturnType<typeof useAddDirectMessageToThreadMutation>;
+export type AddDirectMessageToThreadMutationResult = ApolloReactCommon.MutationResult<AddDirectMessageToThreadMutation>;
+export type AddDirectMessageToThreadMutationOptions = ApolloReactCommon.BaseMutationOptions<AddDirectMessageToThreadMutation, AddDirectMessageToThreadMutationVariables>;
+export const CreateDirectMessageDocument = gql`
+    mutation CreateDirectMessage($input: CreateDirectMessageInput!) {
+  createDirectMessage(input: $input) {
+    success
+    threadId
+    invitees {
+      id
+      name
+    }
+    message {
+      id
+      message
+      sentBy {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+export type CreateDirectMessageMutationFn = ApolloReactCommon.MutationFunction<CreateDirectMessageMutation, CreateDirectMessageMutationVariables>;
+export type CreateDirectMessageComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateDirectMessageMutation, CreateDirectMessageMutationVariables>, 'mutation'>;
+
+    export const CreateDirectMessageComponent = (props: CreateDirectMessageComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateDirectMessageMutation, CreateDirectMessageMutationVariables> mutation={CreateDirectMessageDocument} {...props} />
+    );
+    
+export type CreateDirectMessageProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateDirectMessageMutation, CreateDirectMessageMutationVariables> | TChildProps;
+export function withCreateDirectMessage<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateDirectMessageMutation,
+  CreateDirectMessageMutationVariables,
+  CreateDirectMessageProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateDirectMessageMutation, CreateDirectMessageMutationVariables, CreateDirectMessageProps<TChildProps>>(CreateDirectMessageDocument, {
+      alias: 'createDirectMessage',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateDirectMessageMutation__
+ *
+ * To run a mutation, you first call `useCreateDirectMessageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateDirectMessageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createDirectMessageMutation, { data, loading, error }] = useCreateDirectMessageMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateDirectMessageMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateDirectMessageMutation, CreateDirectMessageMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateDirectMessageMutation, CreateDirectMessageMutationVariables>(CreateDirectMessageDocument, baseOptions);
+      }
+export type CreateDirectMessageMutationHookResult = ReturnType<typeof useCreateDirectMessageMutation>;
+export type CreateDirectMessageMutationResult = ApolloReactCommon.MutationResult<CreateDirectMessageMutation>;
+export type CreateDirectMessageMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateDirectMessageMutation, CreateDirectMessageMutationVariables>;
 export const GetAllMyMessagesDocument = gql`
     query GetAllMyMessages {
   getAllMyMessages {
@@ -1158,19 +1718,15 @@ export type GetAllMyMessagesQueryHookResult = ReturnType<typeof useGetAllMyMessa
 export type GetAllMyMessagesLazyQueryHookResult = ReturnType<typeof useGetAllMyMessagesLazyQuery>;
 export type GetAllMyMessagesQueryResult = ApolloReactCommon.QueryResult<GetAllMyMessagesQuery, GetAllMyMessagesQueryVariables>;
 export const GetListToCreateThreadDocument = gql`
-    query GetListToCreateThread {
-  getListToCreateThread {
+    query GetListToCreateThread($teamId: String!) {
+  getListToCreateThread(teamId: $teamId) {
     id
     firstName
-    thoseICanMessage {
-      id
-      firstName
-      lastName
-    }
+    lastName
   }
 }
     `;
-export type GetListToCreateThreadComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GetListToCreateThreadQuery, GetListToCreateThreadQueryVariables>, 'query'>;
+export type GetListToCreateThreadComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GetListToCreateThreadQuery, GetListToCreateThreadQueryVariables>, 'query'> & ({ variables: GetListToCreateThreadQueryVariables; skip?: boolean; } | { skip: boolean; });
 
     export const GetListToCreateThreadComponent = (props: GetListToCreateThreadComponentProps) => (
       <ApolloReactComponents.Query<GetListToCreateThreadQuery, GetListToCreateThreadQueryVariables> query={GetListToCreateThreadDocument} {...props} />
@@ -1200,6 +1756,7 @@ export function withGetListToCreateThread<TProps, TChildProps = {}>(operationOpt
  * @example
  * const { data, loading, error } = useGetListToCreateThreadQuery({
  *   variables: {
+ *      teamId: // value for 'teamId'
  *   },
  * });
  */
@@ -1269,6 +1826,181 @@ export function useGetMyMessagesFromUserLazyQuery(baseOptions?: ApolloReactHooks
 export type GetMyMessagesFromUserQueryHookResult = ReturnType<typeof useGetMyMessagesFromUserQuery>;
 export type GetMyMessagesFromUserLazyQueryHookResult = ReturnType<typeof useGetMyMessagesFromUserLazyQuery>;
 export type GetMyMessagesFromUserQueryResult = ApolloReactCommon.QueryResult<GetMyMessagesFromUserQuery, GetMyMessagesFromUserQueryVariables>;
+export const LoadDirectMessageThreadsByTeamAndUserDocument = gql`
+    query LoadDirectMessageThreadsByTeamAndUser($teamId: String!) {
+  loadDirectMessageThreadsByTeamAndUser(teamId: $teamId) {
+    id
+    last_message
+    invitees {
+      id
+      name
+    }
+    messages {
+      id
+      message
+    }
+  }
+}
+    `;
+export type LoadDirectMessageThreadsByTeamAndUserComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<LoadDirectMessageThreadsByTeamAndUserQuery, LoadDirectMessageThreadsByTeamAndUserQueryVariables>, 'query'> & ({ variables: LoadDirectMessageThreadsByTeamAndUserQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const LoadDirectMessageThreadsByTeamAndUserComponent = (props: LoadDirectMessageThreadsByTeamAndUserComponentProps) => (
+      <ApolloReactComponents.Query<LoadDirectMessageThreadsByTeamAndUserQuery, LoadDirectMessageThreadsByTeamAndUserQueryVariables> query={LoadDirectMessageThreadsByTeamAndUserDocument} {...props} />
+    );
+    
+export type LoadDirectMessageThreadsByTeamAndUserProps<TChildProps = {}> = ApolloReactHoc.DataProps<LoadDirectMessageThreadsByTeamAndUserQuery, LoadDirectMessageThreadsByTeamAndUserQueryVariables> | TChildProps;
+export function withLoadDirectMessageThreadsByTeamAndUser<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  LoadDirectMessageThreadsByTeamAndUserQuery,
+  LoadDirectMessageThreadsByTeamAndUserQueryVariables,
+  LoadDirectMessageThreadsByTeamAndUserProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, LoadDirectMessageThreadsByTeamAndUserQuery, LoadDirectMessageThreadsByTeamAndUserQueryVariables, LoadDirectMessageThreadsByTeamAndUserProps<TChildProps>>(LoadDirectMessageThreadsByTeamAndUserDocument, {
+      alias: 'loadDirectMessageThreadsByTeamAndUser',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useLoadDirectMessageThreadsByTeamAndUserQuery__
+ *
+ * To run a query within a React component, call `useLoadDirectMessageThreadsByTeamAndUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLoadDirectMessageThreadsByTeamAndUserQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLoadDirectMessageThreadsByTeamAndUserQuery({
+ *   variables: {
+ *      teamId: // value for 'teamId'
+ *   },
+ * });
+ */
+export function useLoadDirectMessageThreadsByTeamAndUserQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<LoadDirectMessageThreadsByTeamAndUserQuery, LoadDirectMessageThreadsByTeamAndUserQueryVariables>) {
+        return ApolloReactHooks.useQuery<LoadDirectMessageThreadsByTeamAndUserQuery, LoadDirectMessageThreadsByTeamAndUserQueryVariables>(LoadDirectMessageThreadsByTeamAndUserDocument, baseOptions);
+      }
+export function useLoadDirectMessageThreadsByTeamAndUserLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LoadDirectMessageThreadsByTeamAndUserQuery, LoadDirectMessageThreadsByTeamAndUserQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<LoadDirectMessageThreadsByTeamAndUserQuery, LoadDirectMessageThreadsByTeamAndUserQueryVariables>(LoadDirectMessageThreadsByTeamAndUserDocument, baseOptions);
+        }
+export type LoadDirectMessageThreadsByTeamAndUserQueryHookResult = ReturnType<typeof useLoadDirectMessageThreadsByTeamAndUserQuery>;
+export type LoadDirectMessageThreadsByTeamAndUserLazyQueryHookResult = ReturnType<typeof useLoadDirectMessageThreadsByTeamAndUserLazyQuery>;
+export type LoadDirectMessageThreadsByTeamAndUserQueryResult = ApolloReactCommon.QueryResult<LoadDirectMessageThreadsByTeamAndUserQuery, LoadDirectMessageThreadsByTeamAndUserQueryVariables>;
+export const LoadDirectMessagesThreadByIdDocument = gql`
+    query LoadDirectMessagesThreadById($threadId: String!) {
+  loadDirectMessagesThreadById(threadId: $threadId) {
+    id
+    invitees {
+      id
+      name
+    }
+    messages {
+      id
+      message
+      sentBy {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+export type LoadDirectMessagesThreadByIdComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<LoadDirectMessagesThreadByIdQuery, LoadDirectMessagesThreadByIdQueryVariables>, 'query'> & ({ variables: LoadDirectMessagesThreadByIdQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const LoadDirectMessagesThreadByIdComponent = (props: LoadDirectMessagesThreadByIdComponentProps) => (
+      <ApolloReactComponents.Query<LoadDirectMessagesThreadByIdQuery, LoadDirectMessagesThreadByIdQueryVariables> query={LoadDirectMessagesThreadByIdDocument} {...props} />
+    );
+    
+export type LoadDirectMessagesThreadByIdProps<TChildProps = {}> = ApolloReactHoc.DataProps<LoadDirectMessagesThreadByIdQuery, LoadDirectMessagesThreadByIdQueryVariables> | TChildProps;
+export function withLoadDirectMessagesThreadById<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  LoadDirectMessagesThreadByIdQuery,
+  LoadDirectMessagesThreadByIdQueryVariables,
+  LoadDirectMessagesThreadByIdProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, LoadDirectMessagesThreadByIdQuery, LoadDirectMessagesThreadByIdQueryVariables, LoadDirectMessagesThreadByIdProps<TChildProps>>(LoadDirectMessagesThreadByIdDocument, {
+      alias: 'loadDirectMessagesThreadById',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useLoadDirectMessagesThreadByIdQuery__
+ *
+ * To run a query within a React component, call `useLoadDirectMessagesThreadByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLoadDirectMessagesThreadByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLoadDirectMessagesThreadByIdQuery({
+ *   variables: {
+ *      threadId: // value for 'threadId'
+ *   },
+ * });
+ */
+export function useLoadDirectMessagesThreadByIdQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<LoadDirectMessagesThreadByIdQuery, LoadDirectMessagesThreadByIdQueryVariables>) {
+        return ApolloReactHooks.useQuery<LoadDirectMessagesThreadByIdQuery, LoadDirectMessagesThreadByIdQueryVariables>(LoadDirectMessagesThreadByIdDocument, baseOptions);
+      }
+export function useLoadDirectMessagesThreadByIdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LoadDirectMessagesThreadByIdQuery, LoadDirectMessagesThreadByIdQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<LoadDirectMessagesThreadByIdQuery, LoadDirectMessagesThreadByIdQueryVariables>(LoadDirectMessagesThreadByIdDocument, baseOptions);
+        }
+export type LoadDirectMessagesThreadByIdQueryHookResult = ReturnType<typeof useLoadDirectMessagesThreadByIdQuery>;
+export type LoadDirectMessagesThreadByIdLazyQueryHookResult = ReturnType<typeof useLoadDirectMessagesThreadByIdLazyQuery>;
+export type LoadDirectMessagesThreadByIdQueryResult = ApolloReactCommon.QueryResult<LoadDirectMessagesThreadByIdQuery, LoadDirectMessagesThreadByIdQueryVariables>;
+export const NewDirectMessageSubDocument = gql`
+    subscription NewDirectMessageSub {
+  newDirectMessageSub {
+    success
+    threadId
+    message {
+      id
+      message
+    }
+    sentBy {
+      id
+      name
+    }
+  }
+}
+    `;
+export type NewDirectMessageSubComponentProps = Omit<ApolloReactComponents.SubscriptionComponentOptions<NewDirectMessageSubSubscription, NewDirectMessageSubSubscriptionVariables>, 'subscription'>;
+
+    export const NewDirectMessageSubComponent = (props: NewDirectMessageSubComponentProps) => (
+      <ApolloReactComponents.Subscription<NewDirectMessageSubSubscription, NewDirectMessageSubSubscriptionVariables> subscription={NewDirectMessageSubDocument} {...props} />
+    );
+    
+export type NewDirectMessageSubProps<TChildProps = {}> = ApolloReactHoc.DataProps<NewDirectMessageSubSubscription, NewDirectMessageSubSubscriptionVariables> | TChildProps;
+export function withNewDirectMessageSub<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  NewDirectMessageSubSubscription,
+  NewDirectMessageSubSubscriptionVariables,
+  NewDirectMessageSubProps<TChildProps>>) {
+    return ApolloReactHoc.withSubscription<TProps, NewDirectMessageSubSubscription, NewDirectMessageSubSubscriptionVariables, NewDirectMessageSubProps<TChildProps>>(NewDirectMessageSubDocument, {
+      alias: 'newDirectMessageSub',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useNewDirectMessageSubSubscription__
+ *
+ * To run a query within a React component, call `useNewDirectMessageSubSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useNewDirectMessageSubSubscription` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNewDirectMessageSubSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useNewDirectMessageSubSubscription(baseOptions?: ApolloReactHooks.SubscriptionHookOptions<NewDirectMessageSubSubscription, NewDirectMessageSubSubscriptionVariables>) {
+        return ApolloReactHooks.useSubscription<NewDirectMessageSubSubscription, NewDirectMessageSubSubscriptionVariables>(NewDirectMessageSubDocument, baseOptions);
+      }
+export type NewDirectMessageSubSubscriptionHookResult = ReturnType<typeof useNewDirectMessageSubSubscription>;
+export type NewDirectMessageSubSubscriptionResult = ApolloReactCommon.SubscriptionResult<NewDirectMessageSubSubscription>;
 export const AddTeamMemberDocument = gql`
     mutation AddTeamMember($teamId: String!, $userId: String!) {
   addTeamMember(teamId: $teamId, userId: $userId)
@@ -1368,8 +2100,8 @@ export type CreateTeamMutationHookResult = ReturnType<typeof useCreateTeamMutati
 export type CreateTeamMutationResult = ApolloReactCommon.MutationResult<CreateTeamMutation>;
 export type CreateTeamMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateTeamMutation, CreateTeamMutationVariables>;
 export const GetAllTeamMembersDocument = gql`
-    query GetAllTeamMembers($teamIds: [ID!]!) {
-  teamMembers(teamIds: $teamIds) {
+    query GetAllTeamMembers($teamId: String!) {
+  getAllTeamMembers(teamId: $teamId) {
     id
     name
     teamRole
@@ -1406,7 +2138,7 @@ export function withGetAllTeamMembers<TProps, TChildProps = {}>(operationOptions
  * @example
  * const { data, loading, error } = useGetAllTeamMembersQuery({
  *   variables: {
- *      teamIds: // value for 'teamIds'
+ *      teamId: // value for 'teamId'
  *   },
  * });
  */
@@ -1419,6 +2151,65 @@ export function useGetAllTeamMembersLazyQuery(baseOptions?: ApolloReactHooks.Laz
 export type GetAllTeamMembersQueryHookResult = ReturnType<typeof useGetAllTeamMembersQuery>;
 export type GetAllTeamMembersLazyQueryHookResult = ReturnType<typeof useGetAllTeamMembersLazyQuery>;
 export type GetAllTeamMembersQueryResult = ApolloReactCommon.QueryResult<GetAllTeamMembersQuery, GetAllTeamMembersQueryVariables>;
+export const GetAllTeamsForUserDocument = gql`
+    query GetAllTeamsForUser {
+  getAllTeamsForUser {
+    id
+    name
+    channels {
+      id
+      name
+      last_message
+      invitees {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+export type GetAllTeamsForUserComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GetAllTeamsForUserQuery, GetAllTeamsForUserQueryVariables>, 'query'>;
+
+    export const GetAllTeamsForUserComponent = (props: GetAllTeamsForUserComponentProps) => (
+      <ApolloReactComponents.Query<GetAllTeamsForUserQuery, GetAllTeamsForUserQueryVariables> query={GetAllTeamsForUserDocument} {...props} />
+    );
+    
+export type GetAllTeamsForUserProps<TChildProps = {}> = ApolloReactHoc.DataProps<GetAllTeamsForUserQuery, GetAllTeamsForUserQueryVariables> | TChildProps;
+export function withGetAllTeamsForUser<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GetAllTeamsForUserQuery,
+  GetAllTeamsForUserQueryVariables,
+  GetAllTeamsForUserProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GetAllTeamsForUserQuery, GetAllTeamsForUserQueryVariables, GetAllTeamsForUserProps<TChildProps>>(GetAllTeamsForUserDocument, {
+      alias: 'getAllTeamsForUser',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGetAllTeamsForUserQuery__
+ *
+ * To run a query within a React component, call `useGetAllTeamsForUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllTeamsForUserQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllTeamsForUserQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAllTeamsForUserQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetAllTeamsForUserQuery, GetAllTeamsForUserQueryVariables>) {
+        return ApolloReactHooks.useQuery<GetAllTeamsForUserQuery, GetAllTeamsForUserQueryVariables>(GetAllTeamsForUserDocument, baseOptions);
+      }
+export function useGetAllTeamsForUserLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetAllTeamsForUserQuery, GetAllTeamsForUserQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GetAllTeamsForUserQuery, GetAllTeamsForUserQueryVariables>(GetAllTeamsForUserDocument, baseOptions);
+        }
+export type GetAllTeamsForUserQueryHookResult = ReturnType<typeof useGetAllTeamsForUserQuery>;
+export type GetAllTeamsForUserLazyQueryHookResult = ReturnType<typeof useGetAllTeamsForUserLazyQuery>;
+export type GetAllTeamsForUserQueryResult = ApolloReactCommon.QueryResult<GetAllTeamsForUserQuery, GetAllTeamsForUserQueryVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($email: String!) {
   forgotPassword(email: $email)

@@ -3,12 +3,13 @@ import styled from "styled-components";
 
 import paths from "./material-paths.json";
 import { MaterialIcons } from "./generated-material-icon-types";
+import { space } from "styled-system";
 
 type PathInfo = keyof MaterialIcons;
 
 let typedPaths: MaterialIcons = paths;
 
-interface IIconProps {
+export interface MaterialIconProps {
   name: PathInfo;
   size: string;
   fill: string;
@@ -29,6 +30,8 @@ interface IIconProps {
 // `;
 
 const SVG = styled.svg`
+  ${space}
+
   transition: fill 0.25s;
   /* width: 48px;
   height: 48px; */
@@ -45,7 +48,7 @@ const Path = styled.path`
   } */
 `;
 
-const Icon: React.FunctionComponent<IIconProps> = ({
+const MaterialIcon: React.FunctionComponent<MaterialIconProps> = ({
   name = "home",
   size = "1em",
   fill = "currentColor",
@@ -62,8 +65,7 @@ const Icon: React.FunctionComponent<IIconProps> = ({
   let mappedPaths: any;
 
   if (iconPaths && iconPaths.length > 0) {
-    // @ts-ignore
-    mappedPaths = (iconPaths as any).map((path: any, index: number) => {
+    mappedPaths = iconPaths.map((path, index: number) => {
       return (
         <Path
           key={`${path}-${index}`}
@@ -112,4 +114,4 @@ const Icon: React.FunctionComponent<IIconProps> = ({
   }
 };
 
-export default Icon;
+export default MaterialIcon;
