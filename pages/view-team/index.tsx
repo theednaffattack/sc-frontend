@@ -10,49 +10,12 @@ import redirect from "../../lib/redirect";
 import {
   useGetAllTeamsForUserQuery,
   User,
-  useLoadChannelsByTeamIdLazyQuery,
-  GetAllTeamsForUserQueryHookResult
-  // useLoadDirectMessagesThreadByIdQuery
+  useLoadChannelsByTeamIdLazyQuery
 } from "../../modules/gql-gen/generated/apollo-graphql";
-import {
-  MappedTeamsProps,
-  TeamListItem
-} from "../../modules/grid-pieces/team-list-item";
+import { MappedTeamsProps } from "../../modules/grid-pieces/team-list-item";
 import { ChannelListItemProps } from "../../modules/grid-pieces/channel-list-item";
-import { UnstyledList } from "../../modules/primitives/styled-rebass";
 import { RenderChannelPanel } from "../../modules/grid-pieces/render-channel-panel";
-// import { MessageListItemProps } from "modules/grid-pieces/message-list-item";
-
-interface I_TeamPanelInfo extends GetAllTeamsForUserQueryHookResult {}
-
-const RenderTeamPanel: React.FC<I_TeamPanelInfo> = ({
-  data,
-  error,
-  loading
-}) => {
-  if (error) return <div>MASSIVE TEAM PANEL ERROR {JSON.stringify(error)}</div>;
-  if (loading) return <div>loading TEAM PANEL...</div>;
-  if (data) {
-    let mappedTeams: MappedTeamsProps[] = data.getAllTeamsForUser.map(
-      (team, index) => {
-        const returnTeamObj = {
-          __typename: team.__typename,
-          highlight: index === 0 ? true : false,
-          id: team.id,
-          name: team.name,
-          channels: team.channels
-        };
-        return returnTeamObj;
-      }
-    );
-    return (
-      <UnstyledList p={0} mx="auto">
-        {mappedTeams.map(TeamListItem)}
-      </UnstyledList>
-    );
-  }
-  return <div>TEAM DATA IS MISSING</div>;
-};
+import { RenderTeamPanel } from "../../modules/grid-pieces/render-team-panel";
 
 type UsernameWithNextContext = {
   setAuthState?: React.Dispatch<React.SetStateAction<boolean>>;
