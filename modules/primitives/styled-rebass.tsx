@@ -53,7 +53,9 @@ import {
   TopProps,
   RightProps,
   LeftProps,
-  OverflowProps
+  OverflowProps,
+  LayoutProps,
+  layout
 } from "styled-system";
 import styled, { StyledComponent } from "styled-components";
 
@@ -313,21 +315,21 @@ export const SidebarLink: React.FC<LinkLinkProps> = ({
   color,
   hoverColor,
   href,
-  setOnClick,
-  setOnClickValue,
+  // setOnClick,
+  // setOnClickValue,
   ...props
 }) => (
-  <Link href={href} as={as}>
+  <Link href={href} as={as} passHref={true}>
     <SidebarLinkAnchor
       hoverColor={hoverColor}
       color={color ? color : "white"}
-      onClick={() => {
-        if (setOnClick && setOnClickValue) {
-          setOnClick(setOnClickValue);
-        } else {
-          console.log("onClick is not set");
-        }
-      }}
+      // onClick={() => {
+      //   if (setOnClick && setOnClickValue) {
+      //     setOnClick(setOnClickValue);
+      //   } else {
+      //     console.log("onClick is not set");
+      //   }
+      // }}
       {...props}
     >
       {children}
@@ -408,18 +410,26 @@ export const Card: React.FC<ICardProps> = styled(CardBase)`
 
 interface FlexMinHeightBordersProps
   extends BordersProps,
-    FlexboxProps,
-    MinHeightProps,
-    FlexProps {}
+    FlexProps,
+    SpaceProps,
+    LayoutProps,
+    MinHeightProps {}
 
-export const Flex: StyledComponent<
-  React.FunctionComponent<FlexMinHeightBordersProps>,
-  any,
-  {},
-  never
-> = styled(FlexBase)`
+//     : StyledComponent<
+//   React.FunctionComponent<FlexMinHeightBordersProps>,
+//   any,
+//   {},
+//   never
+// >
+
+export const Flex = styled(FlexBase)<FlexMinHeightBordersProps>`
+  ${layout}
   ${minHeight}
   ${borders}
+`;
+
+export const PositionFlex = styled(FlexBase)<PositionProps & FlexProps>`
+  ${position}
 `;
 
 export const Box: StyledComponent<
