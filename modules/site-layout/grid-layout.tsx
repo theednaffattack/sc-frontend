@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-// import Layout from "../site-layout/main-v3";
+import Layout from "../site-layout/main-v3";
 import {
   Button,
   ChannelWrapper,
@@ -361,7 +361,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
         {threadId ? (
           <DirectMessageHeader
             threadId={threadId}
-            setSelectedDirectMessageInvitees={setSelectedDirectMessageInvitees}
+            // setSelectedDirectMessageInvitees={setSelectedDirectMessageInvitees}
             selectedDirectMessageInvitees={selectedDirectMessageInvitees}
           />
         ) : null}
@@ -373,7 +373,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
         ""
       )}
 
-      {/* CHANNEL MESSAGES QUERY */}
+      {/* DISPLAY MESSAGES */}
       {dataMeQuery && channelId && !threadId ? (
         <Messages dataMe={dataMeQuery.me} channelId={channelId} />
       ) : (
@@ -426,13 +426,13 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
 //   console.log("VIEW PAGE PROPS IN GRID-LAYOUT", { page });
 //   return <GridLayout title={page.props.title}>{page}</GridLayout>;
 // };
-// export const getLayout = (page: any) => {
-//   console.log("VIEW PAGE PROPS IN GRID-LAYOUT", { page });
-//   return (
-//     <Layout title={page.props.title}>
-//       <GridLayout>{page}</GridLayout>
-//     </Layout>
-//   );
-// };
+export const getLayout = (page: any) => {
+  console.log("VIEW PAGE PROPS IN GRID-LAYOUT", { page });
+  return (
+    <Layout title={page.props.title}>
+      <GridLayout>{page}</GridLayout>
+    </Layout>
+  );
+};
 
 export default GridLayout;
