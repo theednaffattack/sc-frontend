@@ -8,7 +8,8 @@ import {
   Card,
   Flex,
   StyledHr,
-  Text
+  Text,
+  PositionFlex
 } from "../primitives/styled-rebass";
 import { Input, Label } from "../primitives/forms";
 import {
@@ -69,13 +70,14 @@ export const AddChannelModal: React.FunctionComponent<AddChannelModalProps> = ({
               padding="1em"
             >
               <Card p={0} pb={3} width={1}>
-                <Flex
+                <PositionFlex
                   p={2}
                   mb={2}
                   flexDirection="column"
                   alignItems="center"
                   justifyContent="center"
-                  style={{ position: "relative" }}
+                  position="relative"
+                  // style={{ position: "relative" }}
                 >
                   <Text>Add Channel</Text>
 
@@ -98,7 +100,7 @@ export const AddChannelModal: React.FunctionComponent<AddChannelModalProps> = ({
                       <Material_Icon name="close" size="1rem" fill="pink" />
                     </Button>
                   </AbFlex> */}
-                </Flex>
+                </PositionFlex>
                 <StyledHr my={0} />
 
                 <Flex px={2} alignItems="center" justifyContent="center">
