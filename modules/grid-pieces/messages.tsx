@@ -9,7 +9,6 @@ import {
   UnstyledList
 } from "../primitives/styled-rebass";
 import { AvatarPlaceholder } from "../profile/avatar-placeholder";
-
 import {
   useGetAllChannelMessagesQuery,
   GetAllChannelMessagesQueryResult,
@@ -20,7 +19,7 @@ import {
   MeQuery
 } from "../gql-gen/generated/apollo-graphql";
 import { ChannelMessageListItemProps } from "./channel-message-list-item";
-import { EmptyMessagesWrapper } from "../team/empty-messages-wrapper";
+import { EmptyMessagesWrapper } from "./empty-messages-wrapper";
 
 type NewMessageSubType = <
   TSubscriptionData = NewMessageSubSubscription,
@@ -32,8 +31,6 @@ type NewMessageSubType = <
     TSubscriptionData
   >
 ) => () => void;
-
-// type NewMessageSubType = NewMessageSubSubscription["newMessageSub"];
 
 interface MessageProps {
   channelId: string;
@@ -132,30 +129,25 @@ const MessageList: React.FunctionComponent<MessageListProps> = ({
       </UnstyledList>
     );
   }
-  return <li>no list</li>;
-  // else {
-  //   return (
-  //     <>
-  //       {[1, 2, 3, 4].map((result, index: number) => (
-  //         <li key={result.toString()}>maaaaaaaaan {index.toString()}</li>
-  //       ))}
-  //     </>
-  //   );
-  // }
+  return (
+    <UnstyledList p={0}>
+      <li>no list</li>
+    </UnstyledList>
+  );
 };
 
 export const Messages: React.FunctionComponent<MessageProps> = ({
   channelId,
   dataMe
-  // messages,
-
-  // selectedChannelIndex,
-  // setSelectedChannelIndex
 }) => {
-  const { data, subscribeToMore } = useGetAllChannelMessagesQuery({
+  const {
+    data,
+    error,
+    loading,
+    subscribeToMore
+  } = useGetAllChannelMessagesQuery({
     variables: { channelId }
   });
-  // const [isLoading, setIsLoading] = useState(true);
   let listBottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -164,23 +156,34 @@ export const Messages: React.FunctionComponent<MessageProps> = ({
     }
   }, [data]);
 
-  return (
-    <>
-      {data ? (
-        <MessageWrapper ref={listBottomRef}>
-          <MessageList
-            dataMe={dataMe}
-            subscribeToMoreMessages={subscribeToMore}
-            data={data}
-          />
+  if (loading) {
+    return (
+      <EmptyMessagesWrapper>loading channel messages...</EmptyMessagesWrapper>
+    );
+  }
 
-          {/* <div ref={listBottomRef}></div> */}
-        </MessageWrapper>
-      ) : (
-        <EmptyMessagesWrapper>
-          Nothing to see (no channel selected) [{channelId}]
-        </EmptyMessagesWrapper>
-      )}
-    </>
+  if (data) {
+    return (
+      <MessageWrapper ref={listBottomRef}>
+        <MessageList
+          dataMe={dataMe}
+          subscribeToMoreMessages={subscribeToMore}
+          data={data}
+        />
+      </MessageWrapper>
+    );
+  }
+
+  if (error) {
+    return (
+      <EmptyMessagesWrapper>
+        Error loading channel messages
+        {JSON.stringify(error, null, 2)}
+      </EmptyMessagesWrapper>
+    );
+  }
+
+  return (
+    <EmptyMessagesWrapper>loading channel messages...</EmptyMessagesWrapper>
   );
 };
