@@ -6,10 +6,7 @@ import {
   Text,
   AltSidebarLink
 } from "../primitives/styled-rebass";
-import {
-  // LoadDirectMessageThreadsByTeamAndUserQuery,
-  User
-} from "../gql-gen/generated/apollo-graphql";
+import { User } from "../gql-gen/generated/apollo-graphql";
 
 export interface DirectMessageListItemProps {
   messageThreadId: string;
@@ -19,10 +16,6 @@ export interface DirectMessageListItemProps {
     __typename?: "User" | undefined;
   } & Pick<User, "id" | "name">)[];
   highlight: boolean;
-  // invitees: {
-  //   id: string;
-  //   name: string;
-  // }[];
   last_message: string;
   selectedDirectMessageInvitees: ({
     __typename?: "User" | undefined;
