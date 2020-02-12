@@ -1,35 +1,28 @@
 import React from "react";
-// import { Field, Formik } from "formik";
 
 import { NextContext } from "../../../typings/NextContext";
-import GridLayout from "../../../modules/site-layout/grid-layout";
-import { getLayout } from "../../../modules/site-layout/main-v3";
-
+import { getLayout } from "../../../modules/site-layout/grid-layout_v3";
 import redirect from "../../../lib/redirect";
 import { isBrowser } from "../../../lib/isBrowser";
-
 import {
-  useGetAllTeamsForUserQuery,
-  // useGetAllChannelMembersQuery,
-  useLoadDirectMessagesThreadByIdQuery,
-  useLoadChannelsByTeamIdQuery,
-  User
+  User,
+  MeQuery
 } from "../../../modules/gql-gen/generated/apollo-graphql";
 import {
-  // MessageListItem,
-  MessageListItemProps
-} from "../../../modules/grid-pieces/message-list-item";
-import { MappedTeamsProps } from "../../../modules/grid-pieces/team-list-item";
-import { ChannelListItemProps } from "../../../modules/grid-pieces/channel-list-item";
-import { RenderChannelPanel } from "../../../modules/grid-pieces/render-channel-panel";
+  ViewerActionType,
+  ViewerStateInterface
+} from "../../../modules/site-layout/grid-layout_v3";
+import { DirectMessages } from "../../../modules/grid-pieces/direct-messages/direct-message-messages";
 
 interface PageProps extends NextContext {
-  messageId: string;
-  threadId: string;
   teamId: string;
+  threadId: string;
+  clonedThreadId: string;
   channelName: string;
   setChannelName: React.Dispatch<React.SetStateAction<string>>;
-
+  meData: MeQuery;
+  viewerDispatch: React.Dispatch<ViewerActionType>;
+  viewerState: ViewerStateInterface;
   selectedDirectMessageInvitees: ({
     __typename?: "User" | undefined;
   } & Pick<User, "id" | "name">)[];
@@ -43,19 +36,20 @@ interface PageProps extends NextContext {
   >;
 }
 
-interface ViewMessagesByThreadIdProps {
+interface ViewTeamByIdProps {
   ({
     pathname,
     query,
     referer,
     userAgent,
-    // setMessageName,
-
-    selectedDirectMessageInvitees,
-    setSelectedDirectMessageInvitees,
-    messageId,
+    channelName,
+    setChannelName,
     teamId,
-    threadId
+    threadId,
+    clonedThreadId,
+    viewerDispatch,
+    viewerState,
+    meData
   }: PageProps): JSX.Element;
 
   getInitialProps: ({
@@ -68,7 +62,6 @@ interface ViewMessagesByThreadIdProps {
     query: NextContext["query"];
     referer: NextContext["referer"];
     userAgent: NextContext["userAgent"];
-    messageId?: string;
     teamId: string;
     threadId: string;
   }>;
@@ -79,197 +72,37 @@ interface ViewMessagesByThreadIdProps {
   displayName: string;
 }
 
-const ViewDirectMessageThreadById: ViewMessagesByThreadIdProps = ({
-  channelName,
-  messageId,
-  setChannelName,
-  selectedDirectMessageInvitees,
-  setSelectedDirectMessageInvitees,
-  teamId,
+const ViewTeamById: ViewTeamByIdProps = ({
+  meData,
+  clonedThreadId,
+  // viewerDispatch,
+  viewerState,
   threadId
+  // teamId
+  // channelName,
+  // setChannelName,
+  // teamId,
+  // selectedDirectMessageInvitees,
+  // setSelectedDirectMessageInvitees
 }) => {
-  let mappedTeams: MappedTeamsProps[];
-  let mappedMessages: MessageListItemProps[];
-  let mappedChannels: ChannelListItemProps[];
-
-  // GET ALL TEAMS
-  let {
-    data: dataUseGetAllTeamsForUserQuery
-    // error: errorUseGetAllTeamsForUserQuery,
-    // loading: loadingUseGetAllTeamsForUserQuery
-  } = useGetAllTeamsForUserQuery();
-
-  // GET ALL CHANNELS
-  let {
-    data: dataUseLoadChannelsByTeamIdQuery,
-    error: errorUseLoadChannelsByTeamIdQuery,
-    loading: loadingUseLoadChannelsByTeamIdQuery,
-    ...theRestUseLoadChannelsByTeamIdQuery
-  } = useLoadChannelsByTeamIdQuery({
-    variables: {
-      teamId
-    }
-  });
-
-  // GET ALL DIRECT MESSAGES
-  let {
-    data: dataUseLoadDirectMessagesThreadByIdQuery
-    // error: errorUseLoadMessagesByTeamIdQuery,
-    // loading: loadingUseLoadMessagesByTeamIdQuery
-  } = useLoadDirectMessagesThreadByIdQuery({
-    variables: {
-      threadId
-    }
-  });
-
-  // MAP TEAMS
-  if (
-    dataUseGetAllTeamsForUserQuery &&
-    dataUseGetAllTeamsForUserQuery.getAllTeamsForUser
-  ) {
-    mappedTeams = dataUseGetAllTeamsForUserQuery.getAllTeamsForUser.map(
-      team => {
-        let returnTeamObj = {
-          ...team,
-          highlight: team.id === teamId
-        };
-        return returnTeamObj;
-      }
-    );
-  } else {
-    mappedTeams = [
-      {
-        highlight: false,
-        id: "no_team_id",
-        name: "fake_name",
-        channels: [
-          {
-            invitees: [{ name: "invitee_name", id: "id_invitee" }],
-            name: "faux_TEAM_channels_name"
-          }
-        ]
-      }
-    ];
+  if (meData && clonedThreadId) {
+    return <DirectMessages dataMe={meData.me} threadId={clonedThreadId} />;
   }
-
-  // MAP CHANNELS
-  if (
-    dataUseLoadChannelsByTeamIdQuery &&
-    dataUseLoadChannelsByTeamIdQuery.loadChannelsByTeamId
-  ) {
-    mappedChannels = dataUseLoadChannelsByTeamIdQuery.loadChannelsByTeamId.map(
-      channel => {
-        let highlight = false;
-
-        let channelObj = {
-          ...channel,
-          teamId: teamId,
-          highlight,
-          setChannelName,
-          setOnClickValue: channel.name
-        };
-        return channelObj;
-      }
-    );
-  } else {
-    mappedChannels = [1, 2, 3].map((item: number) => {
-      return {
-        id: `fake_channel_id-${item}`,
-        name: "not a real name",
-        teamId: "fake_team_id",
-        highlight: true,
-        invitees: [{}],
-        setChannelName,
-        setOnClickValue: "not a real name",
-        __typename: "Channel"
-      };
-    });
-  }
-
-  // MAP DIRECT MESSAGES
-  if (
-    dataUseLoadDirectMessagesThreadByIdQuery &&
-    dataUseLoadDirectMessagesThreadByIdQuery.loadDirectMessagesThreadById &&
-    dataUseLoadDirectMessagesThreadByIdQuery.loadDirectMessagesThreadById
-      .messages
-  ) {
-    mappedMessages = dataUseLoadDirectMessagesThreadByIdQuery.loadDirectMessagesThreadById.messages.map(
-      message => {
-        return {
-          dataMeId: "",
-          fromMe: "isLoggedInUser",
-          id: message?.id ?? "id",
-          message: message?.message ?? "message",
-          sentBy: { id: "what", name: "" },
-
-          selectedDirectMessageInvitees,
-          setSelectedDirectMessageInvitees
-        };
-      }
-    );
-  } else {
-    mappedMessages = [1, 2, 3].map((item: number) => {
-      return {
-        id: `fake_channel_id-${item}`,
-        name: "not a real name",
-        teamId: "fake_team_id",
-        highlight: true,
-        invitees: [{}],
-        setMessageName: () => console.log("what"),
-        setOnClickValue: "not a real name",
-        __typename: "Message",
-        fromMe: "isLoggedInUser",
-        dataMeId: "",
-        message: "",
-        sentBy: { id: "", name: "" }
-      };
-    });
-  }
-
-  if (mappedTeams && mappedMessages) {
-    return (
-      <GridLayout>
-        {{
-          teamId,
-          mappedChannels,
-          mappedTeams,
-          mappedMessages,
-          messageId,
-          threadId,
-          channelName,
-
-          renderChannelPanel: (
-            <RenderChannelPanel
-              channelId={undefined}
-              data={dataUseLoadChannelsByTeamIdQuery}
-              error={errorUseLoadChannelsByTeamIdQuery}
-              loading={loadingUseLoadChannelsByTeamIdQuery}
-              setChannelName={setChannelName}
-              setOnClickValue=""
-              teamId={teamId}
-              {...theRestUseLoadChannelsByTeamIdQuery}
-            />
-          ),
-          selectedTeamName: mappedTeams[0].name,
-          setChannelName,
-          selectedDirectMessageInvitees,
-          setSelectedDirectMessageInvitees
-        }}
-      </GridLayout>
-    );
-  }
-  return <div>LOOKS EMPTY???</div>;
+  return (
+    <div>
+      LOOKS EMPTY??? {JSON.stringify({ viewerState, threadId }, null, 2)}
+    </div>
+  );
 };
 
-ViewDirectMessageThreadById.getInitialProps = async ctx => {
+ViewTeamById.getInitialProps = async ctx => {
   let { pathname, query, referer, userAgent } = ctx;
 
-  const { threadId: threadIdBase, teamId: teamIdBase } = query;
-
-  const threadId =
-    typeof threadIdBase === "string" ? threadIdBase : threadIdBase[0];
+  const { teamId: teamIdBase, threadId: threadIdBase } = query;
 
   const teamId = typeof teamIdBase === "string" ? teamIdBase : teamIdBase[0];
+  const threadId =
+    typeof threadIdBase === "string" ? threadIdBase : threadIdBase[0];
 
   if (!ctx.token && !isBrowser) {
     console.log("SSR redirect");
@@ -283,14 +116,14 @@ ViewDirectMessageThreadById.getInitialProps = async ctx => {
     query,
     referer,
     userAgent,
-    threadId,
-    teamId
+    teamId,
+    threadId
   };
 };
 
-ViewDirectMessageThreadById.getLayout = getLayout;
+ViewTeamById.getLayout = getLayout;
 
-ViewDirectMessageThreadById.title = "Direct Message";
-ViewDirectMessageThreadById.displayName = "ViewDirectMessageThreadById";
+ViewTeamById.title = "View Team";
+ViewTeamById.displayName = "View Team by teamId";
 
-export default ViewDirectMessageThreadById;
+export default ViewTeamById;

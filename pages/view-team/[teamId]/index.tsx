@@ -1,27 +1,27 @@
 import React from "react";
-// import { Field, Formik } from "formik";
 
 import { NextContext } from "../../../typings/NextContext";
-import GridLayout from "../../../modules/site-layout/grid-layout";
+import { getLayout } from "../../../modules/site-layout/grid-layout_v3";
 import redirect from "../../../lib/redirect";
 import { isBrowser } from "../../../lib/isBrowser";
-
 import {
-  useGetAllTeamsForUserQuery,
-  // @ts-ignore
-  useGetAllChannelMembersQuery,
-  useLoadChannelsByTeamIdQuery,
-  User
+  User,
+  MeQuery
 } from "../../../modules/gql-gen/generated/apollo-graphql";
-import { ChannelListItemProps } from "../../../modules/grid-pieces/channel-list-item";
-import { MappedTeamsProps } from "../../../modules/grid-pieces/team-list-item";
-import { RenderChannelPanel } from "../../../modules/grid-pieces/render-channel-panel";
+import {
+  ViewerActionType,
+  ViewerStateInterface
+} from "../../../modules/site-layout/grid-layout_v3";
+import { Messages } from "../../../modules/grid-pieces/messages";
 
 interface PageProps extends NextContext {
   teamId: string;
+  clonedChannelId: string;
   channelName: string;
   setChannelName: React.Dispatch<React.SetStateAction<string>>;
-
+  meData: MeQuery;
+  viewerDispatch: React.Dispatch<ViewerActionType>;
+  viewerState: ViewerStateInterface;
   selectedDirectMessageInvitees: ({
     __typename?: "User" | undefined;
   } & Pick<User, "id" | "name">)[];
@@ -43,7 +43,11 @@ interface ViewTeamByIdProps {
     userAgent,
     channelName,
     setChannelName,
-    teamId
+    teamId,
+    clonedChannelId,
+    viewerDispatch,
+    viewerState,
+    meData
   }: PageProps): JSX.Element;
 
   getInitialProps: ({
@@ -59,169 +63,17 @@ interface ViewTeamByIdProps {
     teamId: string;
   }>;
 
-  // getLayout: (page: any) => JSX.Element;
+  getLayout: (page: any) => JSX.Element;
 
   title: string;
   displayName: string;
 }
 
-const ViewTeamById: ViewTeamByIdProps = ({
-  channelName,
-  setChannelName,
-  teamId,
-  selectedDirectMessageInvitees,
-  setSelectedDirectMessageInvitees
-}) => {
-  let mappedTeams: MappedTeamsProps[];
-  let mappedChannels: ChannelListItemProps[];
-  // let mappedChannelMembers;
-
-  // GET ALL TEAMS
-  let {
-    data: dataUseGetAllTeamsForUserQuery
-    // error: errorUseGetAllTeamsForUserQuery,
-    // loading: loadingUseGetAllTeamsForUserQuery
-  } = useGetAllTeamsForUserQuery();
-
-  // GET ALL CHANNELS (NAMES, ID'S, ETC)
-  let {
-    data: dataUseLoadChannelsByTeamIdQuery,
-    error: errorUseLoadChannelsByTeamIdQuery,
-    loading: loadingUseLoadChannelsByTeamIdQuery,
-    ...theRestUseLoadChannelsByTeamIdQuery
-  } = useLoadChannelsByTeamIdQuery({
-    variables: {
-      teamId
-    }
-  });
-
-  // // GET ALL CHANNEL MEMBERS (WORTHLESS HERE???)
-  // let {
-  //   data: dataUseGetAllChannelMembersQuery
-  //   // error: errorUseGetAllChannelMembersQuery,
-  //   // loading: loadingUseGetAllChannelMembersQuery
-  // } = useGetAllChannelMembersQuery({ variables: { channelId: channelId } });
-
-  // let boom =
-  //   dataUseGetAllTeamsForUserQuery?.getAllTeamsForUser.map(team => {
-  //     let returnTeamObj = {
-  //       ...team,
-  //       highlight: team.id === teamId
-  //     };
-  //     return returnTeamObj;
-  //   }) ?? [];
-
-  if (
-    dataUseGetAllTeamsForUserQuery &&
-    dataUseGetAllTeamsForUserQuery.getAllTeamsForUser
-  ) {
-    mappedTeams = dataUseGetAllTeamsForUserQuery.getAllTeamsForUser.map(
-      team => {
-        let returnTeamObj = {
-          ...team,
-          highlight: team.id === teamId
-        };
-        return returnTeamObj;
-      }
-    );
-  } else {
-    mappedTeams = [
-      {
-        highlight: false,
-        id: "no_team_id",
-        name: "fake_name",
-        channels: [
-          {
-            invitees: [{ name: "invitee_name", id: "id_invitee" }],
-            name: "faux_TEAM_channels_name"
-          }
-        ]
-      }
-    ];
+const ViewTeamById: ViewTeamByIdProps = ({ meData, clonedChannelId }) => {
+  if (meData && meData.me && clonedChannelId !== "channelIdUndefined") {
+    return <Messages dataMe={meData.me} channelId={clonedChannelId} />;
   }
 
-  if (
-    dataUseLoadChannelsByTeamIdQuery &&
-    dataUseLoadChannelsByTeamIdQuery.loadChannelsByTeamId
-  ) {
-    mappedChannels = dataUseLoadChannelsByTeamIdQuery.loadChannelsByTeamId.map(
-      channel => {
-        let highlight = false;
-        let channelObj = {
-          ...channel,
-          teamId: teamId,
-          highlight,
-          setChannelName,
-          setOnClickValue: channel.name
-        };
-        return channelObj;
-      }
-    );
-  } else {
-    mappedChannels = [1, 2, 3].map((item: number) => {
-      return {
-        id: `fake_channel_id-${item}`,
-        name: "not a real name",
-        teamId: "fake_team_id",
-        highlight: true,
-        invitees: [{}],
-        setChannelName,
-        setOnClickValue: "not a real name",
-        __typename: "Channel"
-      };
-    });
-  }
-
-  // if (
-  //   dataUseGetAllChannelMembersQuery &&
-  //   dataUseGetAllChannelMembersQuery.getAllChannelMembers
-  // ) {
-  //   mappedChannelMembers = dataUseGetAllChannelMembersQuery.getAllChannelMembers.map(
-  //     channelMember => {
-  //       let returnChannelMemberObj = {
-  //         ...channelMember,
-  //         highlight: false
-  //       };
-  //       return returnChannelMemberObj;
-  //     }
-  //   );
-  // } else {
-  //   mappedChannelMembers = [1, 2, 3].map(item => {
-  //     return {
-  //       id: `fake-user-id-${item}`,
-  //       name: "fake user name"
-  //     };
-  //   });
-  // }
-
-  if (mappedTeams) {
-    return (
-      <GridLayout>
-        {{
-          teamId,
-          mappedTeams,
-          mappedChannels,
-          channelName,
-          renderChannelPanel: (
-            <RenderChannelPanel
-              channelId={undefined}
-              data={dataUseLoadChannelsByTeamIdQuery}
-              error={errorUseLoadChannelsByTeamIdQuery}
-              loading={loadingUseLoadChannelsByTeamIdQuery}
-              setChannelName={setChannelName}
-              setOnClickValue=""
-              teamId={teamId}
-              {...theRestUseLoadChannelsByTeamIdQuery}
-            />
-          ),
-          selectedTeamName: mappedTeams[0].name,
-          setChannelName,
-          selectedDirectMessageInvitees,
-          setSelectedDirectMessageInvitees
-        }}
-      </GridLayout>
-    );
-  }
   return <div>LOOKS EMPTY???</div>;
 };
 
@@ -248,7 +100,7 @@ ViewTeamById.getInitialProps = async ctx => {
   };
 };
 
-// ViewTeamById.getLayout = getLayout;
+ViewTeamById.getLayout = getLayout;
 
 ViewTeamById.title = "View Team";
 ViewTeamById.displayName = "View Team by teamId";
