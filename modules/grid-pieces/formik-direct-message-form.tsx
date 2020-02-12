@@ -23,8 +23,7 @@ export const FormikDirectMessageForm: React.FC<I_FormikDirectMessageFormProps> =
   let disabled = threadId ? false : true;
 
   let [
-    addDirectMessageToThreadMutation,
-    { data: dataDirectMessageToThreadMutation }
+    addDirectMessageToThreadMutation
   ] = useAddDirectMessageToThreadMutation();
 
   return (
@@ -33,9 +32,6 @@ export const FormikDirectMessageForm: React.FC<I_FormikDirectMessageFormProps> =
       validateOnChange={false}
       initialValues={initialValues}
       onSubmit={({ direct_message }, { resetForm }) => {
-        console.log("value when submitting: direct_message", {
-          direct_message
-        });
         if (threadId) {
           addDirectMessageToThreadMutation({
             variables: {
@@ -49,11 +45,6 @@ export const FormikDirectMessageForm: React.FC<I_FormikDirectMessageFormProps> =
           });
         }
         resetForm({ values: { direct_message: "" } });
-        console.log("TEST OF RESET FORM");
-
-        if (dataDirectMessageToThreadMutation) {
-          console.log("SUBMIT SUCCESS, ADD DIRECT MESSAGE TO THREAD");
-        }
       }}
     >
       {({ handleReset, handleSubmit }) => {
