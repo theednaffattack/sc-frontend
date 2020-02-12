@@ -25,7 +25,7 @@ import {
 } from "../../gql-gen/generated/apollo-graphql";
 import { ChannelMessageListItemProps } from "../channel-message-list-item";
 // @ts-ignore
-import { EmptyMessagesWrapper } from "../../team/empty-messages-wrapper";
+import { EmptyMessagesWrapper } from "../empty-messages-wrapper";
 
 type NewMessageSubType = <
   TSubscriptionData = NewDirectMessageSubSubscription,
@@ -73,6 +73,7 @@ const DirectMessageList: React.FunctionComponent<DirectMessageListProps> = ({
             loadDirectMessagesThreadById: {
               id: newFeedItem.threadId,
               __typename: prev.loadDirectMessagesThreadById.__typename,
+              invitees: prev.loadDirectMessagesThreadById.invitees,
               messages:
                 prev.loadDirectMessagesThreadById &&
                 prev.loadDirectMessagesThreadById.messages
