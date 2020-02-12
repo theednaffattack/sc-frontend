@@ -23,7 +23,6 @@ class MyApp extends App<any> {
     const getLayout = Component.getLayout || ((page: any) => page);
     const title = Component.title || "Fake test title";
 
-    // console.log("CAN I SEE CHILDREN? FROM _APP.tsx", Component);
     return (
       <ApolloProvider client={apolloClient}>
         <GlobalStyles />
