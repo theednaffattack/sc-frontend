@@ -71,7 +71,7 @@ export const DirectMessageListItem: React.FunctionComponent<DirectMessageListIte
               width={1}
               mr="auto"
               flexWrap="nowrap"
-              style={{
+              sx={{
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
