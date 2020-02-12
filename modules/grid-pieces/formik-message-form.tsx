@@ -16,10 +16,7 @@ export const FormikMessageForm: React.FC<I_FormikMessageFormProps> = ({
   channelId,
   initialValues
 }) => {
-  let [
-    addMessageMutation,
-    { data: dataAddMessageToChannel }
-  ] = useAddMessageToChannelMutation();
+  let [addMessageMutation] = useAddMessageToChannelMutation();
 
   let disabled = channelId ? false : true;
   return (
@@ -28,9 +25,6 @@ export const FormikMessageForm: React.FC<I_FormikMessageFormProps> = ({
       validateOnChange={false}
       initialValues={initialValues}
       onSubmit={({ channel_message }, { resetForm }) => {
-        console.log("value when submitting: channel_message", {
-          channel_message
-        });
         if (channelId) {
           addMessageMutation({
             variables: {
@@ -44,11 +38,6 @@ export const FormikMessageForm: React.FC<I_FormikMessageFormProps> = ({
           });
         }
         resetForm({ values: { channel_message: "" } });
-        console.log("TEST OF RESET FORM");
-
-        if (dataAddMessageToChannel) {
-          console.log("SUBMIT SUCCESS, ADD MESSAGE TO CHANNEL");
-        }
       }}
     >
       {({ handleReset, handleSubmit }) => {
