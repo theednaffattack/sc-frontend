@@ -1,4 +1,4 @@
-import React, { SetStateAction } from "react";
+import React from "react";
 import Maybe from "graphql/tsutils/Maybe";
 
 import { SC_Word as Word } from "../../modules/grid-pieces/content-placeholder";
@@ -14,9 +14,9 @@ import {
 
 interface I_ChannelPanelInfo extends LoadChannelsByTeamIdQueryHookResult {
   channelId: string | undefined;
-  setChannelName: React.Dispatch<SetStateAction<string>>;
-  setOnClickValue: string;
   teamId: string;
+  viewerState?: any;
+  viewerDispatch?: any;
 }
 
 interface ChannelProps {
@@ -33,11 +33,8 @@ interface ChannelProps {
 }
 
 interface MappedChannelProps extends ChannelProps {
-  channelId?: string | undefined;
   highlight: boolean;
-  setChannelName: React.Dispatch<SetStateAction<string>>;
-  setOnClickValue: string;
-  teamId: string;
+  teamId?: string;
 }
 
 export const RenderChannelPanel: React.FC<I_ChannelPanelInfo> = ({
@@ -45,41 +42,50 @@ export const RenderChannelPanel: React.FC<I_ChannelPanelInfo> = ({
   data,
   error,
   // loading,
-  setChannelName,
-  setOnClickValue,
-  teamId
+  teamId,
+  // viewerDispatch,
+  viewerState
 }) => {
   if (error)
     return (
       <div>AN ERROR OCCURRED LOADING CHANNEL DATA {JSON.stringify(error)}</div>
     );
-  // if (loading) return <div>loading CHANNEL PANEL...</div>;
-  // if (!data) return <div>CHANNEL PANEL DATA IS MISSING?</div>;
-  // if (!teamId) return <div>CHANNEL PANEL TEAM ID IS MISSING</div>;
+
   if (data) {
     let mappedChannels: MappedChannelProps[] = data.loadChannelsByTeamId.map(
-      (channel, index) => {
-        const shouldIHighlight =
-          channelId === channel.id
-            ? true
-            : !channelId && index === 0 // && messageId === undefined
-            ? true
-            : false;
-        const returnChannelObj: MappedChannelProps = {
+      channel => {
+        let shouldIHighlight = false;
+
+        if (channelId === channel.id) {
+          shouldIHighlight = true;
+        }
+        if (viewerState && channel.id === viewerState.idShowing) {
+          shouldIHighlight = true;
+        }
+
+        if (teamId) {
+          const returnChannelObj: MappedChannelProps = {
+            __typename: channel.__typename,
+            id: channel.id,
+            name: channel.name,
+            invitees: channel.invitees,
+            highlight: shouldIHighlight,
+            teamId
+          };
+          return returnChannelObj;
+        }
+        return {
           __typename: channel.__typename,
-          highlight: shouldIHighlight,
           id: channel.id,
           name: channel.name,
           invitees: channel.invitees,
-          setChannelName,
-          setOnClickValue,
-          teamId
+          highlight: shouldIHighlight,
+          teamId: ""
         };
-        return returnChannelObj;
       }
     );
     return (
-      <UnstyledList p={0} mx="auto">
+      <UnstyledList p={0} width={1} mx="auto">
         {mappedChannels.map(ChannelListItem)}
       </UnstyledList>
     );
@@ -91,8 +97,6 @@ export const RenderChannelPanel: React.FC<I_ChannelPanelInfo> = ({
         <StyledListItem pl={2} py={1} key={`channel-skeleton-${index}`}>
           <Word
             bg="rgba(255,255,255,0.4)"
-            // mb={2}
-            // mr={2}
             borderRadius="8px"
             height="18px"
             width={1}
