@@ -32,6 +32,7 @@ import {
 } from "../gql-gen/generated/apollo-graphql";
 import Header from "../grid-pieces/header_v2";
 import DirectMessageHeader from "../grid-pieces/direct-message-header";
+import { AddTeamMemberModal } from "../grid-pieces/add-team-member-modal";
 import { AddChannelModal } from "../grid-pieces/add-channel-modal";
 import { AddDirectMessageModal } from "../grid-pieces/direct-messages/direct-message-modal";
 import { ProfileModal } from "../grid-pieces/profile-modal";
@@ -286,13 +287,6 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
     // ...theRestLoadDirectMessageThreadsByTeamAndUserLazyQuery
   } = resultLoadDirectMessageThreadsByTeamAndUserLazyQuery;
 
-  const {
-    data: dataGetAllTeamsForUserQuery,
-    error: errorGetAllTeamsForUserQuery,
-    loading: loadingGetAllTeamsForUserQuery,
-    ...theRestGetAllTeamsForUserQuery
-  } = useGetAllTeamsForUserQuery();
-
   const [
     loadChannelsByTeamIdQuery,
     resultUseLoadChannelsByTeamIdQuery
@@ -458,6 +452,8 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
   const initialChannelModalState = "isClosed";
   const initialDirectMessageModalState = "isClosed";
 
+  const initialTeamMemberModalState = "isClosed";
+
   const [profileModalState, setProfileModalState] = useState<ModalStatesType>(
     initialProfileModalState
   );
@@ -467,8 +463,12 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
   );
 
   const [directMessageModalState, setDirectMessageModalState] = useState<
-    DirectMessageModalState
+    ModalStatesType
   >(initialDirectMessageModalState);
+
+  const [teamMemberModalState, setTeamMemberModalState] = useState<
+    ModalStatesType
+  >(initialTeamMemberModalState);
 
   return (
     <GridPageContainer>
@@ -545,7 +545,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
               onClick={() => setChannelModalState("isOpen")}
               style={{ textAlign: "center" }}
             >
-              <span arial-role="cutton">
+              <span arial-role="button">
                 <MaterialIconBase
                   name="add_circle"
                   size="1rem"
@@ -774,8 +774,27 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
 
         {/* BEG - TEAM MEMBERS SECTION */}
         <Flex mt={3} width={1} flexDirection="column">
-          <Text pl={2}>Team Members</Text>
+          <Flex alignItems="center">
+            <Text pl={2}>Team Members</Text>
 
+            <Button
+              bg="transparent"
+              p={0}
+              type="button"
+              onClick={() => setTeamMemberModalState("isOpen")} // CHANGE THIS TO NEW ADD TEAM MEMBER MODAL
+              style={{ textAlign: "center" }}
+              ml="auto"
+              mr={2}
+            >
+              <span arial-role="cutton">
+                <MaterialIconBase
+                  name="add_circle"
+                  size="1rem"
+                  fill="#958993"
+                />
+              </span>
+            </Button>
+          </Flex>
           <UnstyledList pl={0} my={0} width={1}>
             <UserListItem name="slackbot" />
             {dataGetAllTeamMembersLazyQuery?.getAllTeamMembers.map(
@@ -801,28 +820,31 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
         {/* END - TEAM MEMBERS SECTION */}
       </ChannelWrapper>
 
-      {viewerState.teamIdShowing && viewerState.teamIdShowing !== null ? (
+      {profileModalState === "isOpen" &&
+      getQueryVariables(router).teamId !== noQParams.teamId ? (
         <ProfileModal
           userInfo={dataMeQuery?.me}
-          teamId={viewerState.teamIdShowing}
+          teamId={getQueryVariables(router).teamId}
           profileModal={profileModalState}
           setProfileModal={setProfileModalState}
         />
       ) : (
         ""
       )}
-      {viewerState.teamIdShowing && viewerState.teamIdShowing !== null ? (
+      {channelModalState === "isOpen" &&
+      getQueryVariables(router).teamId !== noQParams.teamId ? (
         <AddChannelModal
-          teamId={viewerState.teamIdShowing}
+          teamId={getQueryVariables(router).teamId}
           channelModal={channelModalState}
           setChannelModal={setChannelModalState}
         />
       ) : (
         ""
       )}
-      {directMessageModalState === "isOpen" ? (
+      {directMessageModalState === "isOpen" &&
+      getQueryVariables(router).teamId !== noQParams.teamId ? (
         <AddDirectMessageModal
-          teamId={viewerState.teamIdShowing ?? ""}
+          teamId={getQueryVariables(router).teamId}
           dataGetAllTeamMembers={dataGetAllTeamMembersLazyQuery}
           directMessageModal={directMessageModalState}
           setDirectMessageModal={setDirectMessageModalState}
@@ -830,6 +852,21 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
       ) : (
         ""
       )}
+      {teamMemberModalState === "isOpen" &&
+      getQueryVariables(router).teamId !== noQParams.teamId ? (
+        <AddTeamMemberModal
+          teamId={getQueryVariables(router).teamId}
+          // dataGetAllTeamMembers={dataGetAllTeamMembersLazyQuery}
+          teamMemberModal={teamMemberModalState}
+          setTeamMemberModalState={setTeamMemberModalState}
+        />
+      ) : (
+        ""
+      )
+
+      // teamMemberModal,
+      // setTeamMemberModal
+      }
       <HeaderWrapper>
         {/* SCENARIO 1 - CHANNEL ROUTE (WE HAVE CHANNEL ID AND TEAM ID FROM A ROUTE) */}
         {getQueryVariables(router).channelId !== noQParams.channelId &&
