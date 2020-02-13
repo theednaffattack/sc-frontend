@@ -215,7 +215,7 @@ export type MutationSignS3Args = {
 
 export type MutationAddTeamMemberArgs = {
   teamId: Scalars['String'],
-  userId: Scalars['String']
+  email: Scalars['String']
 };
 
 
@@ -777,7 +777,7 @@ export type NewDirectMessageSubSubscription = (
 
 export type AddTeamMemberMutationVariables = {
   teamId: Scalars['String'],
-  userId: Scalars['String']
+  email: Scalars['String']
 };
 
 
@@ -2002,8 +2002,8 @@ export function useNewDirectMessageSubSubscription(baseOptions?: ApolloReactHook
 export type NewDirectMessageSubSubscriptionHookResult = ReturnType<typeof useNewDirectMessageSubSubscription>;
 export type NewDirectMessageSubSubscriptionResult = ApolloReactCommon.SubscriptionResult<NewDirectMessageSubSubscription>;
 export const AddTeamMemberDocument = gql`
-    mutation AddTeamMember($teamId: String!, $userId: String!) {
-  addTeamMember(teamId: $teamId, userId: $userId)
+    mutation AddTeamMember($teamId: String!, $email: String!) {
+  addTeamMember(teamId: $teamId, email: $email)
 }
     `;
 export type AddTeamMemberMutationFn = ApolloReactCommon.MutationFunction<AddTeamMemberMutation, AddTeamMemberMutationVariables>;
@@ -2039,7 +2039,7 @@ export function withAddTeamMember<TProps, TChildProps = {}>(operationOptions?: A
  * const [addTeamMemberMutation, { data, loading, error }] = useAddTeamMemberMutation({
  *   variables: {
  *      teamId: // value for 'teamId'
- *      userId: // value for 'userId'
+ *      email: // value for 'email'
  *   },
  * });
  */
