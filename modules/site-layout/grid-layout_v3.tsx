@@ -267,6 +267,13 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
     router
   };
 
+  const {
+    data: dataGetAllTeamsForUserQuery,
+    error: errorGetAllTeamsForUserQuery,
+    loading: loadingGetAllTeamsForUserQuery,
+    ...theRestGetAllTeamsForUserQuery
+  } = useGetAllTeamsForUserQuery();
+
   const [
     loadDirectMessageThreadsByTeamAndUserLazyQuery,
     resultLoadDirectMessageThreadsByTeamAndUserLazyQuery
