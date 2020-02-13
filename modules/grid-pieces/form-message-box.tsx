@@ -33,3 +33,32 @@ export const FormMessageBox: React.FunctionComponent<FormMessageBoxProps> = ({
     </Flex>
   );
 };
+
+interface AddTeamMemberFormMessageBoxProps {
+  // dismissFunction: React.Dispatch<React.SetStateAction<MessageBoxState>>;
+  dismissFunction: (key: string) => void;
+  // clearError
+}
+
+export const AddTeamMemberFormMessageBox: React.FunctionComponent<AddTeamMemberFormMessageBoxProps> = ({
+  children,
+  dismissFunction
+}) => {
+  return (
+    <Flex bg="rgba(255, 0, 0, 0.3)" style={{ position: "relative" }}>
+      <AbFlex position="absolute" right={0} top={0}>
+        <Button
+          ml="auto"
+          p={0}
+          bg="transparent"
+          type="button"
+          onClick={() => dismissFunction("email")}
+        >
+          <MaterialIconBase name="close" size="1rem" fill="grey" />
+        </Button>
+      </AbFlex>
+
+      <span style={{ color: "crimson" }}>{children}</span>
+    </Flex>
+  );
+};
