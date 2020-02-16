@@ -57,7 +57,7 @@ export const DirectMessageListItem: React.FunctionComponent<DirectMessageListIte
       >
         <Flex alignItems="center">
           <Flex alignItems="center" mr={2}>
-            <MaterialIconBase name="lens" size="1rem" fill="#38978D" />
+            <MaterialIconBase name="lens" size="1em" fill="#38978D" />
           </Flex>
           <Flex alignItems="center" width={1}>
             <Flex
@@ -85,7 +85,7 @@ export const DirectMessageListItem: React.FunctionComponent<DirectMessageListIte
                 >
                   <MaterialIconBase
                     name="account_circle"
-                    size="1rem"
+                    size="1em"
                     fill="#38978D"
                   />
                   <Text fontSize=".3rem">{user.name?.slice(0, -3)}</Text>

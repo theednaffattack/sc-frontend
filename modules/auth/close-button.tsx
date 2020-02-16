@@ -11,7 +11,7 @@ interface CloseButtonProps {
 
 export const CloseButton: React.FunctionComponent<CloseButtonProps> = ({
   close,
-  size = "1rem",
+  size = "1em",
   fill
 }) => (
   <AbFlex position="absolute" left={0} top="3px" right="3px">

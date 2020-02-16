@@ -25,7 +25,7 @@ export const FormMessageBox: React.FunctionComponent<FormMessageBoxProps> = ({
           type="button"
           onClick={() => dismissFunction("isClosed")}
         >
-          <MaterialIconBase name="close" size="1rem" fill="grey" />
+          <MaterialIconBase name="close" size="1em" fill="grey" />
         </Button>
       </AbFlex>
 
@@ -54,7 +54,7 @@ export const AddTeamMemberFormMessageBox: React.FunctionComponent<AddTeamMemberF
           type="button"
           onClick={() => dismissFunction("email")}
         >
-          <MaterialIconBase name="close" size="1rem" fill="grey" />
+          <MaterialIconBase name="close" size="1em" fill="grey" />
         </Button>
       </AbFlex>
 

@@ -510,7 +510,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({
               style={{ textAlign: "center" }}
             >
               <span arial-role="cutton">
-                <MaterialIconBase name="open_with" size="1rem" fill="#958993" />
+                <MaterialIconBase name="open_with" size="1em" fill="#958993" />
               </span>
             </Button>
           </Flex>

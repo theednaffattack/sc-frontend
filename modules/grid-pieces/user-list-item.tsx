@@ -21,7 +21,7 @@ export const UserListItem: React.FunctionComponent<UserListItemProps> = ({
       <Flex alignItems="center" mr={2}>
         <MaterialIconBase
           name="lens"
-          size="1rem"
+          size="1em"
           fill={isMe ? "yellow" : "#38978D"}
         />
       </Flex>

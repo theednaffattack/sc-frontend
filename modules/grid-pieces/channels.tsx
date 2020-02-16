@@ -93,7 +93,7 @@ const UserListItem: React.FunctionComponent<ListItemProps> = ({ id, name }) => (
   <StyledListItem pl={2} py={1} key={`user-${id}`}>
     <Flex>
       <Flex>
-        <MaterialIconBase name="lens" size="1rem" fill="#38978D" />
+        <MaterialIconBase name="lens" size="1em" fill="#38978D" />
       </Flex>
       <Flex>{name}</Flex>
     </Flex>
@@ -159,7 +159,7 @@ const ChannelIfTeamIdIsDefined: React.FunctionComponent<ChannelProps> = ({
             onClick={() => setChannelModal(modalToggle)}
             type="button"
           >
-            <Icon name="add_circle" size="1rem" fill={textColor} />
+            <Icon name="add_circle" size="1em" fill={textColor} />
           </Button>
         </Box>
       </Flex>
