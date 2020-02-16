@@ -12,7 +12,7 @@ export type MappedTeamsProps = {
   __typename?: "Team" | undefined;
   id: string;
   name: string;
-  channels: ChannelsLikeType;
+  channels?: ChannelsLikeType;
 };
 
 // interface TeamListItemProps {
