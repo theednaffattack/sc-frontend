@@ -77,7 +77,6 @@ export const AddChannelModal: React.FunctionComponent<AddChannelModalProps> = ({
                   alignItems="center"
                   justifyContent="center"
                   position="relative"
-                  // style={{ position: "relative" }}
                 >
                   <Text>Add Channel</Text>
 
