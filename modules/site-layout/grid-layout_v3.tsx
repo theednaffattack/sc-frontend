@@ -510,13 +510,10 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
           {/* IF WE ARE NOT ON THE VIEW-TEAM INDEX */}
           {dataGetAllTeamsForUserQuery &&
           dataGetAllTeamsForUserQuery.getAllTeamsForUser &&
+          routerIsReady(router) &&
           getQueryVariables(router).teamId !== noQParams.teamId ? (
             <Heading ml={2} fontFamily="main" as="h1" color="white">
-              {
-                dataGetAllTeamsForUserQuery.getAllTeamsForUser.filter(
-                  team => team.id === getQueryVariables(router).teamId
-                )[0].name
-              }
+              {dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].name}
             </Heading>
           ) : (
             ""
@@ -672,11 +669,6 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
                   viewerState={viewerState}
                   viewerDispatch={viewerDispatch}
                   {...resultUseLoadChannelsByTeamIdQuery}
-                  // setChannelName={setChannelName}
-                  // setOnClickValue={
-                  //   dataUseLoadChannelsByTeamIdQuery.loadChannelsByTeamId[0].name
-                  // }
-                  // {...theRestUseLoadChannelsByTeamIdQuery}
                 />
               ) : (
                 ""
@@ -748,21 +740,29 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
                   teamId={getQueryVariables(router).teamId}
                   threadId={getQueryVariables(router).threadId}
                   selectedDirectMessageInvitees={
-                    dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser.filter(
-                      dm => dm.id === getQueryVariables(router).threadId
-                    )[0].invitees
+                    // dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser.filter(
+                    //   dm => {
+                    //     console.log("VIEW DM", { dm });
+                    //     return dm.id === getQueryVariables(router).threadId;
+                    //   }
+                    // )[0].invitees
+                    []
                   }
                   setSelectedDirectMessageInvitees={() => console.log}
                 />
               ) : (
+                // <
                 ""
               )}
 
               {/* DM SCENARIO 2 - WE'RE NOT ON A DM ROUTE AND HAVE TEAM ID, BUT NO THREAD ID  */}
-              {dataLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
+              {routerIsReady(router) &&
+              dataLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
               dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser &&
               dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
-                .loadDirectMessageThreadsByTeamAndUser[0].id &&
+                .loadDirectMessageThreadsByTeamAndUser[0] &&
+              // dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
+              // .loadDirectMessageThreadsByTeamAndUser[0].id &&
               getQueryVariables(router).teamId !== noQParams.teamId &&
               getQueryVariables(router).threadId === noQParams.threadId ? (
                 <RenderDirectMessagesPanel
@@ -790,6 +790,8 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
               {/* DM SCENARIO 3 - WE'RE ON VIEW TEAM INDEX  */}
               {dataLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
               dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser &&
+              dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
+                .loadDirectMessageThreadsByTeamAndUser[0] &&
               dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
                 .loadDirectMessageThreadsByTeamAndUser[0].id &&
               getQueryVariables(router).teamId === noQParams.teamId &&
