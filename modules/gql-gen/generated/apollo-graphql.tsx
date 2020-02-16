@@ -387,6 +387,11 @@ export type Subscription = {
   newDirectMessageSub: AddDirectMessagePayload,
 };
 
+
+export type SubscriptionNewMessageSubArgs = {
+  data: AddMessageToChannelInput
+};
+
 export type Team = {
    __typename?: 'Team',
   id: Scalars['ID'],
@@ -577,7 +582,9 @@ export type LoadChannelsByTeamIdQuery = (
   )> }
 );
 
-export type NewMessageSubSubscriptionVariables = {};
+export type NewMessageSubSubscriptionVariables = {
+  data: AddMessageToChannelInput
+};
 
 
 export type NewMessageSubSubscription = (
@@ -1416,8 +1423,8 @@ export type LoadChannelsByTeamIdQueryHookResult = ReturnType<typeof useLoadChann
 export type LoadChannelsByTeamIdLazyQueryHookResult = ReturnType<typeof useLoadChannelsByTeamIdLazyQuery>;
 export type LoadChannelsByTeamIdQueryResult = ApolloReactCommon.QueryResult<LoadChannelsByTeamIdQuery, LoadChannelsByTeamIdQueryVariables>;
 export const NewMessageSubDocument = gql`
-    subscription NewMessageSub {
-  newMessageSub {
+    subscription NewMessageSub($data: AddMessageToChannelInput!) {
+  newMessageSub(data: $data) {
     id
     created_at
     message
@@ -1466,6 +1473,7 @@ export function withNewMessageSub<TProps, TChildProps = {}>(operationOptions?: A
  * @example
  * const { data, loading, error } = useNewMessageSubSubscription({
  *   variables: {
+ *      data: // value for 'data'
  *   },
  * });
  */
