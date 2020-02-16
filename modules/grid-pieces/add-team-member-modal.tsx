@@ -141,7 +141,7 @@ export const AddTeamMemberModal: React.FunctionComponent<AddTeamMemberModalProps
                               ) {
                                 let returnErrorObj = {
                                   ...errorToSearch,
-                                  message: "User is already a Team member"
+                                  message: "This User is already a Team member"
                                 };
 
                                 return returnErrorObj;
