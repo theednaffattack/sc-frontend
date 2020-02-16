@@ -41,20 +41,30 @@ interface MessageProps {
 }
 
 interface MessageListProps {
+  channelId: string;
   data: GetAllChannelMessagesQueryResult["data"];
   dataMe: MeQuery["me"];
   subscribeToMoreMessages: NewMessageSubType;
 }
 
 const MessageList: React.FunctionComponent<MessageListProps> = ({
+  channelId,
   data,
   dataMe,
   subscribeToMoreMessages
 }) => {
   useEffect(() => {
     if (subscribeToMoreMessages) {
+      let newMessageArgs: NewMessageSubSubscriptionVariables = {
+        data: {
+          channelId: channelId,
+          message: "",
+          sentTo: ""
+        }
+      };
       let unsubscribe = subscribeToMoreMessages({
         document: NewMessageSubDocument,
+        variables: newMessageArgs,
         updateQuery: (prev, { subscriptionData }) => {
           if (!subscriptionData.data) return prev;
 
@@ -71,7 +81,7 @@ const MessageList: React.FunctionComponent<MessageListProps> = ({
         unsubscribe();
       };
     }
-  }, []);
+  }, [data, channelId]);
 
   if (data && dataMe) {
     return (
@@ -169,6 +179,7 @@ export const Messages: React.FunctionComponent<MessageProps> = ({
           dataMe={dataMe}
           subscribeToMoreMessages={subscribeToMore}
           data={data}
+          channelId={channelId}
         />
       </MessageWrapper>
     );
