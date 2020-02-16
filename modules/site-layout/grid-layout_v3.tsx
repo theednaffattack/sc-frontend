@@ -20,6 +20,8 @@ import { UserListItem } from "../grid-pieces/user-list-item";
 import { SC_Word as Word } from "../grid-pieces/content-placeholder";
 import { FormikMessageForm } from "../grid-pieces/formik-message-form";
 import { FormikDirectMessageForm } from "../grid-pieces/formik-direct-message-form";
+import { EmptyMessagesWrapper } from "../grid-pieces/empty-messages-wrapper";
+import {} from "../grid-pieces/messages";
 import {
   useMeQuery,
   useLoadDirectMessageThreadsByTeamAndUserLazyQuery,
@@ -40,6 +42,13 @@ import { RenderTeamPanel } from "../grid-pieces/render-team-panel";
 import { RenderChannelPanel } from "../grid-pieces/render-channel-panel";
 // @ts-ignore
 import { RenderDirectMessagesPanel } from "../grid-pieces/render-direct-message-panel";
+// import { EmptyGrid } from "./empty-grid";
+
+interface EmptyGridProps {}
+
+const EmptyGrid: React.FC<EmptyGridProps> = () => {
+  return <GridPageContainer>Empty</GridPageContainer>;
+};
 
 interface GridLayoutProps {
   title?: string;
@@ -318,6 +327,8 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
     if (
       routerIsReady(router) === true &&
       dataGetAllTeamsForUserQuery &&
+      dataGetAllTeamsForUserQuery.getAllTeamsForUser &&
+      dataGetAllTeamsForUserQuery.getAllTeamsForUser[0] !== undefined &&
       dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].id &&
       getQueryVariables(router).channelId === noQParams.channelId &&
       getQueryVariables(router).teamId === noQParams.teamId
@@ -470,10 +481,12 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
     ModalStatesType
   >(initialTeamMemberModalState);
 
-  return (
-    <GridPageContainer>
-      <TeamWrapper>
-        <Flex flexDirection="column">
+  if (dataGetAllTeamsForUserQuery === undefined) {
+    return <EmptyGrid>NOTHING TO SEE HERE!!!</EmptyGrid>;
+  } else {
+    return (
+      <GridPageContainer>
+        <TeamWrapper>
           <RenderTeamPanel
             data={dataGetAllTeamsForUserQuery}
             error={errorGetAllTeamsForUserQuery}
@@ -481,211 +494,64 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
             selectedTeamId={getQueryVariables(router).teamId}
             {...theRestGetAllTeamsForUserQuery}
           />
-        </Flex>
-      </TeamWrapper>
-
-      <ChannelWrapper>
-        <Heading ml={2} fontFamily="main" as="h1" color="white">
+        </TeamWrapper>
+        <ChannelWrapper>
+          {/* IF WE'RE ON THE VIEW-TEAM INDEX */}
           {dataGetAllTeamsForUserQuery &&
           dataGetAllTeamsForUserQuery.getAllTeamsForUser &&
-          getQueryVariables(router).teamId !== noQParams.teamId
-            ? dataGetAllTeamsForUserQuery.getAllTeamsForUser.filter(
-                team => team.id === getQueryVariables(router).teamId
-              )[0].name
-            : ""}
+          dataGetAllTeamsForUserQuery.getAllTeamsForUser[0] &&
+          getQueryVariables(router).teamId === noQParams.teamId ? (
+            <Heading ml={2} fontFamily="main" as="h1" color="white">
+              {dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].name}
+            </Heading>
+          ) : (
+            ""
+          )}
+          {/* IF WE ARE NOT ON THE VIEW-TEAM INDEX */}
           {dataGetAllTeamsForUserQuery &&
           dataGetAllTeamsForUserQuery.getAllTeamsForUser &&
-          getQueryVariables(router).teamId === noQParams.teamId
-            ? dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].name
-            : ""}
-        </Heading>
-        <Flex alignItems="center">
-          <Flex
-            key={`logged-in-user-${dataMeQuery?.me?.id}`}
-            flexDirection="column"
-            alignItems="center"
-            px={1}
-            style={{ overflowX: "auto" }}
-          >
-            <MaterialIconBase
-              name="account_circle"
-              size="2rem"
-              fill="#38978D"
-            />
-          </Flex>
-          <Text fontSize="1.3rem" ml={2} mr="auto">
-            {dataMeQuery?.me?.name ?? ""}
-          </Text>
-          <Flex mr={1}>
-            <Button
-              bg="transparent"
-              p={1}
-              type="button"
-              onClick={() => setProfileModalState("isOpen")}
-              style={{ textAlign: "center" }}
-            >
-              <span arial-role="cutton">
-                <MaterialIconBase name="open_with" size="1rem" fill="#958993" />
-              </span>
-            </Button>
-          </Flex>
-        </Flex>
-        {/* BEG - CHANNEL SECTION & SECTION HEADER */}
+          getQueryVariables(router).teamId !== noQParams.teamId ? (
+            <Heading ml={2} fontFamily="main" as="h1" color="white">
+              {
+                dataGetAllTeamsForUserQuery.getAllTeamsForUser.filter(
+                  team => team.id === getQueryVariables(router).teamId
+                )[0].name
+              }
+            </Heading>
+          ) : (
+            ""
+          )}
+          {/* USERNAME HEADER */}
 
-        <Flex mt={3} width={1} flexDirection="column">
-          {/* BEG - CHANNEL  HEADER */}
           <Flex alignItems="center">
-            <Text pl={2} mr={2}>
-              Channels
+            <Flex
+              key={`logged-in-user-${dataMeQuery?.me?.id}`}
+              flexDirection="column"
+              alignItems="center"
+              px={1}
+              style={{ overflowX: "auto" }}
+            >
+              <MaterialIconBase
+                name="account_circle"
+                size="2em"
+                fill="#38978D"
+              />
+            </Flex>
+            <Text fontSize="1.3rem" ml={2} mr="auto">
+              {dataMeQuery?.me?.name ?? ""}
             </Text>
-            <Button
-              bg="transparent"
-              p={0}
-              type="button"
-              onClick={() => setChannelModalState("isOpen")}
-              style={{ textAlign: "center" }}
-            >
-              <span arial-role="button">
-                <MaterialIconBase
-                  name="add_circle"
-                  size="1rem"
-                  fill="#958993"
-                />
-              </span>
-            </Button>
-          </Flex>
-          {/* END - CHANNEL  HEADER */}
-
-          {/* BEG - CHANNEL PANEL */}
-          {/* SCENARIO 1 - WE HAVE CHANNEL ID AND TEAM ID FROM A ROUTE */}
-          {getQueryVariables(router).channelId !== noQParams.channelId &&
-          getQueryVariables(router).teamId !== noQParams.teamId &&
-          resultUseLoadChannelsByTeamIdQuery ? (
-            <RenderChannelPanel
-              channelId={getQueryVariables(router).channelId}
-              teamId={getQueryVariables(router).teamId}
-              data={resultUseLoadChannelsByTeamIdQuery.data}
-              error={resultUseLoadChannelsByTeamIdQuery.error}
-              loading={resultUseLoadChannelsByTeamIdQuery.loading}
-              viewerState={viewerState}
-              viewerDispatch={viewerDispatch}
-              {...resultUseLoadChannelsByTeamIdQuery}
-            />
-          ) : (
-            ""
-          )}
-          {/* SCENARIO 2 - WE DO NOT HAVE CHANNEL ID NOR TEAM ID FROM A ROUTE */}
-          {getQueryVariables(router).channelId === noQParams.channelId &&
-          getQueryVariables(router).teamId === noQParams.teamId &&
-          resultUseLoadChannelsByTeamIdQuery &&
-          resultUseLoadChannelsByTeamIdQuery.data &&
-          resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId &&
-          resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id ? (
-            <RenderChannelPanel
-              channelId={
-                resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0]
-                  .id
-              }
-              teamId={getQueryVariables(router).teamId}
-              data={resultUseLoadChannelsByTeamIdQuery.data}
-              error={resultUseLoadChannelsByTeamIdQuery.error}
-              loading={resultUseLoadChannelsByTeamIdQuery.loading}
-              viewerState={viewerState}
-              viewerDispatch={viewerDispatch}
-              {...resultUseLoadChannelsByTeamIdQuery}
-            />
-          ) : (
-            ""
-          )}
-          {/* SCENARIO 3 - WE DO NOT HAVE CHANNEL ID NOR THREAD ID, BUT WE *DO HAVE* TEAM ID FROM A ROUTE */}
-          {getQueryVariables(router).channelId === noQParams.channelId &&
-          getQueryVariables(router).threadId === noQParams.threadId &&
-          getQueryVariables(router).teamId !== noQParams.teamId &&
-          resultUseLoadChannelsByTeamIdQuery &&
-          resultUseLoadChannelsByTeamIdQuery.data &&
-          resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId &&
-          resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id ? (
-            <RenderChannelPanel
-              channelId={
-                resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0]
-                  .id
-              }
-              teamId={getQueryVariables(router).teamId}
-              data={resultUseLoadChannelsByTeamIdQuery.data}
-              error={resultUseLoadChannelsByTeamIdQuery.error}
-              loading={resultUseLoadChannelsByTeamIdQuery.loading}
-              viewerState={viewerState}
-              viewerDispatch={viewerDispatch}
-              {...resultUseLoadChannelsByTeamIdQuery}
-            />
-          ) : (
-            ""
-          )}
-          {/* CHANNEL PANEL - SCENARIO 3 - WE DO NOT HAVE CHANNEL ID NOR THREAD ID, BUT WE *DO HAVE* TEAM ID FROM A ROUTE */}
-          {getQueryVariables(router).channelId === noQParams.channelId &&
-          getQueryVariables(router).threadId !== noQParams.threadId &&
-          getQueryVariables(router).teamId !== noQParams.teamId &&
-          resultUseLoadChannelsByTeamIdQuery &&
-          resultUseLoadChannelsByTeamIdQuery.data &&
-          resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId &&
-          resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id ? (
-            <RenderChannelPanel
-              channelId={""}
-              teamId={getQueryVariables(router).teamId}
-              data={resultUseLoadChannelsByTeamIdQuery.data}
-              error={resultUseLoadChannelsByTeamIdQuery.error}
-              loading={resultUseLoadChannelsByTeamIdQuery.loading}
-              viewerState={viewerState}
-              viewerDispatch={viewerDispatch}
-              {...resultUseLoadChannelsByTeamIdQuery}
-              // setChannelName={setChannelName}
-              // setOnClickValue={
-              //   dataUseLoadChannelsByTeamIdQuery.loadChannelsByTeamId[0].name
-              // }
-              // {...theRestUseLoadChannelsByTeamIdQuery}
-            />
-          ) : (
-            ""
-          )}
-          {/* END - CHANNEL PANEL */}
-        </Flex>
-
-        {/* BEG - DIRECT MESSAGES SECTION & SECTION HEADER */}
-        <Flex mt={3} width={1} flexDirection="column">
-          {/* DIRECT MESSAGES HEADER */}
-          <Flex alignItems="center">
-            <Flex>
-              <Text pl={2}>Direct Messages</Text>
-            </Flex>
-            <Flex ml="auto" mr={1}>
-              <Button
-                bg="transparent"
-                p={1}
-                type="button"
-                onClick={() => setDirectMessageModalState("isOpen")}
-                style={{ textAlign: "center" }}
-              >
-                <span arial-role="cutton">
-                  <MaterialIconBase
-                    name="add_circle"
-                    size="1rem"
-                    fill="#958993"
-                  />
-                </span>
-              </Button>
-            </Flex>
             <Flex mr={1}>
               <Button
                 bg="transparent"
                 p={1}
                 type="button"
-                onClick={() => setDirectMessageModalState("isOpen")}
+                onClick={() => setProfileModalState("isOpen")}
                 style={{ textAlign: "center" }}
               >
                 <span arial-role="cutton">
                   <MaterialIconBase
                     name="open_with"
-                    size="1rem"
+                    size="1em"
                     fill="#958993"
                   />
                 </span>
@@ -693,431 +559,622 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
             </Flex>
           </Flex>
 
-          {/* DIRECT MESSAGES PANEL */}
-          {/* DM SCENARIO 1 - WE'RE ON A DM ROUTE AND HAVE THREAD ID AND TEAM ID  */}
-          {routerIsReady(router) === true &&
-          dataLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
-          getQueryVariables(router).teamId !== noQParams.teamId &&
-          getQueryVariables(router).threadId !== noQParams.threadId ? (
-            <RenderDirectMessagesPanel
-              data={dataLoadDirectMessageThreadsByTeamAndUserLazyQuery}
-              loading={loadingLoadDirectMessageThreadsByTeamAndUserLazyQuery}
-              dataMeQuery={dataMeQuery}
-              teamId={getQueryVariables(router).teamId}
-              threadId={getQueryVariables(router).threadId}
-              selectedDirectMessageInvitees={
-                dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser.filter(
-                  dm => dm.id === getQueryVariables(router).threadId
-                )[0].invitees
-              }
-              setSelectedDirectMessageInvitees={() => console.log}
-            />
-          ) : (
-            ""
-          )}
+          {/* BEG - CHANNEL SECTION & SECTION HEADER */}
+          {dataGetAllTeamsForUserQuery &&
+          dataGetAllTeamsForUserQuery.getAllTeamsForUser &&
+          dataGetAllTeamsForUserQuery.getAllTeamsForUser.length > 0 ? (
+            <Flex mt={3} width={1} flexDirection="column">
+              {/* BEG - CHANNEL  HEADER */}
+              <Flex alignItems="center">
+                <Text pl={2} mr={2}>
+                  Channels
+                </Text>
+                <Button
+                  bg="transparent"
+                  p={0}
+                  type="button"
+                  onClick={() => setChannelModalState("isOpen")}
+                  style={{ textAlign: "center" }}
+                >
+                  <span arial-role="button">
+                    <MaterialIconBase
+                      name="add_circle"
+                      size="1em"
+                      fill="#958993"
+                    />
+                  </span>
+                </Button>
+              </Flex>
+              {/* END - CHANNEL  HEADER */}
 
-          {/* DM SCENARIO 2 - WE'RE NOT ON A DM ROUTE AND HAVE TEAM ID, BUT NO THREAD ID  */}
-          {dataLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
-          dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser &&
-          dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
-            .loadDirectMessageThreadsByTeamAndUser[0].id &&
-          getQueryVariables(router).teamId !== noQParams.teamId &&
-          getQueryVariables(router).threadId === noQParams.threadId ? (
-            <RenderDirectMessagesPanel
-              data={dataLoadDirectMessageThreadsByTeamAndUserLazyQuery}
-              loading={loadingLoadDirectMessageThreadsByTeamAndUserLazyQuery}
-              dataMeQuery={dataMeQuery}
-              teamId={getQueryVariables(router).teamId}
-              threadId={
-                ""
-                // dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
-                //   .loadDirectMessageThreadsByTeamAndUser[0].id
-              }
-              selectedDirectMessageInvitees={
-                dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
-                  .loadDirectMessageThreadsByTeamAndUser[0].invitees
-              }
-              setSelectedDirectMessageInvitees={() => console.log}
-            />
-          ) : (
-            ""
-          )}
-
-          {/* DM SCENARIO 3 - WE'RE NOT ON VIEW TEAM INDEX  */}
-          {dataLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
-          dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser &&
-          dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
-            .loadDirectMessageThreadsByTeamAndUser[0].id &&
-          getQueryVariables(router).teamId === noQParams.teamId &&
-          getQueryVariables(router).threadId === noQParams.threadId ? (
-            <RenderDirectMessagesPanel
-              data={dataLoadDirectMessageThreadsByTeamAndUserLazyQuery}
-              loading={loadingLoadDirectMessageThreadsByTeamAndUserLazyQuery}
-              dataMeQuery={dataMeQuery}
-              teamId={getQueryVariables(router).teamId}
-              threadId={
-                ""
-                // dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
-                //   .loadDirectMessageThreadsByTeamAndUser[0].id
-              }
-              selectedDirectMessageInvitees={
-                dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
-                  .loadDirectMessageThreadsByTeamAndUser[0].invitees
-              }
-              setSelectedDirectMessageInvitees={() => console.log}
-            />
-          ) : (
-            ""
-          )}
-        </Flex>
-        {/* END - DIRECT MESSAGES SECTION */}
-
-        {/* BEG - TEAM MEMBERS SECTION */}
-        <Flex mt={3} width={1} flexDirection="column">
-          <Flex alignItems="center">
-            <Text pl={2}>Team Members</Text>
-
-            <Button
-              bg="transparent"
-              p={0}
-              type="button"
-              onClick={() => setTeamMemberModalState("isOpen")} // CHANGE THIS TO NEW ADD TEAM MEMBER MODAL
-              style={{ textAlign: "center" }}
-              ml="auto"
-              mr={2}
-            >
-              <span arial-role="cutton">
-                <MaterialIconBase
-                  name="add_circle"
-                  size="1rem"
-                  fill="#958993"
+              {/* BEG - CHANNEL PANEL */}
+              {/* SCENARIO 1 - WE HAVE CHANNEL ID AND TEAM ID FROM A ROUTE */}
+              {getQueryVariables(router).channelId !== noQParams.channelId &&
+              getQueryVariables(router).teamId !== noQParams.teamId &&
+              resultUseLoadChannelsByTeamIdQuery ? (
+                <RenderChannelPanel
+                  channelId={getQueryVariables(router).channelId}
+                  teamId={getQueryVariables(router).teamId}
+                  data={resultUseLoadChannelsByTeamIdQuery.data}
+                  error={resultUseLoadChannelsByTeamIdQuery.error}
+                  loading={resultUseLoadChannelsByTeamIdQuery.loading}
+                  viewerState={viewerState}
+                  viewerDispatch={viewerDispatch}
+                  {...resultUseLoadChannelsByTeamIdQuery}
                 />
-              </span>
-            </Button>
-          </Flex>
-          <UnstyledList pl={0} my={0} width={1}>
-            <UserListItem name="slackbot" />
-            {dataGetAllTeamMembersLazyQuery?.getAllTeamMembers.map(
-              UserListItem
-            ) ??
-              Array.from({ length: 7 }).map((_, index) => (
-                <StyledListItem key={index}>
-                  <Word
-                    bg="rgba(255,255,255,0.4)"
-                    // mb={2}
-                    // mr={2}
-                    borderRadius="8px"
-                    height="18px"
-                    width={1}
-                    sx={{
-                      display: "inline-block"
-                    }}
-                  />
-                </StyledListItem>
-              ))}
-          </UnstyledList>
-        </Flex>
-        {/* END - TEAM MEMBERS SECTION */}
-      </ChannelWrapper>
-
-      {profileModalState === "isOpen" &&
-      getQueryVariables(router).teamId !== noQParams.teamId ? (
-        <ProfileModal
-          userInfo={dataMeQuery?.me}
-          teamId={getQueryVariables(router).teamId}
-          profileModal={profileModalState}
-          setProfileModal={setProfileModalState}
-        />
-      ) : (
-        ""
-      )}
-      {channelModalState === "isOpen" &&
-      getQueryVariables(router).teamId !== noQParams.teamId ? (
-        <AddChannelModal
-          teamId={getQueryVariables(router).teamId}
-          channelModal={channelModalState}
-          setChannelModal={setChannelModalState}
-        />
-      ) : (
-        ""
-      )}
-      {directMessageModalState === "isOpen" &&
-      getQueryVariables(router).teamId !== noQParams.teamId ? (
-        <AddDirectMessageModal
-          teamId={getQueryVariables(router).teamId}
-          dataGetAllTeamMembers={dataGetAllTeamMembersLazyQuery}
-          directMessageModal={directMessageModalState}
-          setDirectMessageModal={setDirectMessageModalState}
-        />
-      ) : (
-        ""
-      )}
-      {teamMemberModalState === "isOpen" &&
-      getQueryVariables(router).teamId !== noQParams.teamId ? (
-        <AddTeamMemberModal
-          teamId={getQueryVariables(router).teamId}
-          // dataGetAllTeamMembers={dataGetAllTeamMembersLazyQuery}
-          teamMemberModal={teamMemberModalState}
-          setTeamMemberModalState={setTeamMemberModalState}
-        />
-      ) : (
-        ""
-      )
-
-      // teamMemberModal,
-      // setTeamMemberModal
-      }
-      <HeaderWrapper>
-        {/* SCENARIO 1 - CHANNEL ROUTE (WE HAVE CHANNEL ID AND TEAM ID FROM A ROUTE) */}
-        {getQueryVariables(router).channelId !== noQParams.channelId &&
-        getQueryVariables(router).teamId !== noQParams.teamId &&
-        resultUseLoadChannelsByTeamIdQuery &&
-        resultUseLoadChannelsByTeamIdQuery.data &&
-        resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId ? (
-          <Header
-            data={
-              resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId.filter(
-                channel => channel.id === getQueryVariables(router).channelId
-              )[0].name
-            }
-          />
-        ) : (
-          ""
-        )}
-        {/* SCENARIO 2 - THREAD ROUTE (WE HAVE NO CHANNEL ID, BUT DO HAVE A TEAM ID FROM A ROUTE) */}
-        {getQueryVariables(router).channelId === noQParams.channelId &&
-        getQueryVariables(router).threadId !== noQParams.threadId &&
-        getQueryVariables(router).teamId !== noQParams.teamId &&
-        resultLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
-        resultLoadDirectMessageThreadsByTeamAndUserLazyQuery.data &&
-        resultLoadDirectMessageThreadsByTeamAndUserLazyQuery.data
-          .loadDirectMessageThreadsByTeamAndUser ? (
-          <DirectMessageHeader
-            selectedDirectMessageInvitees={
-              resultLoadDirectMessageThreadsByTeamAndUserLazyQuery.data
-                .loadDirectMessageThreadsByTeamAndUser[0].invitees
-            }
-          />
-        ) : (
-          ""
-        )}
-        {/* SCENARIO 3 - TEAM ONLY ROUTE (WE HAVE NO CHANNEL ID, NOR THREAD ID, BUT DO HAVE A TEAM ID FROM A ROUTE) */}
-        {getQueryVariables(router).channelId === noQParams.channelId &&
-        getQueryVariables(router).threadId === noQParams.threadId &&
-        getQueryVariables(router).teamId !== noQParams.teamId &&
-        resultUseLoadChannelsByTeamIdQuery &&
-        resultUseLoadChannelsByTeamIdQuery.data &&
-        resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId ? (
-          <Header
-            data={
+              ) : (
+                ""
+              )}
+              {/* SCENARIO 2 - WE DO NOT HAVE CHANNEL ID NOR TEAM ID FROM A ROUTE */}
+              {getQueryVariables(router).channelId === noQParams.channelId &&
+              getQueryVariables(router).teamId === noQParams.teamId &&
+              resultUseLoadChannelsByTeamIdQuery &&
+              resultUseLoadChannelsByTeamIdQuery.data &&
+              resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId &&
               resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0]
-                .name
+                .id ? (
+                <RenderChannelPanel
+                  channelId={
+                    resultUseLoadChannelsByTeamIdQuery.data
+                      .loadChannelsByTeamId[0].id
+                  }
+                  teamId={dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].id}
+                  data={resultUseLoadChannelsByTeamIdQuery.data}
+                  error={resultUseLoadChannelsByTeamIdQuery.error}
+                  loading={resultUseLoadChannelsByTeamIdQuery.loading}
+                  viewerState={viewerState}
+                  viewerDispatch={viewerDispatch}
+                  {...resultUseLoadChannelsByTeamIdQuery}
+                />
+              ) : (
+                ""
+              )}
+              {/* SCENARIO 3 - WE DO NOT HAVE CHANNEL ID NOR THREAD ID, BUT WE *DO HAVE* TEAM ID FROM A ROUTE */}
+              {getQueryVariables(router).channelId === noQParams.channelId &&
+              getQueryVariables(router).threadId === noQParams.threadId &&
+              getQueryVariables(router).teamId !== noQParams.teamId &&
+              resultUseLoadChannelsByTeamIdQuery &&
+              resultUseLoadChannelsByTeamIdQuery.data &&
+              resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId &&
+              resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0]
+                .id ? (
+                <RenderChannelPanel
+                  channelId={
+                    resultUseLoadChannelsByTeamIdQuery.data
+                      .loadChannelsByTeamId[0].id
+                  }
+                  teamId={getQueryVariables(router).teamId}
+                  data={resultUseLoadChannelsByTeamIdQuery.data}
+                  error={resultUseLoadChannelsByTeamIdQuery.error}
+                  loading={resultUseLoadChannelsByTeamIdQuery.loading}
+                  viewerState={viewerState}
+                  viewerDispatch={viewerDispatch}
+                  {...resultUseLoadChannelsByTeamIdQuery}
+                />
+              ) : (
+                ""
+              )}
+              {/* CHANNEL PANEL - SCENARIO 3 - WE DO NOT HAVE CHANNEL ID NOR THREAD ID, BUT WE *DO HAVE* TEAM ID FROM A ROUTE */}
+              {getQueryVariables(router).channelId === noQParams.channelId &&
+              getQueryVariables(router).threadId !== noQParams.threadId &&
+              getQueryVariables(router).teamId !== noQParams.teamId &&
+              resultUseLoadChannelsByTeamIdQuery &&
+              resultUseLoadChannelsByTeamIdQuery.data &&
+              resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId &&
+              resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0]
+                .id ? (
+                <RenderChannelPanel
+                  channelId={""}
+                  teamId={getQueryVariables(router).teamId}
+                  data={resultUseLoadChannelsByTeamIdQuery.data}
+                  error={resultUseLoadChannelsByTeamIdQuery.error}
+                  loading={resultUseLoadChannelsByTeamIdQuery.loading}
+                  viewerState={viewerState}
+                  viewerDispatch={viewerDispatch}
+                  {...resultUseLoadChannelsByTeamIdQuery}
+                  // setChannelName={setChannelName}
+                  // setOnClickValue={
+                  //   dataUseLoadChannelsByTeamIdQuery.loadChannelsByTeamId[0].name
+                  // }
+                  // {...theRestUseLoadChannelsByTeamIdQuery}
+                />
+              ) : (
+                ""
+              )}
+              {/* END - CHANNEL PANEL */}
+            </Flex>
+          ) : (
+            ""
+          )}
+
+          {/* BEG - DIRECT MESSAGES SECTION & SECTION HEADER */}
+          {dataGetAllTeamsForUserQuery &&
+          dataGetAllTeamsForUserQuery.getAllTeamsForUser &&
+          dataGetAllTeamsForUserQuery.getAllTeamsForUser.length > 0 ? (
+            <Flex mt={3} width={1} flexDirection="column">
+              {/* DIRECT MESSAGES HEADER */}
+              <Flex alignItems="center">
+                <Flex>
+                  <Text pl={2}>Direct Messages</Text>
+                </Flex>
+                <Flex ml="auto" mr={1}>
+                  <Button
+                    bg="transparent"
+                    p={1}
+                    type="button"
+                    onClick={() => setDirectMessageModalState("isOpen")}
+                    style={{ textAlign: "center" }}
+                  >
+                    <span arial-role="cutton">
+                      <MaterialIconBase
+                        name="add_circle"
+                        size="1em"
+                        fill="#958993"
+                      />
+                    </span>
+                  </Button>
+                </Flex>
+                <Flex mr={1}>
+                  <Button
+                    bg="transparent"
+                    p={1}
+                    type="button"
+                    onClick={() => setDirectMessageModalState("isOpen")}
+                    style={{ textAlign: "center" }}
+                  >
+                    <span arial-role="cutton">
+                      <MaterialIconBase
+                        name="open_with"
+                        size="1em"
+                        fill="#958993"
+                      />
+                    </span>
+                  </Button>
+                </Flex>
+              </Flex>
+
+              {/* DIRECT MESSAGES PANEL */}
+              {/* DM SCENARIO 1 - WE'RE ON A DM ROUTE AND HAVE THREAD ID AND TEAM ID  */}
+              {routerIsReady(router) === true &&
+              dataLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
+              getQueryVariables(router).teamId !== noQParams.teamId &&
+              getQueryVariables(router).threadId !== noQParams.threadId ? (
+                <RenderDirectMessagesPanel
+                  data={dataLoadDirectMessageThreadsByTeamAndUserLazyQuery}
+                  loading={
+                    loadingLoadDirectMessageThreadsByTeamAndUserLazyQuery
+                  }
+                  dataMeQuery={dataMeQuery}
+                  teamId={getQueryVariables(router).teamId}
+                  threadId={getQueryVariables(router).threadId}
+                  selectedDirectMessageInvitees={
+                    dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser.filter(
+                      dm => dm.id === getQueryVariables(router).threadId
+                    )[0].invitees
+                  }
+                  setSelectedDirectMessageInvitees={() => console.log}
+                />
+              ) : (
+                ""
+              )}
+
+              {/* DM SCENARIO 2 - WE'RE NOT ON A DM ROUTE AND HAVE TEAM ID, BUT NO THREAD ID  */}
+              {dataLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
+              dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser &&
+              dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
+                .loadDirectMessageThreadsByTeamAndUser[0].id &&
+              getQueryVariables(router).teamId !== noQParams.teamId &&
+              getQueryVariables(router).threadId === noQParams.threadId ? (
+                <RenderDirectMessagesPanel
+                  data={dataLoadDirectMessageThreadsByTeamAndUserLazyQuery}
+                  loading={
+                    loadingLoadDirectMessageThreadsByTeamAndUserLazyQuery
+                  }
+                  dataMeQuery={dataMeQuery}
+                  teamId={getQueryVariables(router).teamId}
+                  threadId={
+                    ""
+                    // dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
+                    //   .loadDirectMessageThreadsByTeamAndUser[0].id
+                  }
+                  selectedDirectMessageInvitees={
+                    dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
+                      .loadDirectMessageThreadsByTeamAndUser[0].invitees
+                  }
+                  setSelectedDirectMessageInvitees={() => console.log}
+                />
+              ) : (
+                ""
+              )}
+
+              {/* DM SCENARIO 3 - WE'RE ON VIEW TEAM INDEX  */}
+              {dataLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
+              dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser &&
+              dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
+                .loadDirectMessageThreadsByTeamAndUser[0].id &&
+              getQueryVariables(router).teamId === noQParams.teamId &&
+              getQueryVariables(router).threadId === noQParams.threadId ? (
+                <RenderDirectMessagesPanel
+                  data={dataLoadDirectMessageThreadsByTeamAndUserLazyQuery}
+                  loading={
+                    loadingLoadDirectMessageThreadsByTeamAndUserLazyQuery
+                  }
+                  dataMeQuery={dataMeQuery}
+                  teamId={getQueryVariables(router).teamId}
+                  threadId={
+                    ""
+                    // dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
+                    //   .loadDirectMessageThreadsByTeamAndUser[0].id
+                  }
+                  selectedDirectMessageInvitees={
+                    dataLoadDirectMessageThreadsByTeamAndUserLazyQuery
+                      .loadDirectMessageThreadsByTeamAndUser[0].invitees
+                  }
+                  setSelectedDirectMessageInvitees={() => console.log}
+                />
+              ) : (
+                ""
+              )}
+            </Flex>
+          ) : (
+            ""
+          )}
+          {/* END - DIRECT MESSAGES SECTION */}
+
+          {/* BEG - TEAM MEMBERS SECTION */}
+
+          {dataGetAllTeamsForUserQuery &&
+          dataGetAllTeamsForUserQuery.getAllTeamsForUser &&
+          dataGetAllTeamsForUserQuery.getAllTeamsForUser.length > 0 ? (
+            // &&
+            // getQueryVariables(router).teamId !== noQParams.teamId
+            <Flex mt={3} width={1} flexDirection="column">
+              <Flex alignItems="center">
+                <Text pl={2}>Team Members</Text>
+
+                <Button
+                  bg="transparent"
+                  p={0}
+                  type="button"
+                  onClick={() => setTeamMemberModalState("isOpen")} // CHANGE THIS TO NEW ADD TEAM MEMBER MODAL
+                  style={{ textAlign: "center" }}
+                  ml="auto"
+                  mr={2}
+                >
+                  <span arial-role="cutton">
+                    <MaterialIconBase
+                      name="add_circle"
+                      size="1em"
+                      fill="#958993"
+                    />
+                  </span>
+                </Button>
+              </Flex>
+              <UnstyledList pl={0} my={0} width={1}>
+                <UserListItem name="slackbot" />
+                {dataGetAllTeamMembersLazyQuery?.getAllTeamMembers.map(
+                  UserListItem
+                ) ??
+                  Array.from({ length: 7 }).map((_, index) => (
+                    <StyledListItem key={index}>
+                      <Word
+                        bg="rgba(255,255,255,0.4)"
+                        // mb={2}
+                        // mr={2}
+                        borderRadius="8px"
+                        height="18px"
+                        width={1}
+                        sx={{
+                          display: "inline-block"
+                        }}
+                      />
+                    </StyledListItem>
+                  ))}
+              </UnstyledList>
+            </Flex>
+          ) : (
+            ""
+          )}
+          {/* END - TEAM MEMBERS SECTION */}
+        </ChannelWrapper>
+        {profileModalState === "isOpen" &&
+        dataGetAllTeamsForUserQuery &&
+        dataGetAllTeamsForUserQuery.getAllTeamsForUser ? (
+          <ProfileModal
+            userInfo={dataMeQuery?.me}
+            teamId={
+              getQueryVariables(router).teamId !== noQParams.teamId
+                ? getQueryVariables(router).teamId
+                : dataGetAllTeamsForUserQuery.getAllTeamsForUser[0] &&
+                  dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].id
+                ? dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].id
+                : "blank teamId"
             }
+            profileModal={profileModalState}
+            setProfileModal={setProfileModalState}
           />
         ) : (
           ""
         )}
-        {/* SCENARIO 4 - NO ID'S WERE PROVIDED FROM ROUTES) */}
-        {getQueryVariables(router).channelId === noQParams.channelId &&
-        getQueryVariables(router).threadId === noQParams.threadId &&
+        {/* FOR TEAM INDEX */}
+        {channelModalState === "isOpen" &&
         getQueryVariables(router).teamId === noQParams.teamId &&
-        resultUseLoadChannelsByTeamIdQuery &&
-        resultUseLoadChannelsByTeamIdQuery.data &&
-        resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId &&
-        resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].name ? (
-          <>
+        dataGetAllTeamsForUserQuery &&
+        dataGetAllTeamsForUserQuery.getAllTeamsForUser &&
+        dataGetAllTeamsForUserQuery.getAllTeamsForUser[0] ? (
+          <AddChannelModal
+            teamId={dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].id}
+            channelModal={channelModalState}
+            setChannelModal={setChannelModalState}
+          />
+        ) : (
+          ""
+        )}
+        {channelModalState === "isOpen" &&
+        getQueryVariables(router).teamId !== noQParams.teamId ? (
+          <AddChannelModal
+            teamId={getQueryVariables(router).teamId}
+            channelModal={channelModalState}
+            setChannelModal={setChannelModalState}
+          />
+        ) : (
+          ""
+        )}
+        {directMessageModalState === "isOpen" &&
+        getQueryVariables(router).teamId === noQParams.teamId &&
+        dataGetAllTeamsForUserQuery &&
+        dataGetAllTeamsForUserQuery.getAllTeamsForUser &&
+        dataGetAllTeamsForUserQuery.getAllTeamsForUser[0] ? (
+          <AddDirectMessageModal
+            teamId={dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].id}
+            dataGetAllTeamMembers={dataGetAllTeamMembersLazyQuery}
+            directMessageModal={directMessageModalState}
+            setDirectMessageModal={setDirectMessageModalState}
+          />
+        ) : (
+          ""
+        )}
+        {directMessageModalState === "isOpen" &&
+        getQueryVariables(router).teamId !== noQParams.teamId ? (
+          <AddDirectMessageModal
+            teamId={getQueryVariables(router).teamId}
+            dataGetAllTeamMembers={dataGetAllTeamMembersLazyQuery}
+            directMessageModal={directMessageModalState}
+            setDirectMessageModal={setDirectMessageModalState}
+          />
+        ) : (
+          ""
+        )}
+
+        {teamMemberModalState === "isOpen" &&
+        getQueryVariables(router).teamId === noQParams.teamId &&
+        dataGetAllTeamsForUserQuery &&
+        dataGetAllTeamsForUserQuery.getAllTeamsForUser &&
+        dataGetAllTeamsForUserQuery.getAllTeamsForUser[0] ? (
+          <AddTeamMemberModal
+            teamId={dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].id}
+            // dataGetAllTeamMembers={dataGetAllTeamMembersLazyQuery}
+            teamMemberModal={teamMemberModalState}
+            setTeamMemberModalState={setTeamMemberModalState}
+          />
+        ) : (
+          ""
+        )}
+
+        {teamMemberModalState === "isOpen" &&
+        getQueryVariables(router).teamId !== noQParams.teamId ? (
+          <AddTeamMemberModal
+            teamId={getQueryVariables(router).teamId}
+            // dataGetAllTeamMembers={dataGetAllTeamMembersLazyQuery}
+            teamMemberModal={teamMemberModalState}
+            setTeamMemberModalState={setTeamMemberModalState}
+          />
+        ) : (
+          ""
+        )}
+        <HeaderWrapper>
+          {/* SCENARIO 1 - CHANNEL ROUTE (WE HAVE CHANNEL ID AND TEAM ID FROM A ROUTE) */}
+          {getQueryVariables(router).channelId !== noQParams.channelId &&
+          getQueryVariables(router).teamId !== noQParams.teamId &&
+          resultUseLoadChannelsByTeamIdQuery &&
+          resultUseLoadChannelsByTeamIdQuery.data &&
+          resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId ? (
+            <Header
+              data={
+                resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId.filter(
+                  channel => channel.id === getQueryVariables(router).channelId
+                )[0].name
+              }
+            />
+          ) : (
+            ""
+          )}
+          {/* SCENARIO 2 - THREAD ROUTE (WE HAVE NO CHANNEL ID, BUT DO HAVE A TEAM ID FROM A ROUTE) */}
+          {getQueryVariables(router).channelId === noQParams.channelId &&
+          getQueryVariables(router).threadId !== noQParams.threadId &&
+          getQueryVariables(router).teamId !== noQParams.teamId &&
+          resultLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
+          resultLoadDirectMessageThreadsByTeamAndUserLazyQuery.data &&
+          resultLoadDirectMessageThreadsByTeamAndUserLazyQuery.data
+            .loadDirectMessageThreadsByTeamAndUser ? (
+            <DirectMessageHeader
+              selectedDirectMessageInvitees={
+                resultLoadDirectMessageThreadsByTeamAndUserLazyQuery.data
+                  .loadDirectMessageThreadsByTeamAndUser[0].invitees
+              }
+            />
+          ) : (
+            ""
+          )}
+          {/* SCENARIO 3 - TEAM ONLY ROUTE (WE HAVE NO CHANNEL ID, NOR THREAD ID, BUT DO HAVE A TEAM ID FROM A ROUTE) */}
+          {getQueryVariables(router).channelId === noQParams.channelId &&
+          getQueryVariables(router).threadId === noQParams.threadId &&
+          getQueryVariables(router).teamId !== noQParams.teamId &&
+          resultUseLoadChannelsByTeamIdQuery &&
+          resultUseLoadChannelsByTeamIdQuery.data &&
+          resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId ? (
             <Header
               data={
                 resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0]
                   .name
               }
             />
-          </>
-        ) : (
-          ""
-        )}
-        {viewerState.headerInfo &&
-        // viewerState.idShowing &&
-        viewerState.viewerMode === "channel" ? (
-          <Header
-            // channelId={viewerState.idShowing}
-            data={viewerState.headerInfo}
-          />
-        ) : null
-        // <Header channelId="none" channelName="" />
-        }
-        {viewerState.headerInfo &&
-        // viewerState.idShowing &&
-        viewerState.viewerMode === "default" ? (
-          <Header
-            // channelId={viewerState.idShowing}
-            data={viewerState.headerInfo}
-          />
-        ) : null
-        // <Header channelId="none" channelName="" />
-        }
+          ) : (
+            ""
+          )}
+          {/* SCENARIO 4 - NO ID'S WERE PROVIDED FROM ROUTES) */}
+          {getQueryVariables(router).channelId === noQParams.channelId &&
+          getQueryVariables(router).threadId === noQParams.threadId &&
+          getQueryVariables(router).teamId === noQParams.teamId &&
+          resultUseLoadChannelsByTeamIdQuery &&
+          resultUseLoadChannelsByTeamIdQuery.data &&
+          resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId &&
+          resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0]
+            .name ? (
+            <>
+              <Header
+                data={
+                  resultUseLoadChannelsByTeamIdQuery.data
+                    .loadChannelsByTeamId[0].name
+                }
+              />
+            </>
+          ) : (
+            ""
+          )}
+          {viewerState.headerInfo &&
+          // viewerState.idShowing &&
+          viewerState.viewerMode === "channel" ? (
+            <Header
+              // channelId={viewerState.idShowing}
+              data={viewerState.headerInfo}
+            />
+          ) : null
+          // <Header channelId="none" channelName="" />
+          }
+          {viewerState.headerInfo &&
+          // viewerState.idShowing &&
+          viewerState.viewerMode === "default" ? (
+            <Header
+              // channelId={viewerState.idShowing}
+              data={viewerState.headerInfo}
+            />
+          ) : null
+          // <Header channelId="none" channelName="" />
+          }
 
-        {/* DM HEADER */}
-        {viewerState.headerInfo &&
-        viewerState.idShowing &&
-        viewerState.viewerMode === "directMessage" &&
-        typeof viewerState.headerInfo !== "string" ? (
-          <DirectMessageHeader
-            selectedDirectMessageInvitees={viewerState.headerInfo}
-          />
-        ) : null
-        // <Header channelId="none" channelName="" />
-        }
-
-        {/* {threadId ? (
-          <DirectMessageHeader
-            threadId={threadId}
-            setSelectedDirectMessageInvitees={setSelectedDirectMessageInvitees}
-            selectedDirectMessageInvitees={selectedDirectMessageInvitees}
-          />
-        ) : null} */}
-      </HeaderWrapper>
-      {/* DIRECT MESSAGES QUERY */}
-      {/* {dataMeQuery && threadId ? (
+          {/* DM HEADER */}
+          {viewerState.headerInfo &&
+          viewerState.idShowing &&
+          viewerState.viewerMode === "directMessage" &&
+          typeof viewerState.headerInfo !== "string" ? (
+            <DirectMessageHeader
+              selectedDirectMessageInvitees={viewerState.headerInfo}
+            />
+          ) : null
+          // <Header channelId="none" channelName="" />
+          }
+        </HeaderWrapper>
+        {/* DIRECT MESSAGES QUERY */}
+        {/* {dataMeQuery && threadId ? (
         <DirectMessages dataMe={dataMeQuery.me} threadId={threadId} />
       ) : (
         ""
       )} */}
+        {/* DISPLAY MESSAGES */}
 
-      {/* DISPLAY MESSAGES */}
-      {/* {dataMeQuery &&
-      viewerState &&
-      dataUseLoadChannelsByTeamIdQuery &&
-      dataUseLoadChannelsByTeamIdQuery.loadChannelsByTeamId &&
-      dataUseLoadChannelsByTeamIdQuery.loadChannelsByTeamId[0].id ? (
-        <Messages
-          dataMe={dataMeQuery.me}
-          channelId={
-            dataUseLoadChannelsByTeamIdQuery.loadChannelsByTeamId[0].id
-          }
-        />
-      ) : (
-        ""
-      )} */}
-      {childrentWithMeDataAndMeSetter}
-      {/* {children} */}
-      <InputContainer>
-        {/* SCENARIO 1 */}
-        {/* FORM SCENARIO 2 */}
-        {/* {viewerState &&
-        viewerState.idShowing &&
-        !router.pathname.includes("/channel") &&
-        !router.pathname.includes("/mew-team") &&
-        viewerState.headerInfo &&
-        typeof viewerState.headerInfo !== "string" &&
-        viewerState.viewerMode === "directMessage" &&
-        viewerState.idShowing.length > 0 ? (
-          <>
+        {dataGetAllTeamsForUserQuery &&
+        dataGetAllTeamsForUserQuery.getAllTeamsForUser &&
+        dataGetAllTeamsForUserQuery.getAllTeamsForUser.length === 0 &&
+        getQueryVariables(router).teamId === noQParams.teamId ? (
+          <EmptyMessagesWrapper>
+            You must be invited to a Team to continue
+          </EmptyMessagesWrapper>
+        ) : (
+          ""
+        )}
+        {childrentWithMeDataAndMeSetter}
+        <InputContainer>
+          {/* SCENARIO 1 */}
+          {/* NEW FORM SCENARIO 1 - WE'RE ON A DM ROUTE */}
+
+          {getQueryVariables(router).threadId !== noQParams.threadId &&
+          getQueryVariables(router).teamId !== noQParams.teamId &&
+          getQueryVariables(router).channelId === noQParams.channelId &&
+          router.pathname.includes("messages") &&
+          dataLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
+          dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser ? (
             <FormikDirectMessageForm
               initialValues={{ direct_message: "" }}
-              threadId={viewerState.idShowing}
-              teamId={viewerState.teamIdShowing ?? ""}
-              invitees={viewerState.headerInfo.map(person => {
-                if (person.id) return person.id;
-                return "";
-              })}
+              threadId={getQueryVariables(router).threadId}
+              teamId={getQueryVariables(router).teamId}
+              invitees={
+                dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser
+                  .filter(dm => dm.id === getQueryVariables(router).threadId)[0]
+                  .invitees.map(person => person.id)
+                  ? dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser
+                      .filter(
+                        dm => dm.id === getQueryVariables(router).threadId
+                      )[0]
+                      .invitees.map(person => {
+                        if (person.id) return person.id;
+                        return "";
+                      })
+                  : [""]
+              }
             />
-          </>
-        ) : (
-          ""
-        )}
-
-        {viewerState &&
-        viewerState.idShowing &&
-        typeof viewerState.idShowing === "string" &&
-        !router.pathname.includes("/mmessage") &&
-        viewerState.idShowing.length > 0 ? (
-          <FormikMessageForm
-            channelId={viewerState.idShowing}
-            initialValues={{
-              channel_message: ""
-            }}
-          />
-        ) : (
-          ""
-        )} */}
-        {/* NEW FORM SCENARIO 1 - WE'RE ON A DM ROUTE */}
-
-        {getQueryVariables(router).threadId !== noQParams.threadId &&
-        getQueryVariables(router).teamId !== noQParams.teamId &&
-        getQueryVariables(router).channelId === noQParams.channelId &&
-        router.pathname.includes("messages") &&
-        dataLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
-        dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser ? (
-          <FormikDirectMessageForm
-            initialValues={{ direct_message: "" }}
-            threadId={getQueryVariables(router).threadId}
-            teamId={getQueryVariables(router).teamId}
-            invitees={
-              dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser
-                .filter(dm => dm.id === getQueryVariables(router).threadId)[0]
-                .invitees.map(person => person.id)
-                ? dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser
-                    .filter(
-                      dm => dm.id === getQueryVariables(router).threadId
-                    )[0]
-                    .invitees.map(person => {
-                      if (person.id) return person.id;
-                      return "";
-                    })
-                : [""]
-            }
-          />
-        ) : (
-          ""
-        )}
-        {/* NEW FORM SCENARIO 2 - WE HAVE TEAM ID & CHANNEL ID*/}
-        {getQueryVariables(router).teamId !== noQParams.teamId &&
-        getQueryVariables(router).channelId !== noQParams.channelId &&
-        !router.pathname.includes("messages") ? (
-          <FormikMessageForm
-            channelId={getQueryVariables(router).channelId}
-            initialValues={{
-              channel_message: ""
-            }}
-          />
-        ) : (
-          ""
-        )}
-        {/* FORM SCENARIO 3 - WE HAVE TEAM ID BUT NO CHANNEL ID*/}
-        {getQueryVariables(router).teamId !== noQParams.teamId &&
-        getQueryVariables(router).channelId === noQParams.channelId &&
-        !router.pathname.includes("messages") ? (
-          <FormikMessageForm
-            channelId={getQueryVariables(router).channelId}
-            initialValues={{
-              channel_message: ""
-            }}
-          />
-        ) : (
-          ""
-        )}
-        {/* FORM SCENARIO 4 - WE DO NOT HAVE TEAM ID NOR CHANNEL ID*/}
-        {getQueryVariables(router).teamId === noQParams.teamId &&
-        getQueryVariables(router).channelId === noQParams.channelId &&
-        resultUseLoadChannelsByTeamIdQuery &&
-        resultUseLoadChannelsByTeamIdQuery.data &&
-        resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId &&
-        resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id ? (
-          <FormikMessageForm
-            channelId={
-              resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id
-            }
-            initialValues={{
-              channel_message: ""
-            }}
-          />
-        ) : (
-          ""
-        )}
-      </InputContainer>
-    </GridPageContainer>
-  );
+          ) : (
+            ""
+          )}
+          {/* NEW FORM SCENARIO 2 - WE HAVE TEAM ID & CHANNEL ID*/}
+          {getQueryVariables(router).teamId !== noQParams.teamId &&
+          getQueryVariables(router).channelId !== noQParams.channelId &&
+          !router.pathname.includes("messages") ? (
+            <FormikMessageForm
+              channelId={getQueryVariables(router).channelId}
+              initialValues={{
+                channel_message: ""
+              }}
+            />
+          ) : (
+            ""
+          )}
+          {/* FORM SCENARIO 3 - WE HAVE TEAM ID BUT NO CHANNEL ID*/}
+          {getQueryVariables(router).teamId !== noQParams.teamId &&
+          getQueryVariables(router).channelId === noQParams.channelId &&
+          !router.pathname.includes("messages") ? (
+            <FormikMessageForm
+              channelId={getQueryVariables(router).channelId}
+              initialValues={{
+                channel_message: ""
+              }}
+            />
+          ) : (
+            ""
+          )}
+          {/* FORM SCENARIO 4 - WE DO NOT HAVE TEAM ID NOR CHANNEL ID*/}
+          {getQueryVariables(router).teamId === noQParams.teamId &&
+          getQueryVariables(router).channelId === noQParams.channelId &&
+          resultUseLoadChannelsByTeamIdQuery &&
+          resultUseLoadChannelsByTeamIdQuery.data &&
+          resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId &&
+          resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id ? (
+            <FormikMessageForm
+              channelId={
+                resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0]
+                  .id
+              }
+              initialValues={{
+                channel_message: ""
+              }}
+            />
+          ) : (
+            ""
+          )}
+        </InputContainer>
+      </GridPageContainer>
+    );
+  }
 };
 
 export const getLayout = (page: any) => {
