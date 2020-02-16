@@ -1,5 +1,6 @@
 import React from "react";
 import { UniversalPortal } from "@jesstelford/react-portal-universal";
+import Link from "next/link";
 
 import {
   AbFlex,
@@ -17,7 +18,7 @@ interface ProfileModalProps {
   userInfo: MeQuery["me"] | undefined;
   profileModal: string;
   setProfileModal: React.Dispatch<React.SetStateAction<ModalStates>>;
-  teamId: string;
+  teamId?: string;
 }
 
 export type MessageBoxState = "isOpen" | "isClosed";
@@ -45,9 +46,11 @@ export const ProfileModal: React.FunctionComponent<ProfileModalProps> = ({
             position="fixed"
             bg="rgba(0, 0, 0, 0.7)"
             top={0}
-            // left={0}
+            width={[1 / 2, 1 / 2, 1 / 3, 1 / 5, 1 / 5]}
+            // left={150}
             right={0}
             bottom={0}
+            border="lime"
           >
             <Card p={0} pb={3} width={1}>
               <Flex
@@ -75,8 +78,12 @@ export const ProfileModal: React.FunctionComponent<ProfileModalProps> = ({
                 <Flex my={3} flexDirection="column">
                   <Text>TEAM ID</Text>
 
-                  {teamId}
+                  {teamId ? teamId : "no team ID"}
                 </Flex>
+                {/* <Button type="button" onClick={()=>}>Logout</Button> */}
+                <Link href="/logout" passHref={true}>
+                  <a>logout</a>
+                </Link>
 
                 <Button
                   type="button"
