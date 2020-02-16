@@ -2,6 +2,9 @@ import React from "react";
 
 import { SC_Word as Word } from "../../modules/grid-pieces/content-placeholder";
 import {
+  Flex,
+  LinkLink,
+  ListItem,
   UnstyledList,
   StyledListItem,
   Text
@@ -67,20 +70,24 @@ export const RenderTeamPanel: React.FC<I_TeamPanelInfo> = ({
 }) => {
   if (error)
     return (
-      <UnstyledList>
-        ERROR Loading Team Panel Information
-        {JSON.stringify(error, null, 2)}
-      </UnstyledList>
+      <Flex flexDirection="column">
+        <UnstyledList>
+          ERROR Loading Team Panel Information
+          {JSON.stringify(error, null, 2)}
+        </UnstyledList>
+      </Flex>
     );
   if (loading)
     return (
-      <UnstyledList>
-        {Array.from({ length: 5 }).map((_, index) => (
-          <StyledListItem key={index}>
-            <Word width={1} />
-          </StyledListItem>
-        ))}
-      </UnstyledList>
+      <Flex flexDirection="column">
+        <UnstyledList>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <StyledListItem key={index}>
+              <Word width={1} />
+            </StyledListItem>
+          ))}
+        </UnstyledList>
+      </Flex>
     );
   if (data) {
     let mappedTeams: MappedTeamsProps[] = data.getAllTeamsForUser.map(
@@ -106,19 +113,55 @@ export const RenderTeamPanel: React.FC<I_TeamPanelInfo> = ({
         return returnTeamObj;
       }
     );
+
     return (
-      <UnstyledList p={0} mx="auto">
-        {mappedTeams.map(TeamListItem)}
-      </UnstyledList>
+      <Flex flexDirection="column" width={1} alignItems="center">
+        <UnstyledList p={0}>
+          {mappedTeams.length > 0 ? (
+            mappedTeams.map(TeamListItem)
+          ) : (
+            <TeamListItem id="#" name="???" highlight={true} />
+          )}
+          <ListItem
+            height="50px"
+            width="50px"
+            borderRadius="15px"
+            bg="#676066"
+            mx={3}
+            my={2}
+            highlight={false}
+          >
+            <Flex
+              px={2}
+              pb={2}
+              pt={1}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Text fontSize="1.6rem" as="p" ml="3px">
+                <LinkLink
+                  href={`/create-team`}
+                  as={`/create-team`}
+                  hoverColor="white"
+                >
+                  +
+                </LinkLink>
+              </Text>
+            </Flex>
+          </ListItem>
+        </UnstyledList>
+      </Flex>
     );
   }
   return (
-    <UnstyledList>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <StyledListItem key={index}>
-          <Word width={1} />
-        </StyledListItem>
-      ))}
-    </UnstyledList>
+    <Flex flexDirection="column">
+      <UnstyledList>
+        {Array.from({ length: 5 }).map((_, index) => (
+          <StyledListItem key={index}>
+            <Word width={1} />
+          </StyledListItem>
+        ))}
+      </UnstyledList>
+    </Flex>
   );
 };
