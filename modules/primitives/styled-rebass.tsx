@@ -428,8 +428,11 @@ export const Flex = styled(FlexBase)<FlexMinHeightBordersProps>`
   ${borders}
 `;
 
-export const PositionFlex = styled(FlexBase)<PositionProps & FlexProps>`
+export const PositionFlex = styled(FlexBase)<
+  PositionProps & FlexProps & BordersProps
+>`
   ${position}
+  ${borders}
 `;
 
 export const Box: StyledComponent<
