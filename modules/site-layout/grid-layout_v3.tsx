@@ -40,9 +40,7 @@ import { AddDirectMessageModal } from "../grid-pieces/direct-messages/direct-mes
 import { ProfileModal } from "../grid-pieces/profile-modal";
 import { RenderTeamPanel } from "../grid-pieces/render-team-panel";
 import { RenderChannelPanel } from "../grid-pieces/render-channel-panel";
-// @ts-ignore
 import { RenderDirectMessagesPanel } from "../grid-pieces/render-direct-message-panel";
-// import { EmptyGrid } from "./empty-grid";
 
 interface EmptyGridProps {}
 
@@ -1084,7 +1082,6 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
         ""
       )} */}
         {/* DISPLAY MESSAGES */}
-
         {dataGetAllTeamsForUserQuery &&
         dataGetAllTeamsForUserQuery.getAllTeamsForUser &&
         dataGetAllTeamsForUserQuery.getAllTeamsForUser.length === 0 &&
@@ -1135,7 +1132,8 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
             <FormikMessageForm
               channelId={getQueryVariables(router).channelId}
               initialValues={{
-                channel_message: ""
+                channel_message: "",
+                files: []
               }}
             />
           ) : (
@@ -1148,7 +1146,8 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
             <FormikMessageForm
               channelId={getQueryVariables(router).channelId}
               initialValues={{
-                channel_message: ""
+                channel_message: "",
+                files: []
               }}
             />
           ) : (
@@ -1167,7 +1166,8 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
                   .id
               }
               initialValues={{
-                channel_message: ""
+                channel_message: "",
+                files: []
               }}
             />
           ) : (
