@@ -4,17 +4,12 @@ import { SubscribeToMoreOptions } from "apollo-boost";
 import {
   Text,
   Flex,
-  // @ts-ignore
-  MessageWrapper,
   StyledListItem,
   UnstyledList
 } from "../../primitives/styled-rebass";
 import { AvatarPlaceholder } from "../../profile/avatar-placeholder";
 
 import {
-  // useGetAllChannelMessagesQuery,
-  // GetAllChannelMessagesQueryResult,
-  // GetAllChannelMessagesQuery,
   NewDirectMessageSubDocument,
   NewDirectMessageSubSubscription,
   MeQuery,
@@ -24,7 +19,6 @@ import {
   NewDirectMessageSubSubscriptionVariables
 } from "../../gql-gen/generated/apollo-graphql";
 import { ChannelMessageListItemProps } from "../channel-message-list-item";
-// @ts-ignore
 import { EmptyMessagesWrapper } from "../empty-messages-wrapper";
 
 type NewMessageSubType = <
@@ -54,7 +48,6 @@ interface DirectMessageListProps {
   subscribeToMoreMessages: NewMessageSubType;
 }
 
-// @ts-ignore
 const DirectMessageList: React.FunctionComponent<DirectMessageListProps> = ({
   data,
   dataMe,
@@ -189,13 +182,13 @@ export const DirectMessages: React.FunctionComponent<DirectMessageProps> = ({
   return (
     <>
       {data ? (
-        <MessageWrapper ref={listBottomRef}>
+        <div ref={listBottomRef}>
           <DirectMessageList
             dataMe={dataMe}
             subscribeToMoreMessages={subscribeToMore}
             data={data}
           />
-        </MessageWrapper>
+        </div>
       ) : (
         <EmptyMessagesWrapper>
           Nothing to see (no DM selected) [{threadId}]

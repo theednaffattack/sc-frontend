@@ -4,7 +4,7 @@ import { SubscribeToMoreOptions } from "apollo-boost";
 import {
   Text,
   Flex,
-  MessageWrapper,
+  // MessageWrapper,
   StyledListItem,
   UnstyledList
 } from "../primitives/styled-rebass";
@@ -174,14 +174,14 @@ export const Messages: React.FunctionComponent<MessageProps> = ({
 
   if (data) {
     return (
-      <MessageWrapper ref={listBottomRef}>
+      <div ref={listBottomRef}>
         <MessageList
           dataMe={dataMe}
           subscribeToMoreMessages={subscribeToMore}
           data={data}
           channelId={channelId}
         />
-      </MessageWrapper>
+      </div>
     );
   }
 

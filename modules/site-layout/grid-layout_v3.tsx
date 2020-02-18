@@ -9,7 +9,6 @@ import {
   GridPageContainer,
   HeaderWrapper,
   Heading,
-  InputContainer,
   TeamWrapper,
   Text,
   UnstyledList,
@@ -1092,88 +1091,95 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
         ) : (
           ""
         )}
-        {childrentWithMeDataAndMeSetter}
-        <InputContainer>
-          {/* SCENARIO 1 */}
-          {/* NEW FORM SCENARIO 1 - WE'RE ON A DM ROUTE */}
+        {/* {childrentWithMeDataAndMeSetter} */}
+        {/* <InputContainer> */}
+        {/* SCENARIO 1 */}
+        {/* NEW FORM SCENARIO 1 - WE'RE ON A DM ROUTE */}
 
-          {getQueryVariables(router).threadId !== noQParams.threadId &&
-          getQueryVariables(router).teamId !== noQParams.teamId &&
-          getQueryVariables(router).channelId === noQParams.channelId &&
-          router.pathname.includes("messages") &&
-          dataLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
-          dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser ? (
-            <FormikDirectMessageForm
-              initialValues={{ direct_message: "" }}
-              threadId={getQueryVariables(router).threadId}
-              teamId={getQueryVariables(router).teamId}
-              invitees={
-                dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser
-                  .filter(dm => dm.id === getQueryVariables(router).threadId)[0]
-                  .invitees.map(person => person.id)
-                  ? dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser
-                      .filter(
-                        dm => dm.id === getQueryVariables(router).threadId
-                      )[0]
-                      .invitees.map(person => {
-                        if (person.id) return person.id;
-                        return "";
-                      })
-                  : [""]
-              }
-            />
-          ) : (
-            ""
-          )}
-          {/* NEW FORM SCENARIO 2 - WE HAVE TEAM ID & CHANNEL ID*/}
-          {getQueryVariables(router).teamId !== noQParams.teamId &&
-          getQueryVariables(router).channelId !== noQParams.channelId &&
-          !router.pathname.includes("messages") ? (
-            <FormikMessageForm
-              channelId={getQueryVariables(router).channelId}
-              initialValues={{
-                channel_message: "",
-                files: []
-              }}
-            />
-          ) : (
-            ""
-          )}
-          {/* FORM SCENARIO 3 - WE HAVE TEAM ID BUT NO CHANNEL ID*/}
-          {getQueryVariables(router).teamId !== noQParams.teamId &&
-          getQueryVariables(router).channelId === noQParams.channelId &&
-          !router.pathname.includes("messages") ? (
-            <FormikMessageForm
-              channelId={getQueryVariables(router).channelId}
-              initialValues={{
-                channel_message: "",
-                files: []
-              }}
-            />
-          ) : (
-            ""
-          )}
-          {/* FORM SCENARIO 4 - WE DO NOT HAVE TEAM ID NOR CHANNEL ID*/}
-          {getQueryVariables(router).teamId === noQParams.teamId &&
-          getQueryVariables(router).channelId === noQParams.channelId &&
-          resultUseLoadChannelsByTeamIdQuery &&
-          resultUseLoadChannelsByTeamIdQuery.data &&
-          resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId &&
-          resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id ? (
-            <FormikMessageForm
-              channelId={
-                resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0]
-                  .id
-              }
-              initialValues={{
-                channel_message: "",
-                files: []
-              }}
-            />
-          ) : (
-            ""
-          )}
-        </InputContainer>
+        {getQueryVariables(router).threadId !== noQParams.threadId &&
+        getQueryVariables(router).teamId !== noQParams.teamId &&
+        getQueryVariables(router).channelId === noQParams.channelId &&
+        router.pathname.includes("messages") &&
+        dataLoadDirectMessageThreadsByTeamAndUserLazyQuery &&
+        dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser ? (
+          <FormikDirectMessageForm
+            initialValues={{ direct_message: "", files: [] }}
+            threadId={getQueryVariables(router).threadId}
+            teamId={getQueryVariables(router).teamId}
+            invitees={
+              dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser
+                .filter(dm => dm.id === getQueryVariables(router).threadId)[0]
+                .invitees.map(person => person.id)
+                ? dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser
+                    .filter(
+                      dm => dm.id === getQueryVariables(router).threadId
+                    )[0]
+                    .invitees.map(person => {
+                      if (person.id) return person.id;
+                      return "";
+                    })
+                : [""]
+            }
+          >
+            {childrentWithMeDataAndMeSetter}
+          </FormikDirectMessageForm>
+        ) : (
+          ""
+        )}
+        {/* NEW FORM SCENARIO 2 - WE HAVE TEAM ID & CHANNEL ID*/}
+        {getQueryVariables(router).teamId !== noQParams.teamId &&
+        getQueryVariables(router).channelId !== noQParams.channelId &&
+        !router.pathname.includes("messages") ? (
+          <FormikMessageForm
+            channelId={getQueryVariables(router).channelId}
+            initialValues={{
+              channel_message: "",
+              files: []
+            }}
+          >
+            {childrentWithMeDataAndMeSetter}
+          </FormikMessageForm>
+        ) : (
+          ""
+        )}
+        {/* FORM SCENARIO 3 - WE HAVE TEAM ID BUT NO CHANNEL ID*/}
+        {getQueryVariables(router).teamId !== noQParams.teamId &&
+        getQueryVariables(router).channelId === noQParams.channelId &&
+        !router.pathname.includes("messages") ? (
+          <FormikMessageForm
+            channelId={getQueryVariables(router).channelId}
+            initialValues={{
+              channel_message: "",
+              files: []
+            }}
+          >
+            {childrentWithMeDataAndMeSetter}
+          </FormikMessageForm>
+        ) : (
+          ""
+        )}
+        {/* FORM SCENARIO 4 - WE DO NOT HAVE TEAM ID NOR CHANNEL ID*/}
+        {getQueryVariables(router).teamId === noQParams.teamId &&
+        getQueryVariables(router).channelId === noQParams.channelId &&
+        resultUseLoadChannelsByTeamIdQuery &&
+        resultUseLoadChannelsByTeamIdQuery.data &&
+        resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId &&
+        resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id ? (
+          <FormikMessageForm
+            channelId={
+              resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id
+            }
+            initialValues={{
+              channel_message: "",
+              files: []
+            }}
+          >
+            {childrentWithMeDataAndMeSetter}
+          </FormikMessageForm>
+        ) : (
+          ""
+        )}
+        {/* </InputContainer> */}
       </GridPageContainer>
     );
   }
