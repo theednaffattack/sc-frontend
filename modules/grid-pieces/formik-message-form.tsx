@@ -15,16 +15,18 @@ import {
 import { Input, StyledForm } from "../primitives/forms";
 import { FileUpload } from "../file-upload/file-upload";
 
-interface FileType {
-  file: string;
-  preview: Blob;
+import { CssFileIcon } from "../icon/css-file-icon";
+import { PdfFileIcon } from "../icon/pdf-file-icon";
+
+interface FileWithPreview extends File {
+  preview: Blob | string;
 }
 
 interface I_FormikMessageFormProps {
   channelId: string;
   initialValues: {
     channel_message: string;
-    files: FileType[];
+    files: FileWithPreview[];
   };
 }
 
@@ -77,31 +79,70 @@ export const FormikMessageForm: React.FC<I_FormikMessageFormProps> = ({
                 <FieldArray
                   name="files"
                   render={arrayHelpers => (
-                    <Flex>
-                      {values.files && values.files.length > 0
-                        ? values.files.map((file, index) => (
-                            <PositionFlex
-                              key={index}
-                              width="100px"
-                              position="relative"
-                              mx={2}
-                            >
-                              <AbFlex position="absolute" top={0} right={0}>
-                                <Button
-                                  type="button"
-                                  onClick={() => arrayHelpers.remove(index)} // remove a file from the list
+                    <Flex flexDirection="column">
+                      {values.files && values.files.length > 0 ? (
+                        <Button
+                          bg="crimson"
+                          type="button"
+                          width="150px"
+                          onClick={() => {
+                            values.files && values.files.length > 0
+                              ? values.files.forEach(() =>
+                                  arrayHelpers.remove(0)
+                                )
+                              : null;
+                            // arrayHelpers.remove(index);
+                          }} // remove a file from the list
+                        >
+                          remove all
+                        </Button>
+                      ) : (
+                        ""
+                      )}
+                      <Flex flexDirection="row">
+                        {values.files && values.files.length > 0
+                          ? values.files.map((file, index) => {
+                              return (
+                                <PositionFlex
+                                  key={index}
+                                  width="100px"
+                                  position="relative"
+                                  mx={2}
                                 >
-                                  -
-                                </Button>
-                              </AbFlex>
-                              {file.file}
-                              <img
-                                src={`${file.preview}`}
-                                style={{ maxWidth: "100px" }}
-                              />
-                            </PositionFlex>
-                          ))
-                        : ""}
+                                  <AbFlex position="absolute" top={0} right={0}>
+                                    <Button
+                                      type="button"
+                                      onClick={() => arrayHelpers.remove(index)} // remove a file from the list
+                                    >
+                                      -
+                                    </Button>
+                                  </AbFlex>
+                                  {typeof file.preview === "string" &&
+                                  file.preview === "pdf-svg" ? (
+                                    <PdfFileIcon />
+                                  ) : (
+                                    ""
+                                  )}
+                                  {typeof file.preview === "string" &&
+                                  file.preview === "css-svg" ? (
+                                    <CssFileIcon />
+                                  ) : (
+                                    ""
+                                  )}
+                                  {file.type.includes("image") &&
+                                  typeof file.name === "string" ? (
+                                    <img
+                                      src={`${file.preview}`}
+                                      style={{ maxWidth: "100px" }}
+                                    />
+                                  ) : (
+                                    ""
+                                  )}
+                                </PositionFlex>
+                              );
+                            })
+                          : ""}
+                      </Flex>
                     </Flex>
                   )}
                 />
@@ -122,8 +163,8 @@ export const FormikMessageForm: React.FC<I_FormikMessageFormProps> = ({
                   />
 
                   <FileUpload setFieldValue={setFieldValue}>
-                    <Button type="button">
-                      <span role="button" aria-controls="filename">
+                    <Button type="button" p={0} px={1} m={0} bg="#ccc">
+                      <span role="button" aria-controls="files">
                         <MaterialIconBase
                           name="cloud_upload"
                           size="2rem"

@@ -13,10 +13,11 @@ import {
 } from "../primitives/styled-rebass";
 import { Label, Input, StyledForm } from "../primitives/forms";
 import { FileUpload } from "../file-upload/file-upload";
+import { CssFileIcon } from "../icon/css-file-icon";
+import { PdfFileIcon } from "../icon/pdf-file-icon";
 
-interface FileType {
-  file: string;
-  preview: Blob;
+interface FileWithPreview extends File {
+  preview: Blob | string;
 }
 
 interface I_FormikDirectMessageFormProps {
@@ -25,7 +26,7 @@ interface I_FormikDirectMessageFormProps {
   invitees: string[];
   initialValues: {
     direct_message: string;
-    files: FileType[];
+    files: FileWithPreview[];
   };
 }
 
@@ -99,11 +100,27 @@ export const FormikDirectMessageForm: React.FC<I_FormikDirectMessageFormProps> =
                                   -
                                 </Button>
                               </AbFlex>
-                              {file.file}
-                              <img
-                                src={`${file.preview}`}
-                                style={{ maxWidth: "100px" }}
-                              />
+                              {typeof file.preview === "string" &&
+                              file.preview === "pdf-svg" ? (
+                                <PdfFileIcon />
+                              ) : (
+                                ""
+                              )}
+                              {typeof file.preview === "string" &&
+                              file.preview === "css-svg" ? (
+                                <CssFileIcon />
+                              ) : (
+                                ""
+                              )}
+                              {file.type.includes("image") &&
+                              typeof file.name === "string" ? (
+                                <img
+                                  src={`${file.preview}`}
+                                  style={{ maxWidth: "100px" }}
+                                />
+                              ) : (
+                                ""
+                              )}
                             </PositionFlex>
                           ))
                         : ""}
