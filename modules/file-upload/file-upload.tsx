@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 
 // import { Input } from "../primitives/forms";
@@ -15,6 +15,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   children,
   setFieldValue
 }) => {
+  let listBottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (listBottomRef && listBottomRef.current) {
+      listBottomRef.current.scrollTop = listBottomRef.current.scrollHeight;
+    }
+  }, [children]);
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const previewFiles = acceptedFiles.map(file =>
       Object.assign(file, {
@@ -39,9 +47,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   return (
-    <div {...getRootProps()}>
-      <input {...getInputProps({ name: "files" })} />
+    <div
+      ref={listBottomRef}
+      {...getRootProps({
+        style: { minHeight: "100%" }
+      })}
+    >
       {children}
+      <input {...getInputProps({ name: "files" })} />
     </div>
   );
 };
