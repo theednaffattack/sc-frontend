@@ -23,12 +23,31 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     }
   }, [children]);
 
+  // async function convertBlob(file: File) {
+  //   // const copyFile = Object.assign(file);
+
+  //   const convertBlob = await FileType.fromBlob(file);
+  //   return convertBlob;
+  // }
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const previewFiles = acceptedFiles.map(file =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file)
-      })
-    );
+    const previewFiles = acceptedFiles.map(file => {
+      if (file.type.includes("image")) {
+        return Object.assign(file, {
+          preview: URL.createObjectURL(file)
+        });
+      }
+      if (file.type.includes("application/pdf")) {
+        return Object.assign(file, {
+          preview: "pdf-svg"
+        });
+      } else {
+        return Object.assign(file, {
+          preview: "general-file"
+        });
+      }
+    });
+
     setFieldValue("files", previewFiles);
 
     // acceptedFiles.forEach(file => {
