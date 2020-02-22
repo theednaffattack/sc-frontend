@@ -87,6 +87,7 @@ export type EditUserInput = {
   firstName: Scalars['String'],
   lastName: Scalars['String'],
   email: Scalars['String'],
+  teamRoles: Array<UserTeamRole>,
 };
 
 export type GetAllMyMessagesInput = {
@@ -370,6 +371,14 @@ export type RegisterInput = {
   email: Scalars['String'],
 };
 
+export type Role = {
+   __typename?: 'Role',
+  id?: Maybe<Scalars['ID']>,
+  teamRole: TeamRoleEnum,
+  userForRole: User,
+  teamForRole?: Maybe<Team>,
+};
+
 export type SignedS3Payload = {
    __typename?: 'SignedS3Payload',
   signatures: Array<SignedS3SubPayload>,
@@ -399,7 +408,17 @@ export type Team = {
   owner: User,
   channels: Array<Maybe<Channel>>,
   threads: Array<Maybe<Thread>>,
+  members: Array<Maybe<User>>,
+  teamRoles: Array<Role>,
 };
+
+/** admin | owner | member | public guest */
+export enum TeamRoleEnum {
+  Admin = 'ADMIN',
+  Owner = 'OWNER',
+  Member = 'MEMBER',
+  PublicGuest = 'PUBLIC_GUEST'
+}
 
 export type Thread = {
    __typename?: 'Thread',
@@ -431,15 +450,16 @@ export type User = {
   firstName?: Maybe<Scalars['String']>,
   lastName?: Maybe<Scalars['String']>,
   email?: Maybe<Scalars['String']>,
-  teamRole: UserTeamRole,
+  teamRoles: Array<Role>,
   channels_created?: Maybe<Channel>,
   images?: Maybe<Array<Maybe<Image>>>,
   mappedMessages?: Maybe<Array<Maybe<Message>>>,
   followers?: Maybe<Array<Maybe<User>>>,
   following?: Maybe<Array<Maybe<User>>>,
+  teams?: Maybe<Array<Maybe<Team>>>,
   threads?: Maybe<Array<Thread>>,
   thread_invitations?: Maybe<Array<Maybe<Thread>>>,
-  channel_memberships?: Maybe<Array<Maybe<Thread>>>,
+  channel_memberships?: Maybe<Array<Maybe<Channel>>>,
   profileImageUri?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
   team_ownership: Scalars['String'],
@@ -815,7 +835,7 @@ export type GetAllTeamMembersQuery = (
   { __typename?: 'Query' }
   & { getAllTeamMembers: Array<(
     { __typename?: 'User' }
-    & Pick<User, 'id' | 'name' | 'teamRole'>
+    & Pick<User, 'id' | 'name'>
   )> }
 );
 
@@ -2112,7 +2132,6 @@ export const GetAllTeamMembersDocument = gql`
   getAllTeamMembers(teamId: $teamId) {
     id
     name
-    teamRole
   }
 }
     `;

@@ -5,7 +5,14 @@ export const GET_ALL_TEAM_MEMBERS = gql`
     getAllTeamMembers(teamId: $teamId) {
       id
       name
-      teamRole
+      # teamRoles {
+      #   id
+      #   teamRole
+      #   userForRole {
+      #     id
+      #     name
+      #   }
+      # }
     }
   }
 `;
