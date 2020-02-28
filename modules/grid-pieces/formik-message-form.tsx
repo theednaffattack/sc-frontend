@@ -13,6 +13,7 @@ import {
   MessageWrapper
 } from "../primitives/styled-rebass";
 import { Input, StyledForm } from "../primitives/forms";
+import { FileUploadNoClick } from "../file-upload/file-upload-no-click";
 import { FileUpload } from "../file-upload/file-upload";
 
 import { CssFileIcon } from "../icon/css-file-icon";
@@ -54,7 +55,12 @@ export const FormikMessageForm: React.FC<I_FormikMessageFormProps> = ({
       validateOnBlur={false}
       validateOnChange={false}
       initialValues={initialValues}
-      onSubmit={({ channel_message }, { resetForm }) => {
+      onSubmit={({ channel_message, files }, { resetForm }) => {
+        // const convertedFiles = files.map(file => new File([file], "filename"));
+        console.log("VIEW ATTRIBUTES TO EXTRACT FILE NAME", {
+          files
+        });
+
         if (channelId) {
           addMessageMutation({
             variables: {
@@ -75,7 +81,9 @@ export const FormikMessageForm: React.FC<I_FormikMessageFormProps> = ({
         return (
           <>
             <MessageWrapper ref={listBottomRef}>
-              <FileUpload setFieldValue={setFieldValue}>{children}</FileUpload>
+              <FileUploadNoClick setFieldValue={setFieldValue}>
+                {children}
+              </FileUploadNoClick>
             </MessageWrapper>
             <InputContainer>
               <Flex flexDirection="column">

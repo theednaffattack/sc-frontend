@@ -12,7 +12,7 @@ import {
   PositionFlex
 } from "../primitives/styled-rebass";
 import { Label, Input, StyledForm } from "../primitives/forms";
-import { FileUpload } from "../file-upload/file-upload";
+import { FileUploadNoClick } from "../file-upload/file-upload-no-click";
 import { CssFileIcon } from "../icon/css-file-icon";
 import { PdfFileIcon } from "../icon/pdf-file-icon";
 
@@ -76,7 +76,9 @@ export const FormikDirectMessageForm: React.FC<I_FormikDirectMessageFormProps> =
         return (
           <>
             <MessageWrapper ref={listBottomRef}>
-              <FileUpload setFieldValue={setFieldValue}>{children}</FileUpload>
+              <FileUploadNoClick setFieldValue={setFieldValue}>
+                {children}
+              </FileUploadNoClick>
             </MessageWrapper>
             <InputContainer>
               <Flex flexDirection="column">
