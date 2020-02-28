@@ -5,6 +5,14 @@ export const ADD_TEAM_MEMBER = gql`
     getAllTeamsForUser {
       id
       name
+      members {
+        id
+        firstName
+      }
+      userToTeams {
+        userToTeamId
+        teamRoleAuthorizations
+      }
       channels {
         id
         name
@@ -13,7 +21,8 @@ export const ADD_TEAM_MEMBER = gql`
           id
           name
         }
-        # messages {
+
+        # messages{
         #   id
         #   message
         # }
