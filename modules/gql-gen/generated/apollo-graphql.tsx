@@ -49,6 +49,7 @@ export type AddMessagePayload = {
 
 export type AddMessageToChannelInput = {
   channelId: Scalars['ID'],
+  teamId: Scalars['ID'],
   sentTo: Scalars['String'],
   invitees?: Maybe<Array<Maybe<Scalars['ID']>>>,
   message: Scalars['String'],
@@ -87,7 +88,8 @@ export type EditUserInput = {
   firstName: Scalars['String'],
   lastName: Scalars['String'],
   email: Scalars['String'],
-  teamRoles: Array<UserTeamRole>,
+  teamRoles: Array<TeamRoleEnum>,
+  teamId: Scalars['ID'],
 };
 
 export type GetAllMyMessagesInput = {
@@ -134,6 +136,9 @@ export type Mutation = {
    __typename?: 'Mutation',
   createProduct: Product,
   createUser: User,
+  addTeamMember: UserToTeamIdReferencesOnlyClass,
+  createTeam: Team,
+  teamLogin?: Maybe<User>,
   changePasswordFromContextUserid?: Maybe<User>,
   changePasswordFromToken?: Maybe<User>,
   confirmUser: Scalars['Boolean'],
@@ -143,10 +148,8 @@ export type Mutation = {
   register: User,
   addProfilePicture: UploadProfilePictueReturnType,
   editUserInfo: User,
+  adminEditUserInfo: UserClassTypeWithReferenceIds,
   signS3: SignedS3Payload,
-  addTeamMember: Scalars['Boolean'],
-  createTeam: Team,
-  teamLogin?: Maybe<User>,
   addMessageToChannel: AddMessagePayload,
   addChannelMember: Scalars['Boolean'],
   removeChannelMember: Scalars['Boolean'],
@@ -165,6 +168,25 @@ export type MutationCreateProductArgs = {
 
 export type MutationCreateUserArgs = {
   data: RegisterInput
+};
+
+
+export type MutationAddTeamMemberArgs = {
+  roles: Array<TeamRoleEnum>,
+  teamId: Scalars['String'],
+  email: Scalars['String']
+};
+
+
+export type MutationCreateTeamArgs = {
+  name: Scalars['String']
+};
+
+
+export type MutationTeamLoginArgs = {
+  email: Scalars['Int'],
+  password: Scalars['Int'],
+  teamId: Scalars['String']
 };
 
 
@@ -209,26 +231,13 @@ export type MutationEditUserInfoArgs = {
 };
 
 
+export type MutationAdminEditUserInfoArgs = {
+  data: EditUserInput
+};
+
+
 export type MutationSignS3Args = {
   files: Array<ImageSubInput>
-};
-
-
-export type MutationAddTeamMemberArgs = {
-  teamId: Scalars['String'],
-  email: Scalars['String']
-};
-
-
-export type MutationCreateTeamArgs = {
-  name: Scalars['String']
-};
-
-
-export type MutationTeamLoginArgs = {
-  email: Scalars['Int'],
-  password: Scalars['Int'],
-  teamId: Scalars['String']
 };
 
 
@@ -291,15 +300,15 @@ export type ProductInput = {
 
 export type Query = {
    __typename?: 'Query',
+  batchTeams: Array<Team>,
+  getAllTeamMembers: Array<UserToTeam>,
+  getAllTeamsForUser: Array<Team>,
+  teamMembers?: Maybe<Array<Maybe<User>>>,
   me?: Maybe<User>,
   helloWorld: Scalars['String'],
   getAllMyMessages?: Maybe<User>,
   getListToCreateThread: Array<Maybe<User>>,
   getMyMessagesFromUser?: Maybe<Array<Message>>,
-  batchTeams: Array<Team>,
-  getAllTeamMembers: Array<User>,
-  getAllTeamsForUser: Array<Team>,
-  teamMembers?: Maybe<Array<Maybe<User>>>,
   getChannelName: Scalars['String'],
   getAllChannelMembers: Array<User>,
   getAllChannelMessages: Array<Message>,
@@ -310,16 +319,6 @@ export type Query = {
 };
 
 
-export type QueryGetListToCreateThreadArgs = {
-  teamId: Scalars['String']
-};
-
-
-export type QueryGetMyMessagesFromUserArgs = {
-  input: GetMessagesFromUserInput
-};
-
-
 export type QueryGetAllTeamMembersArgs = {
   teamId: Scalars['String']
 };
@@ -327,6 +326,16 @@ export type QueryGetAllTeamMembersArgs = {
 
 export type QueryTeamMembersArgs = {
   teamIds: Array<Scalars['ID']>
+};
+
+
+export type QueryGetListToCreateThreadArgs = {
+  teamId: Scalars['String']
+};
+
+
+export type QueryGetMyMessagesFromUserArgs = {
+  input: GetMessagesFromUserInput
 };
 
 
@@ -341,6 +350,7 @@ export type QueryGetAllChannelMembersArgs = {
 
 
 export type QueryGetAllChannelMessagesArgs = {
+  teamId?: Maybe<Scalars['String']>,
   channelId?: Maybe<Scalars['String']>
 };
 
@@ -356,6 +366,7 @@ export type QueryChannelMembersArgs = {
 
 
 export type QueryLoadDirectMessagesThreadByIdArgs = {
+  teamId: Scalars['String'],
   threadId: Scalars['String']
 };
 
@@ -374,9 +385,7 @@ export type RegisterInput = {
 export type Role = {
    __typename?: 'Role',
   id?: Maybe<Scalars['ID']>,
-  teamRole: TeamRoleEnum,
-  userForRole: User,
-  teamForRole?: Maybe<Team>,
+  teamRoleAuthorizations: Array<TeamRoleEnum>,
 };
 
 export type SignedS3Payload = {
@@ -409,7 +418,7 @@ export type Team = {
   channels: Array<Maybe<Channel>>,
   threads: Array<Maybe<Thread>>,
   members: Array<Maybe<User>>,
-  teamRoles: Array<Role>,
+  userToTeams: Array<Maybe<UserToTeam>>,
 };
 
 /** admin | owner | member | public guest */
@@ -450,7 +459,6 @@ export type User = {
   firstName?: Maybe<Scalars['String']>,
   lastName?: Maybe<Scalars['String']>,
   email?: Maybe<Scalars['String']>,
-  teamRoles: Array<Role>,
   channels_created?: Maybe<Channel>,
   images?: Maybe<Array<Maybe<Image>>>,
   mappedMessages?: Maybe<Array<Maybe<Message>>>,
@@ -465,6 +473,30 @@ export type User = {
   team_ownership: Scalars['String'],
   messages?: Maybe<Array<Message>>,
   sent_messages?: Maybe<Array<Message>>,
+  userToTeams?: Maybe<Array<UserToTeam>>,
+};
+
+export type UserClassTypeWithReferenceIds = {
+   __typename?: 'UserClassTypeWithReferenceIds',
+  id?: Maybe<Scalars['ID']>,
+  firstName?: Maybe<Scalars['String']>,
+  lastName?: Maybe<Scalars['String']>,
+  email?: Maybe<Scalars['String']>,
+  channels_created?: Maybe<Channel>,
+  images?: Maybe<Array<Maybe<Image>>>,
+  mappedMessages?: Maybe<Array<Maybe<Message>>>,
+  followers?: Maybe<Array<Maybe<User>>>,
+  following?: Maybe<Array<Maybe<User>>>,
+  teams?: Maybe<Array<Maybe<Team>>>,
+  threads?: Maybe<Array<Thread>>,
+  thread_invitations?: Maybe<Array<Maybe<Thread>>>,
+  channel_memberships?: Maybe<Array<Maybe<Channel>>>,
+  profileImageUri?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  team_ownership: Scalars['String'],
+  messages?: Maybe<Array<Message>>,
+  sent_messages?: Maybe<Array<Message>>,
+  userToTeams?: Maybe<Array<UserToTeamIdReferencesOnlyClass>>,
 };
 
 export type UserTeam = {
@@ -474,13 +506,23 @@ export type UserTeam = {
   name: Scalars['String'],
 };
 
-/** admin | owner | member | public guest */
-export enum UserTeamRole {
-  Admin = 'ADMIN',
-  Owner = 'OWNER',
-  Member = 'MEMBER',
-  PublicGuest = 'PUBLIC_GUEST'
-}
+export type UserToTeam = {
+   __typename?: 'UserToTeam',
+  userToTeamId: Scalars['ID'],
+  userId: Scalars['ID'],
+  teamId: Scalars['ID'],
+  teamRoleAuthorizations: Array<TeamRoleEnum>,
+  user: User,
+  team: Team,
+};
+
+export type UserToTeamIdReferencesOnlyClass = {
+   __typename?: 'UserToTeamIdReferencesOnlyClass',
+  userToTeamId: Scalars['ID'],
+  userId: Scalars['ID'],
+  teamId: Scalars['ID'],
+  teamRoleAuthorizations: Array<TeamRoleEnum>,
+};
 
 export type AddChannelMemberMutationVariables = {
   channelId: Scalars['String'],
@@ -535,7 +577,8 @@ export type DeleteChannelMutation = (
 );
 
 export type GetAllChannelMessagesQueryVariables = {
-  channelId: Scalars['String']
+  channelId: Scalars['String'],
+  teamId: Scalars['String']
 };
 
 
@@ -761,7 +804,8 @@ export type LoadDirectMessageThreadsByTeamAndUserQuery = (
 );
 
 export type LoadDirectMessagesThreadByIdQueryVariables = {
-  threadId: Scalars['String']
+  threadId: Scalars['String'],
+  teamId: Scalars['String']
 };
 
 
@@ -803,6 +847,7 @@ export type NewDirectMessageSubSubscription = (
 );
 
 export type AddTeamMemberMutationVariables = {
+  roles: Array<TeamRoleEnum>,
   teamId: Scalars['String'],
   email: Scalars['String']
 };
@@ -810,7 +855,10 @@ export type AddTeamMemberMutationVariables = {
 
 export type AddTeamMemberMutation = (
   { __typename?: 'Mutation' }
-  & Pick<Mutation, 'addTeamMember'>
+  & { addTeamMember: (
+    { __typename?: 'UserToTeamIdReferencesOnlyClass' }
+    & Pick<UserToTeamIdReferencesOnlyClass, 'userId' | 'teamId' | 'teamRoleAuthorizations'>
+  ) }
 );
 
 export type CreateTeamMutationVariables = {
@@ -834,8 +882,12 @@ export type GetAllTeamMembersQueryVariables = {
 export type GetAllTeamMembersQuery = (
   { __typename?: 'Query' }
   & { getAllTeamMembers: Array<(
-    { __typename?: 'User' }
-    & Pick<User, 'id' | 'name'>
+    { __typename?: 'UserToTeam' }
+    & Pick<UserToTeam, 'userToTeamId' | 'teamId'>
+    & { user: (
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'name'>
+    ) }
   )> }
 );
 
@@ -847,7 +899,13 @@ export type GetAllTeamsForUserQuery = (
   & { getAllTeamsForUser: Array<(
     { __typename?: 'Team' }
     & Pick<Team, 'id' | 'name'>
-    & { channels: Array<Maybe<(
+    & { members: Array<Maybe<(
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'firstName'>
+    )>>, userToTeams: Array<Maybe<(
+      { __typename?: 'UserToTeam' }
+      & Pick<UserToTeam, 'userToTeamId' | 'teamRoleAuthorizations'>
+    )>>, channels: Array<Maybe<(
       { __typename?: 'Channel' }
       & Pick<Channel, 'id' | 'name' | 'last_message'>
       & { invitees: Maybe<Array<Maybe<(
@@ -886,6 +944,23 @@ export type AddProfilePictureMutation = (
   & { addProfilePicture: (
     { __typename?: 'UploadProfilePictueReturnType' }
     & Pick<UploadProfilePictueReturnType, 'message' | 'profileImgUrl'>
+  ) }
+);
+
+export type AdminEditUserInfoMutationVariables = {
+  data: EditUserInput
+};
+
+
+export type AdminEditUserInfoMutation = (
+  { __typename?: 'Mutation' }
+  & { adminEditUserInfo: (
+    { __typename?: 'UserClassTypeWithReferenceIds' }
+    & Pick<UserClassTypeWithReferenceIds, 'id' | 'name' | 'email'>
+    & { userToTeams: Maybe<Array<(
+      { __typename?: 'UserToTeamIdReferencesOnlyClass' }
+      & Pick<UserToTeamIdReferencesOnlyClass, 'userToTeamId' | 'teamRoleAuthorizations' | 'teamId' | 'userId'>
+    )>> }
   ) }
 );
 
@@ -1186,8 +1261,8 @@ export type DeleteChannelMutationHookResult = ReturnType<typeof useDeleteChannel
 export type DeleteChannelMutationResult = ApolloReactCommon.MutationResult<DeleteChannelMutation>;
 export type DeleteChannelMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteChannelMutation, DeleteChannelMutationVariables>;
 export const GetAllChannelMessagesDocument = gql`
-    query GetAllChannelMessages($channelId: String!) {
-  getAllChannelMessages(channelId: $channelId) {
+    query GetAllChannelMessages($channelId: String!, $teamId: String!) {
+  getAllChannelMessages(channelId: $channelId, teamId: $teamId) {
     id
     message
     sentBy {
@@ -1228,6 +1303,7 @@ export function withGetAllChannelMessages<TProps, TChildProps = {}>(operationOpt
  * const { data, loading, error } = useGetAllChannelMessagesQuery({
  *   variables: {
  *      channelId: // value for 'channelId'
+ *      teamId: // value for 'teamId'
  *   },
  * });
  */
@@ -1914,8 +1990,8 @@ export type LoadDirectMessageThreadsByTeamAndUserQueryHookResult = ReturnType<ty
 export type LoadDirectMessageThreadsByTeamAndUserLazyQueryHookResult = ReturnType<typeof useLoadDirectMessageThreadsByTeamAndUserLazyQuery>;
 export type LoadDirectMessageThreadsByTeamAndUserQueryResult = ApolloReactCommon.QueryResult<LoadDirectMessageThreadsByTeamAndUserQuery, LoadDirectMessageThreadsByTeamAndUserQueryVariables>;
 export const LoadDirectMessagesThreadByIdDocument = gql`
-    query LoadDirectMessagesThreadById($threadId: String!) {
-  loadDirectMessagesThreadById(threadId: $threadId) {
+    query LoadDirectMessagesThreadById($threadId: String!, $teamId: String!) {
+  loadDirectMessagesThreadById(threadId: $threadId, teamId: $teamId) {
     id
     invitees {
       id
@@ -1963,6 +2039,7 @@ export function withLoadDirectMessagesThreadById<TProps, TChildProps = {}>(opera
  * const { data, loading, error } = useLoadDirectMessagesThreadByIdQuery({
  *   variables: {
  *      threadId: // value for 'threadId'
+ *      teamId: // value for 'teamId'
  *   },
  * });
  */
@@ -2030,8 +2107,12 @@ export function useNewDirectMessageSubSubscription(baseOptions?: ApolloReactHook
 export type NewDirectMessageSubSubscriptionHookResult = ReturnType<typeof useNewDirectMessageSubSubscription>;
 export type NewDirectMessageSubSubscriptionResult = ApolloReactCommon.SubscriptionResult<NewDirectMessageSubSubscription>;
 export const AddTeamMemberDocument = gql`
-    mutation AddTeamMember($teamId: String!, $email: String!) {
-  addTeamMember(teamId: $teamId, email: $email)
+    mutation AddTeamMember($roles: [TeamRoleEnum!]!, $teamId: String!, $email: String!) {
+  addTeamMember(roles: $roles, teamId: $teamId, email: $email) {
+    userId
+    teamId
+    teamRoleAuthorizations
+  }
 }
     `;
 export type AddTeamMemberMutationFn = ApolloReactCommon.MutationFunction<AddTeamMemberMutation, AddTeamMemberMutationVariables>;
@@ -2066,6 +2147,7 @@ export function withAddTeamMember<TProps, TChildProps = {}>(operationOptions?: A
  * @example
  * const [addTeamMemberMutation, { data, loading, error }] = useAddTeamMemberMutation({
  *   variables: {
+ *      roles: // value for 'roles'
  *      teamId: // value for 'teamId'
  *      email: // value for 'email'
  *   },
@@ -2130,8 +2212,12 @@ export type CreateTeamMutationOptions = ApolloReactCommon.BaseMutationOptions<Cr
 export const GetAllTeamMembersDocument = gql`
     query GetAllTeamMembers($teamId: String!) {
   getAllTeamMembers(teamId: $teamId) {
-    id
-    name
+    userToTeamId
+    teamId
+    user {
+      id
+      name
+    }
   }
 }
     `;
@@ -2183,6 +2269,14 @@ export const GetAllTeamsForUserDocument = gql`
   getAllTeamsForUser {
     id
     name
+    members {
+      id
+      firstName
+    }
+    userToTeams {
+      userToTeamId
+      teamRoleAuthorizations
+    }
     channels {
       id
       name
@@ -2380,6 +2474,63 @@ export function useAddProfilePictureMutation(baseOptions?: ApolloReactHooks.Muta
 export type AddProfilePictureMutationHookResult = ReturnType<typeof useAddProfilePictureMutation>;
 export type AddProfilePictureMutationResult = ApolloReactCommon.MutationResult<AddProfilePictureMutation>;
 export type AddProfilePictureMutationOptions = ApolloReactCommon.BaseMutationOptions<AddProfilePictureMutation, AddProfilePictureMutationVariables>;
+export const AdminEditUserInfoDocument = gql`
+    mutation AdminEditUserInfo($data: EditUserInput!) {
+  adminEditUserInfo(data: $data) {
+    id
+    name
+    email
+    userToTeams {
+      userToTeamId
+      teamRoleAuthorizations
+      teamId
+      userId
+    }
+  }
+}
+    `;
+export type AdminEditUserInfoMutationFn = ApolloReactCommon.MutationFunction<AdminEditUserInfoMutation, AdminEditUserInfoMutationVariables>;
+export type AdminEditUserInfoComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<AdminEditUserInfoMutation, AdminEditUserInfoMutationVariables>, 'mutation'>;
+
+    export const AdminEditUserInfoComponent = (props: AdminEditUserInfoComponentProps) => (
+      <ApolloReactComponents.Mutation<AdminEditUserInfoMutation, AdminEditUserInfoMutationVariables> mutation={AdminEditUserInfoDocument} {...props} />
+    );
+    
+export type AdminEditUserInfoProps<TChildProps = {}> = ApolloReactHoc.MutateProps<AdminEditUserInfoMutation, AdminEditUserInfoMutationVariables> | TChildProps;
+export function withAdminEditUserInfo<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AdminEditUserInfoMutation,
+  AdminEditUserInfoMutationVariables,
+  AdminEditUserInfoProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, AdminEditUserInfoMutation, AdminEditUserInfoMutationVariables, AdminEditUserInfoProps<TChildProps>>(AdminEditUserInfoDocument, {
+      alias: 'adminEditUserInfo',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAdminEditUserInfoMutation__
+ *
+ * To run a mutation, you first call `useAdminEditUserInfoMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAdminEditUserInfoMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [adminEditUserInfoMutation, { data, loading, error }] = useAdminEditUserInfoMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useAdminEditUserInfoMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<AdminEditUserInfoMutation, AdminEditUserInfoMutationVariables>) {
+        return ApolloReactHooks.useMutation<AdminEditUserInfoMutation, AdminEditUserInfoMutationVariables>(AdminEditUserInfoDocument, baseOptions);
+      }
+export type AdminEditUserInfoMutationHookResult = ReturnType<typeof useAdminEditUserInfoMutation>;
+export type AdminEditUserInfoMutationResult = ApolloReactCommon.MutationResult<AdminEditUserInfoMutation>;
+export type AdminEditUserInfoMutationOptions = ApolloReactCommon.BaseMutationOptions<AdminEditUserInfoMutation, AdminEditUserInfoMutationVariables>;
 export const ChangePasswordFromContextUseridDocument = gql`
     mutation ChangePasswordFromContextUserid($data: PasswordInput!) {
   changePasswordFromContextUserid(data: $data) {

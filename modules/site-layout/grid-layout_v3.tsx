@@ -15,7 +15,6 @@ import {
   MaterialIconBase,
   StyledListItem
 } from "../primitives/styled-rebass";
-import { UserListItem } from "../grid-pieces/user-list-item";
 import { SC_Word as Word } from "../grid-pieces/content-placeholder";
 import { FormikMessageForm } from "../grid-pieces/formik-message-form";
 import { FormikDirectMessageForm } from "../grid-pieces/formik-direct-message-form";
@@ -40,6 +39,8 @@ import { ProfileModal } from "../grid-pieces/profile-modal";
 import { RenderTeamPanel } from "../grid-pieces/render-team-panel";
 import { RenderChannelPanel } from "../grid-pieces/render-channel-panel";
 import { RenderDirectMessagesPanel } from "../grid-pieces/render-direct-message-panel";
+import { AdminEditUserModal } from "../grid-pieces/admin-edit-user-modal";
+import { TeamMemberListItem } from "../grid-pieces/team-member-list-item";
 
 interface EmptyGridProps {}
 
@@ -330,6 +331,8 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
       getQueryVariables(router).channelId === noQParams.channelId &&
       getQueryVariables(router).teamId === noQParams.teamId
     ) {
+      console.log("SCENARIO #1 - TEAMS & MEMBERS");
+
       loadChannelsByTeamIdQuery({
         variables: {
           teamId: dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].id
@@ -374,7 +377,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
       });
     }
 
-    // DATA LOAD SCENARIO #3 - CHANNELS - if we have a team ID but no channel ID
+    // DATA LOAD SCENARIO #3 - TEAMS & MEMBERS - if we have a team ID but no channel ID
     if (
       routerIsReady(router) === true &&
       getQueryVariables(router).channelId === noQParams.channelId &&
@@ -456,6 +459,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
     });
   }
 
+  const initialAdminEditUserModalState = "isClosed";
   const initialProfileModalState = "isClosed";
   const initialChannelModalState = "isClosed";
   const initialDirectMessageModalState = "isClosed";
@@ -465,6 +469,10 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
   const [profileModalState, setProfileModalState] = useState<ModalStatesType>(
     initialProfileModalState
   );
+
+  const [adminEditUserModalState, setAdminEditUserModalState] = useState<
+    ModalStatesType
+  >(initialAdminEditUserModalState);
 
   const [channelModalState, setChannelModalState] = useState<ModalStatesType>(
     initialChannelModalState
@@ -481,6 +489,18 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
   if (dataGetAllTeamsForUserQuery === undefined) {
     return <EmptyGrid>NOTHING TO SEE HERE!!!</EmptyGrid>;
   } else {
+    let teamMembers = dataGetAllTeamMembersLazyQuery?.getAllTeamMembers.map(
+      person => {
+        const returnObject = {
+          ...person,
+          adminEditUserModalState,
+          setAdminEditUserModalState
+        };
+        // console.log("RETURN OBJECT", { returnObject });
+        return returnObject;
+      }
+    );
+
     return (
       <GridPageContainer>
         <TeamWrapper>
@@ -850,10 +870,9 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
                 </Button>
               </Flex>
               <UnstyledList pl={0} my={0} width={1}>
-                <UserListItem name="slackbot" />
-                {dataGetAllTeamMembersLazyQuery?.getAllTeamMembers.map(
-                  UserListItem
-                ) ??
+                <TeamMemberListItem user={{ name: "slackbot", id: "fake" }} />
+                {(teamMembers && teamMembers.map(TeamMemberListItem)) ??
+                  //  JSON.stringify(teamMembers)
                   Array.from({ length: 7 }).map((_, index) => (
                     <StyledListItem key={index}>
                       <Word
@@ -891,6 +910,26 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
             }
             profileModal={profileModalState}
             setProfileModal={setProfileModalState}
+          />
+        ) : (
+          ""
+        )}
+        {/* EDIT USER MODAL */}
+        {adminEditUserModalState === "isOpen" &&
+        dataGetAllTeamsForUserQuery &&
+        dataGetAllTeamsForUserQuery.getAllTeamsForUser ? (
+          <AdminEditUserModal
+            userInfo={dataMeQuery?.me}
+            teamId={
+              getQueryVariables(router).teamId !== noQParams.teamId
+                ? getQueryVariables(router).teamId
+                : dataGetAllTeamsForUserQuery.getAllTeamsForUser[0] &&
+                  dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].id
+                ? dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].id
+                : "blank teamId"
+            }
+            adminEditUserModal={adminEditUserModalState}
+            setAdminEditUserModal={setAdminEditUserModalState}
           />
         ) : (
           ""
@@ -1132,6 +1171,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
         !router.pathname.includes("messages") ? (
           <FormikMessageForm
             channelId={getQueryVariables(router).channelId}
+            teamId={getQueryVariables(router).teamId}
             initialValues={{
               channel_message: "",
               files: []
@@ -1143,11 +1183,19 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
           ""
         )}
         {/* FORM SCENARIO 3 - WE HAVE TEAM ID BUT NO CHANNEL ID*/}
+        {/* THIS IS IT */}
         {getQueryVariables(router).teamId !== noQParams.teamId &&
         getQueryVariables(router).channelId === noQParams.channelId &&
+        resultUseLoadChannelsByTeamIdQuery &&
+        resultUseLoadChannelsByTeamIdQuery.data &&
+        resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId &&
+        resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id &&
         !router.pathname.includes("messages") ? (
           <FormikMessageForm
-            channelId={getQueryVariables(router).channelId}
+            channelId={
+              resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id
+            }
+            teamId={getQueryVariables(router).teamId}
             initialValues={{
               channel_message: "",
               files: []
@@ -1164,11 +1212,15 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
         resultUseLoadChannelsByTeamIdQuery &&
         resultUseLoadChannelsByTeamIdQuery.data &&
         resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId &&
-        resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id ? (
+        resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id &&
+        dataGetAllTeamsForUserQuery &&
+        dataGetAllTeamsForUserQuery.getAllTeamsForUser &&
+        dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].id ? (
           <FormikMessageForm
             channelId={
               resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id
             }
+            teamId={dataGetAllTeamsForUserQuery.getAllTeamsForUser[0].id}
             initialValues={{
               channel_message: "",
               files: []

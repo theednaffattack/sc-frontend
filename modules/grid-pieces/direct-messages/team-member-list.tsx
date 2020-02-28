@@ -29,10 +29,6 @@ export const TeamMemberList: React.FC<TeamMemberListProps> = ({
   // setInvitees,
   setFieldValue
 }) => {
-  // const initialInviteeState: GetAllTeamMembersQuery["getAllTeamMembers"] = [];
-  // const [invitees, setInvitees] = useState<
-  //   GetAllTeamMembersQuery["getAllTeamMembers"]
-  // >(initialInviteeState);
   return (
     <UnstyledList
       width={["350px"]}
@@ -47,8 +43,7 @@ export const TeamMemberList: React.FC<TeamMemberListProps> = ({
         ? filterTeammates.map((user, index) => (
             <StyledListItem
               key={
-                `modal-list-team-members-${user.id}` ??
-                index + "-team-member-key"
+                `modal-list-team-members-${index}` ?? index + "-team-member-key"
               }
               style={{
                 cursor: "pointer"
@@ -80,7 +75,8 @@ export const TeamMemberList: React.FC<TeamMemberListProps> = ({
               >
                 <Flex alignItems="center">
                   <AvatarPlaceholder size="2em" />
-                  <Text>{user.name}</Text>
+                  {/* <Text>{user.name}</Text> */}
+                  <Text>username here</Text>
                 </Flex>
                 <Flex ml="auto">
                   {invitees && invitees.includes(user) ? (
