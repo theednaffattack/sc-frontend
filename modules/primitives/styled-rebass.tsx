@@ -455,12 +455,7 @@ interface AbFlexProps
     LeftProps,
     OverflowProps {}
 
-export const AbFlex: StyledComponent<
-  React.FunctionComponent<AbFlexProps>,
-  any,
-  {},
-  never
-> = styled(FlexBase)`
+export const AbFlex = styled(FlexBase)<AbFlexProps>`
   ${position}
   ${top}
   ${right}
