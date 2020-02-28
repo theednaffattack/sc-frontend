@@ -24,6 +24,7 @@ interface PageProps extends NextContext {
 
   meData: MeQueryResult["data"];
   clonedChannelId: string;
+  clonedTeamId: string;
 
   selectedDirectMessageInvitees: ({
     __typename?: "User" | undefined;
@@ -45,7 +46,8 @@ interface ViewTeamIndexProps {
     referer,
     userAgent,
     meData,
-    clonedChannelId
+    clonedChannelId,
+    clonedTeamId
   }: PageProps): JSX.Element;
 
   getInitialProps: ({
@@ -68,9 +70,23 @@ interface ViewTeamIndexProps {
   title: string;
 }
 
-const ViewTeamIndex: ViewTeamIndexProps = ({ clonedChannelId, meData }) => {
+const ViewTeamIndex: ViewTeamIndexProps = ({
+  clonedChannelId,
+  clonedTeamId,
+  meData
+}) => {
+  console.log("WHAT IS clonedChannelId ViewTeamIndex?????", {
+    clonedChannelId
+  });
+
   if (meData && meData.me) {
-    return <ChannelMessages dataMe={meData.me} channelId={clonedChannelId} />;
+    return (
+      <ChannelMessages
+        dataMe={meData.me}
+        channelId={clonedChannelId}
+        teamId={clonedTeamId}
+      />
+    );
   }
   return <div>huh?</div>;
 };

@@ -77,9 +77,19 @@ interface ViewChannelByIdProps {
   displayName: string;
 }
 
-const ViewChannelById: ViewChannelByIdProps = ({ clonedChannelId, meData }) => {
+const ViewChannelById: ViewChannelByIdProps = ({
+  clonedChannelId,
+  clonedTeamId,
+  meData
+}) => {
   if (meData) {
-    return <Messages dataMe={meData.me} channelId={clonedChannelId} />;
+    return (
+      <Messages
+        teamId={clonedTeamId}
+        dataMe={meData.me}
+        channelId={clonedChannelId}
+      />
+    );
   }
   return <div>LOOKS EMPTY???</div>;
 };

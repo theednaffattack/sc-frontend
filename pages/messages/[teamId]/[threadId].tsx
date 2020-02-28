@@ -77,8 +77,8 @@ const ViewTeamById: ViewTeamByIdProps = ({
   clonedThreadId,
   // viewerDispatch,
   viewerState,
-  threadId
-  // teamId
+  threadId,
+  teamId
   // channelName,
   // setChannelName,
   // teamId,
@@ -86,7 +86,13 @@ const ViewTeamById: ViewTeamByIdProps = ({
   // setSelectedDirectMessageInvitees
 }) => {
   if (meData && clonedThreadId) {
-    return <DirectMessages dataMe={meData.me} threadId={clonedThreadId} />;
+    return (
+      <DirectMessages
+        dataMe={meData.me}
+        threadId={clonedThreadId}
+        teamId={teamId}
+      />
+    );
   }
   return (
     <div>

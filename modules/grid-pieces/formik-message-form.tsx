@@ -24,6 +24,7 @@ interface FileWithPreview extends File {
 
 interface I_FormikMessageFormProps {
   channelId: string;
+  teamId: string;
   initialValues: {
     channel_message: string;
     files: FileWithPreview[];
@@ -32,6 +33,7 @@ interface I_FormikMessageFormProps {
 
 export const FormikMessageForm: React.FC<I_FormikMessageFormProps> = ({
   children,
+  teamId,
   channelId,
   initialValues
 }) => {
@@ -58,6 +60,7 @@ export const FormikMessageForm: React.FC<I_FormikMessageFormProps> = ({
             variables: {
               data: {
                 channelId,
+                teamId,
                 invitees: [],
                 message: channel_message,
                 sentTo: ""

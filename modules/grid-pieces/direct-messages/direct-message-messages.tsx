@@ -35,6 +35,7 @@ type NewMessageSubType = <
 // type NewMessageSubType = NewMessageSubSubscription["newMessageSub"];
 
 interface DirectMessageProps {
+  teamId: string;
   threadId: string;
   messages?: ChannelMessageListItemProps[];
   selectedChannelIndex?: number;
@@ -157,6 +158,7 @@ const DirectMessageList: React.FunctionComponent<DirectMessageListProps> = ({
 };
 
 export const DirectMessages: React.FunctionComponent<DirectMessageProps> = ({
+  teamId,
   threadId,
   dataMe
 }) => {
@@ -166,7 +168,7 @@ export const DirectMessages: React.FunctionComponent<DirectMessageProps> = ({
     loading,
     subscribeToMore
   } = useLoadDirectMessagesThreadByIdQuery({
-    variables: { threadId }
+    variables: { threadId, teamId }
   });
 
   useEffect(() => {

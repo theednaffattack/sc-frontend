@@ -118,7 +118,8 @@ export const AddDirectMessageModal: React.FunctionComponent<AddDirectMessageModa
                               query: LoadDirectMessagesThreadByIdDocument,
                               variables: {
                                 threadId:
-                                  data?.createDirectMessage.threadId ?? ""
+                                  data?.createDirectMessage.threadId ?? "",
+                                teamId
                               }
                             });
 
@@ -150,7 +151,8 @@ export const AddDirectMessageModal: React.FunctionComponent<AddDirectMessageModa
                               query: LoadDirectMessagesThreadByIdDocument,
                               variables: {
                                 threadId:
-                                  data?.createDirectMessage.threadId ?? ""
+                                  data?.createDirectMessage.threadId ?? "",
+                                teamId
                               },
                               data: {
                                 loadDirectMessagesThreadById: {

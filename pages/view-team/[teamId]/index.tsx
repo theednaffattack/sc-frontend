@@ -45,6 +45,7 @@ interface ViewTeamByIdProps {
     setChannelName,
     teamId,
     clonedChannelId,
+    // clonedTeamId,
     viewerDispatch,
     viewerState,
     meData
@@ -69,9 +70,19 @@ interface ViewTeamByIdProps {
   displayName: string;
 }
 
-const ViewTeamById: ViewTeamByIdProps = ({ meData, clonedChannelId }) => {
+const ViewTeamById: ViewTeamByIdProps = ({
+  meData,
+  clonedChannelId,
+  teamId
+}) => {
   if (meData && meData.me && clonedChannelId !== "channelIdUndefined") {
-    return <Messages dataMe={meData.me} channelId={clonedChannelId} />;
+    return (
+      <Messages
+        dataMe={meData.me}
+        channelId={clonedChannelId}
+        teamId={teamId}
+      />
+    );
   }
 
   return <div>LOOKS EMPTY???</div>;
