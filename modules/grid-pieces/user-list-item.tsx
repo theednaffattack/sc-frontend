@@ -26,6 +26,9 @@ export const UserListItem: React.FunctionComponent<UserListItemProps> = ({
         />
       </Flex>
       <Flex>{name}</Flex>
+      <Flex ml="auto" mr={2}>
+        Edit
+      </Flex>
     </Flex>
   </StyledListItem>
 );
