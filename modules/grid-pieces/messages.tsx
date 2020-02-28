@@ -33,6 +33,7 @@ type NewMessageSubType = <
 ) => () => void;
 
 interface MessageProps {
+  teamId?: string;
   channelId: string;
   messages?: ChannelMessageListItemProps[];
   selectedChannelIndex?: number;
@@ -42,6 +43,7 @@ interface MessageProps {
 
 interface MessageListProps {
   channelId: string;
+  teamId: string;
   data: GetAllChannelMessagesQueryResult["data"];
   dataMe: MeQuery["me"];
   subscribeToMoreMessages: NewMessageSubType;
@@ -49,6 +51,7 @@ interface MessageListProps {
 
 const MessageList: React.FunctionComponent<MessageListProps> = ({
   channelId,
+  teamId,
   data,
   dataMe,
   subscribeToMoreMessages
@@ -57,7 +60,8 @@ const MessageList: React.FunctionComponent<MessageListProps> = ({
     if (subscribeToMoreMessages) {
       let newMessageArgs: NewMessageSubSubscriptionVariables = {
         data: {
-          channelId: channelId,
+          channelId,
+          teamId,
           message: "",
           sentTo: ""
         }
@@ -81,7 +85,7 @@ const MessageList: React.FunctionComponent<MessageListProps> = ({
         unsubscribe();
       };
     }
-  }, [data, channelId]);
+  }, [data, channelId, teamId]);
 
   if (data && dataMe) {
     return (
@@ -148,7 +152,8 @@ const MessageList: React.FunctionComponent<MessageListProps> = ({
 
 export const Messages: React.FunctionComponent<MessageProps> = ({
   channelId,
-  dataMe
+  dataMe,
+  teamId
 }) => {
   const {
     data,
@@ -156,7 +161,7 @@ export const Messages: React.FunctionComponent<MessageProps> = ({
     loading,
     subscribeToMore
   } = useGetAllChannelMessagesQuery({
-    variables: { channelId }
+    variables: { channelId, teamId: teamId ?? "team_ID_is_undefined" }
   });
   let listBottomRef = useRef<HTMLDivElement>(null);
 
@@ -172,7 +177,7 @@ export const Messages: React.FunctionComponent<MessageProps> = ({
     );
   }
 
-  if (data) {
+  if (data && teamId) {
     return (
       <div ref={listBottomRef}>
         <MessageList
@@ -180,6 +185,7 @@ export const Messages: React.FunctionComponent<MessageProps> = ({
           subscribeToMoreMessages={subscribeToMore}
           data={data}
           channelId={channelId}
+          teamId={teamId}
         />
       </div>
     );
