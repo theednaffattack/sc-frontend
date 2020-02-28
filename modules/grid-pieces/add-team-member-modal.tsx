@@ -16,7 +16,8 @@ import {
   // LoadChannelsByTeamIdQuery,
   // LoadChannelsByTeamIdDocument,
   // LoadChannelsByTeamIdQueryVariables,
-  useAddTeamMemberMutation
+  useAddTeamMemberMutation,
+  TeamRoleEnum
 } from "../gql-gen/generated/apollo-graphql";
 import {
   AddTeamMemberFormMessageBox,
@@ -124,7 +125,11 @@ export const AddTeamMemberModal: React.FunctionComponent<AddTeamMemberModalProps
                     onSubmit={({ email }, { resetForm, setErrors }) => {
                       // FIND THIS
                       addTeamMemberMutation({
-                        variables: { email, teamId }
+                        variables: {
+                          email,
+                          teamId,
+                          roles: [TeamRoleEnum.PublicGuest, TeamRoleEnum.Member]
+                        }
                       }).catch(error => {
                         let newErrors;
                         if (
