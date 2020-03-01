@@ -63,7 +63,6 @@ const MessageList: React.FunctionComponent<MessageListProps> = ({
           channelId,
           teamId,
           message: "",
-
           sentTo: ""
         }
       };
