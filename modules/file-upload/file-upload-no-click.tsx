@@ -49,7 +49,6 @@ export const FileUploadNoClick: React.FC<FileUploadProps> = ({
     });
 
     setFieldValue("files", previewFiles);
-
     // acceptedFiles.forEach(file => {
     //   const reader = new FileReader();
 
