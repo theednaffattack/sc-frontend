@@ -5,6 +5,10 @@ export const GET_ALL_CHANNEL_MESSAGES = gql`
     getAllChannelMessages(channelId: $channelId, teamId: $teamId) {
       id
       message
+      images {
+        id
+        uri
+      }
       sentBy {
         id
         name

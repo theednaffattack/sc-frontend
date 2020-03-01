@@ -63,6 +63,7 @@ const MessageList: React.FunctionComponent<MessageListProps> = ({
           channelId,
           teamId,
           message: "",
+
           sentTo: ""
         }
       };
@@ -91,7 +92,7 @@ const MessageList: React.FunctionComponent<MessageListProps> = ({
     return (
       <UnstyledList p={0}>
         {data.getAllChannelMessages.map(result => {
-          let { id, message, sentBy } = result;
+          let { id, images, message, sentBy } = result;
           let getUserId =
             dataMe && dataMe.id ? dataMe.id : "unable to determine user";
           let fromMe =
@@ -122,6 +123,14 @@ const MessageList: React.FunctionComponent<MessageListProps> = ({
                   border="lime"
                   width={[1, 1, 2 / 3, 2 / 3, 2 / 3]}
                 >
+                  {images
+                    ? images.map(image => {
+                        if (image && image.uri) {
+                          return image.uri;
+                        }
+                        return "no-image-uri";
+                      })
+                    : ""}
                   {message}
                 </Flex>
                 {fromMe === "is_NOT_LoggedInUser" ? (
