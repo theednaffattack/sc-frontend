@@ -110,8 +110,13 @@ export type Image = {
 };
 
 export type ImageSubInput = {
-  filename: Scalars['String'],
-  filetype: Scalars['String'],
+  type: Scalars['String'],
+  lastModified: Scalars['Float'],
+  lastModifiedDate: Scalars['DateTime'],
+  size: Scalars['Int'],
+  name: Scalars['String'],
+  webkitRelativePath: Scalars['String'],
+  path: Scalars['String'],
 };
 
 export type Message = {
@@ -587,7 +592,10 @@ export type GetAllChannelMessagesQuery = (
   & { getAllChannelMessages: Array<(
     { __typename?: 'Message' }
     & Pick<Message, 'id' | 'message'>
-    & { sentBy: (
+    & { images: Maybe<Array<Maybe<(
+      { __typename?: 'Image' }
+      & Pick<Image, 'id' | 'uri'>
+    )>>>, sentBy: (
       { __typename?: 'User' }
       & Pick<User, 'id' | 'name'>
     ) }
@@ -1265,6 +1273,10 @@ export const GetAllChannelMessagesDocument = gql`
   getAllChannelMessages(channelId: $channelId, teamId: $teamId) {
     id
     message
+    images {
+      id
+      uri
+    }
     sentBy {
       id
       name
