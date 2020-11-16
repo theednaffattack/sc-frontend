@@ -31,14 +31,14 @@ export default (App: any) => {
   return class WithData extends React.Component<any, WithDataState> {
     static displayName = `WithData(${App.displayName})`;
     static propTypes = {
-      apolloState: PropTypes.object.isRequired
+      apolloState: PropTypes.object.isRequired,
     };
 
     static async getInitialProps(ctx: any) {
       const {
         Component,
         router,
-        ctx: { req, res }
+        ctx: { req, res },
       } = ctx;
       // let referer: NextContext["referer"];
 
@@ -69,6 +69,7 @@ export default (App: any) => {
           getToken: () => parseCookies(req).scg,
           // getToken: () => token,
           getEnvVars: {
+            COOKIE_NAME: process.env.COOKIE_NAME || "COOKIE_NAME is missing",
             WEBSOCKET_URL: process.env.WEBSOCKET_URL || "WEBSOCKET_URL missing",
             GRAPHQL_URL: process.env.GRAPHQL_URL
               ? process.env.GRAPHQL_URL
@@ -78,8 +79,8 @@ export default (App: any) => {
               "PRODUCTION_CLIENT_DOMAIN is missing",
             PRODUCTION_SERVER_DOMAIN:
               process.env.PRODUCTION_SERVER_DOMAIN ||
-              "PRODUCTION_SERVER_DOMAIN is missing"
-          }
+              "PRODUCTION_SERVER_DOMAIN is missing",
+          },
         }
       );
 
@@ -132,7 +133,7 @@ export default (App: any) => {
         ...appProps,
         apolloState,
         token: ctx.ctx.token,
-        teamId: ctx.ctx.teamId
+        teamId: ctx.ctx.teamId,
       };
     }
 
@@ -152,11 +153,12 @@ export default (App: any) => {
           return parseCookies().token;
         },
         getEnvVars: {
+          COOKIE_NAME: process.env.COOKIE_NAME!,
           WEBSOCKET_URL: process.env.WEBSOCKET_URL!,
           GRAPHQL_URL: process.env.GRAPHQL_URL!,
           PRODUCTION_SERVER_DOMAIN: process.env.PRODUCTION_SERVER_DOMAIN!,
-          PRODUCTION_CLIENT_DOMAIN: process.env.PRODUCTION_CLIENT_DOMAIN!
-        }
+          PRODUCTION_CLIENT_DOMAIN: process.env.PRODUCTION_CLIENT_DOMAIN!,
+        },
       });
 
       this.state = { hocLogin: initialLoginState };
@@ -192,7 +194,7 @@ export default (App: any) => {
       console.log("SYNC LOGOUT CALLED!");
       if (event && event.key === "logout") {
         const attemptLogout = await this.apolloClient.mutate({
-          mutation: LogoutDocument
+          mutation: LogoutDocument,
         });
         if (attemptLogout) {
           this.hocLogout();
