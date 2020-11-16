@@ -2,7 +2,7 @@ import {
   ApolloClient,
   InMemoryCache,
   NormalizedCacheObject,
-  IntrospectionFragmentMatcher
+  IntrospectionFragmentMatcher,
 } from "apollo-boost";
 import { setContext } from "apollo-link-context";
 import { WebSocketLink } from "apollo-link-ws";
@@ -44,7 +44,7 @@ import { isBrowser } from "./isBrowser";
 let apolloClient: ApolloClient<NormalizedCacheObject> | null = null;
 
 const fragmentMatcher = new IntrospectionFragmentMatcher({
-  introspectionQueryResultData
+  introspectionQueryResultData,
 });
 
 // Polyfill fetch() on the server (used by apollo-client)
@@ -53,6 +53,7 @@ if (!isBrowser) {
 }
 
 interface EnvVars {
+  COOKIE_NAME: string;
   WEBSOCKET_URL: string;
   GRAPHQL_URL: string;
   PRODUCTION_SERVER_DOMAIN: string;
@@ -71,7 +72,7 @@ function create(
   const httpLink = new HttpLink({
     uri: getEnvVars.GRAPHQL_URL, // Server URL (must be absolute)
     credentials: "include", // Additional fetch() options like `credentials` or `headers`
-    fetch
+    fetch,
   });
 
   // Create a WebSocket link:
@@ -79,8 +80,8 @@ function create(
     ? new WebSocketLink({
         uri: getEnvVars.WEBSOCKET_URL,
         options: {
-          reconnect: true
-        }
+          reconnect: true,
+        },
       })
     : null;
 
@@ -130,8 +131,8 @@ function create(
     return {
       headers: {
         ...headers,
-        cookie: token ? `scg=${token}` : ""
-      }
+        cookie: token ? `${getEnvVars.COOKIE_NAME}=${token}` : "",
+      },
     };
   });
 
@@ -142,8 +143,8 @@ function create(
     link: errorLink.concat(authLink.concat(splitLink)),
     cache: new InMemoryCache({
       addTypename: true,
-      fragmentMatcher
-    }).restore(initialState || {})
+      fragmentMatcher,
+    }).restore(initialState || {}),
   });
 }
 
