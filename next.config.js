@@ -2,16 +2,16 @@ require("dotenv").config();
 const internalIp = require("internal-ip");
 const {
   PHASE_DEVELOPMENT_SERVER,
-  PHASE_PRODUCTION_BUILD
+  PHASE_PRODUCTION_BUILD,
 } = require("next/constants");
 
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
-  enabled: process.env.BUNDLE_ANALYZE === "true"
+  enabled: process.env.BUNDLE_ANALYZE === "true",
 });
 
 // This uses phases as outlined here: https://nextjs.org/docs/#custom-configuration
 // View all constants here: https://github.com/zeit/next.js/blob/canary/packages/next/next-server/lib/constants.ts
-const config = phase => {
+const config = (phase) => {
   const clientIpAddress = internalIp.v4.sync();
   // when started in development mode `next dev` or `npm run dev` regardless of the value of STAGING environmental variable
   const isDev = phase === PHASE_DEVELOPMENT_SERVER;
@@ -33,6 +33,7 @@ const config = phase => {
   );
 
   const env = {
+    COOKIE_NAME: process.env.COOKIE_NAME,
     GRAPHQL_URL: (() => {
       if (isDev)
         return `${devPrefix}://${clientIpAddress}:${process.env.GRAPHQL_PORT}/graphql`;
@@ -54,15 +55,15 @@ const config = phase => {
       if (isStaging)
         return `ws://${clientIpAddress}:${process.env.GRAPHQL_PORT.toString()}/subscriptions`;
       return "WEBSOCKET_URL:not (isDev,isProd && !isStaging,isProd && isStaging)";
-    })()
+    })(),
   };
 
   // next.config.js object
   return {
-    env
+    env,
   };
 };
 
-module.exports = phase => withBundleAnalyzer(config(phase));
+module.exports = (phase) => withBundleAnalyzer(config(phase));
 
 // module.exports = config;
