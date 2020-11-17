@@ -2,6 +2,31 @@ const blue = "#07c";
 
 export const theme = {
   breakpoints: ["40em", "52em", "64em"],
+  borders: {
+    crimson: "2px crimson dashed",
+    lime: "2px limegreen dashed",
+    purp: "2px rebeccapurple dashed",
+    primary: "1px #ccc solid"
+  },
+  buttons: {
+    primary: {
+      color: "#fff",
+      backgroundColor: blue
+    },
+    outline: {
+      color: "text",
+      backgroundColor: "#dedcf7",
+      // boxShadow: "inset 0 0 0 2px",
+      border: "2px rebeccapurple solid",
+      borderRadius: 20
+    },
+    gradient: {
+      backgroundImage:
+        "linear-gradient( 87deg, rgb(210,48,120) 6%, rgb(254,97,97) 74%, rgb(255,121,85) 100%)",
+
+      boxShadow: "0px 10px 27px 0px rgba(0, 0, 0, 0.1);"
+    }
+  },
   fontSizes: [12, 14, 16, 20, 24, 32, 48, 64],
   colors: {
     blue,
@@ -32,31 +57,6 @@ export const theme = {
   },
   radii: {
     card: "17px"
-  },
-  buttons: {
-    primary: {
-      color: "#fff",
-      backgroundColor: blue
-    },
-    outline: {
-      color: "text",
-      backgroundColor: "#dedcf7",
-      // boxShadow: "inset 0 0 0 2px",
-      border: "2px rebeccapurple solid",
-      borderRadius: 20
-    },
-    gradient: {
-      backgroundImage:
-        "linear-gradient( 87deg, rgb(210,48,120) 6%, rgb(254,97,97) 74%, rgb(255,121,85) 100%)",
-
-      boxShadow: "0px 10px 27px 0px rgba(0, 0, 0, 0.1);"
-    }
-  },
-  borders: {
-    crimson: "2px crimson dashed",
-    lime: "2px limegreen dashed",
-    purp: "2px rebeccapurple dashed",
-    primary: "1px #ccc solid"
   },
   variants: {
     card: {
