@@ -8,7 +8,7 @@ import {
   minHeight,
   MinHeightProps,
   SpaceProps,
-  space
+  space,
 } from "styled-system";
 
 import { Flex, Image } from "../primitives/styled-rebass";
@@ -50,7 +50,7 @@ interface RenderLogoutProps {
 
 const RenderLogout: React.FunctionComponent<RenderLogoutProps> = ({
   hocLogout,
-  syncLogout
+  syncLogout,
 }) => {
   return (
     <MyLink
@@ -75,7 +75,7 @@ const RenderAvatarLink = () => {
           height: 48,
           borderRadius: "50%",
           paddingBottom: 0,
-          verticalAlign: "middle"
+          verticalAlign: "middle",
         }}
       />
     </MyLink>
@@ -100,28 +100,32 @@ const Header: React.FunctionComponent<HeaderProps> = ({
   hocLogout,
   referer,
   syncLogout,
-  token
+  token,
 }) => {
   // @ts-ignore
   const [count, setCount] = React.useState(0);
   // const increment = () => setCount(c => c + 1);
 
   const breakWidths = [1, 1, "690px", "690px"];
-  let { query } = useRouter();
+  const router = useRouter();
 
   let getQuery;
 
   let isAnArray =
-    query && query.message instanceof Array ? query.message[0] : undefined;
+    router && router.query && router.query.message instanceof Array
+      ? router.query.message[0]
+      : undefined;
   let isAString =
-    query && typeof query.message === "string" ? query.message : undefined;
+    router && router.query && typeof router.query.message === "string"
+      ? router.query.message
+      : undefined;
 
   getQuery = isAString ? isAString : isAnArray ? isAnArray : "unknown";
 
   let makeAuthenticatedFalseMatches = [
     "Not authenticated",
     "logout",
-    "You have successfully logged out."
+    "You have successfully logged out.",
   ];
   let shouldntBeAuthed =
     makeAuthenticatedFalseMatches.indexOf(getQuery, 0) !== -1;
@@ -163,7 +167,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
 
   let renderDecision: RenderDecisionEnum =
     shouldntBeAuthed === true || isAuthenticated === false
-      ? "do not render" // hocLogin state is false || query message is "Not authenticated"
+      ? "do not render" // hocLogin state is false || router.query message is "Not authenticated"
       : loginStatus === "i just logged in" ||
         loginStatus === "i am authenticated"
       ? "okay to render"
