@@ -1,6 +1,9 @@
 import React from "react";
 
-import { getLayout } from "../../modules/site-layout/grid-layout_v3";
+import {
+  getLayout,
+  FileModalState
+} from "../../modules/site-layout/grid-layout_v3";
 import { NextContext } from "../../typings/NextContext";
 import { isBrowser } from "../../lib/isBrowser";
 import redirect from "../../lib/redirect";
@@ -37,17 +40,22 @@ interface PageProps extends NextContext {
       } & Pick<User, "id" | "name">)[]
     >
   >;
+
+  fileViewerModalState: FileModalState;
+  setFileViewerModalState: React.Dispatch<React.SetStateAction<FileModalState>>;
 }
 
 interface ViewTeamIndexProps {
   ({
+    clonedChannelId,
+    clonedTeamId,
+    fileViewerModalState,
+    meData,
     pathname,
     query,
     referer,
-    userAgent,
-    meData,
-    clonedChannelId,
-    clonedTeamId
+    setFileViewerModalState,
+    userAgent
   }: PageProps): JSX.Element;
 
   getInitialProps: ({
@@ -73,7 +81,9 @@ interface ViewTeamIndexProps {
 const ViewTeamIndex: ViewTeamIndexProps = ({
   clonedChannelId,
   clonedTeamId,
-  meData
+  fileViewerModalState,
+  meData,
+  setFileViewerModalState
 }) => {
   console.log("WHAT IS clonedChannelId ViewTeamIndex?????", {
     clonedChannelId
@@ -84,6 +94,8 @@ const ViewTeamIndex: ViewTeamIndexProps = ({
       <ChannelMessages
         dataMe={meData.me}
         channelId={clonedChannelId}
+        fileViewerModalState={fileViewerModalState}
+        setFileViewerModalState={setFileViewerModalState}
         teamId={clonedTeamId}
       />
     );
