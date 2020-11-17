@@ -1,57 +1,67 @@
 import React, { useEffect, useRef } from "react";
 import { Field, Formik, FieldArray } from "formik";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
+import { ApolloError, ExecutionResult } from "apollo-boost";
+import { MutationFunctionOptions } from "react-apollo";
+import dynamic from "next/dynamic";
 // import dFormat from "date-fns/format";
 
 import {
-  useAddMessageToChannelMutation,
   AddMessageToChannelMutation,
   AddMessageToChannelMutationVariables,
-  useSignS3Mutation,
+  FileTypeEnum,
+  ImageSubInput,
   SignS3MutationVariables,
   SignS3Mutation,
   SignedS3Payload,
-  ImageSubInput
+  useAddMessageToChannelMutation,
+  useSignS3Mutation,
+  S3SignatureAction
 } from "../gql-gen/generated/apollo-graphql";
 
 import {
   AbFlex,
+  // Box,
+  // Text
   Button,
   Flex,
   InputContainer,
   MaterialIconBase,
-  PositionFlex,
-  MessageWrapper
+  MessageWrapper,
+  PositionFlex
 } from "../primitives/styled-rebass";
 import { Input, StyledForm } from "../primitives/forms";
 import { FileUploadNoClick } from "../file-upload/file-upload-no-click";
 import { FileUpload } from "../file-upload/file-upload";
 
-import { CssFileIcon } from "../icon/css-file-icon";
-import { PdfFileIcon } from "../icon/pdf-file-icon";
-import { ApolloError, ExecutionResult } from "apollo-boost";
-import { MutationFunctionOptions } from "react-apollo";
+// import { CssFileIcon } from "../icon/css-file-icon";
+// import { PdfFileIcon } from "../icon/pdf-file-icon";
+// import { GeneralFileIcon } from "../icon/general-file-icon";
 
-// enum FileTypesEnum {
-//   PNG = "image/png",
+const PdfFileIcon = dynamic(() => import("../icon/pdf-file-icon"), {
+  loading: () => <p>loading pdf file icon...</p>
+});
+const CssFileIcon = dynamic(() => import("../icon/svg-file-icon"), {
+  loading: () => <p>loading svg file icon...</p>
+});
+const GeneralFileIcon = dynamic(() => import("../icon/general-file-icon"), {
+  loading: () => <p>loading svg file icon...</p>
+});
+
+// /** Basic Known File Types */
+// export enum FileTypeEnum {
+//   /** CSS */
+//   CSS = "text/css",
+//   /** CSV */
+//   CSV = "text/csv",
+//   /** IMAGE - many differnt image types */
+//   IMAGE = "image/*",
+//   /** OWNER */
 //   PDF = "application/pdf",
-//   OTHER = "other"
-// }
-
-// interface FileType {
-//   type: string;
-
-//   lastModified: number;
-
-//   lastModifiedDate: Date;
-
-//   size: number;
-
-//   name: string;
-
-//   webkitRelativePath: string;
-
-//   path: string;
+//   /** MEMBER */
+//   SVG = "svg",
+//   /** UNKNOWN AND UNREGISTERED FILE TYPES */
+//   OTHER = "other / unknown"
 // }
 
 interface FileWithPreview extends ImageSubInput {
@@ -101,13 +111,7 @@ export const FormikMessageForm: React.FC<I_FormikMessageFormProps> = ({
       validateOnBlur={false}
       validateOnChange={false}
       initialValues={initialValues}
-      // @ts-ignore
       onSubmit={async ({ channel_message, files }, { resetForm }) => {
-        // const convertedFiles = files.map(file => new File([file], "filename"));
-        console.log("VIEW ATTRIBUTES TO EXTRACT FILE NAME", {
-          files
-        });
-
         if (channelId && files && files.length > 0) {
           submitWithFiles({
             addMessageMutation,
@@ -142,10 +146,6 @@ export const FormikMessageForm: React.FC<I_FormikMessageFormProps> = ({
               </FileUploadNoClick>
             </MessageWrapper>
             <InputContainer>
-              {JSON.stringify(values)}
-              {values && values.files && values.files[0]
-                ? JSON.stringify(values.files[0].type, null, 2)
-                : ""}
               <Flex flexDirection="column">
                 <FieldArray
                   name="files"
@@ -188,6 +188,8 @@ export const FormikMessageForm: React.FC<I_FormikMessageFormProps> = ({
                                       -
                                     </Button>
                                   </AbFlex>
+                                  {/* Get extension and match to a MIME-types list. (http://www.htmlquick.com/es/reference/mime-types.html) */}
+
                                   {typeof file.preview === "string" &&
                                   file.preview === "pdf-svg" ? (
                                     <PdfFileIcon />
@@ -200,6 +202,13 @@ export const FormikMessageForm: React.FC<I_FormikMessageFormProps> = ({
                                   ) : (
                                     ""
                                   )}
+                                  {typeof file.preview === "string" &&
+                                  file.preview === "general-file" ? (
+                                    <GeneralFileIcon />
+                                  ) : (
+                                    ""
+                                  )}
+
                                   {file.type.includes("image") &&
                                   typeof file.name === "string" ? (
                                     <img
@@ -335,7 +344,7 @@ async function submitWithoutFiles({
 }
 
 interface UploadToS3Props {
-  file: File;
+  file: FileWithPreview;
   signedRequest: SignedS3Payload["signatures"][0]["signedRequest"];
   // signedRequest: ({
   //   __typename?: "SignedS3SubPayload" | undefined;
@@ -343,9 +352,9 @@ interface UploadToS3Props {
 }
 
 async function uploadToS3({ file, signedRequest }: UploadToS3Props) {
-  const options = {
+  const options: AxiosRequestConfig = {
     headers: {
-      "Content-Type": "image/png"
+      "Content-Type": file.type
     }
   };
 
@@ -386,7 +395,7 @@ async function submitWithFiles({
   addMessageMutation,
   channelId,
   channel_message,
-  data,
+  // data,
   // error,
   files,
   // loading,
@@ -407,48 +416,26 @@ async function submitWithFiles({
 
   let viewSignS3 = await signS3Mutation({
     variables: {
-      files: preppedFiles
+      files: preppedFiles,
+      action: S3SignatureAction.PutObject
     }
   });
-  let imagesAreUploadedToS3;
-  console.log("IS THIS TRUE? data && data.signS3 && data.signS3", {
-    isTrue: data && data.signS3,
-    viewSignS3
-  });
+
   if (viewSignS3.data?.signS3.signatures) {
-    // const { signatures } = data.signS3;
-    const { signatures } = viewSignS3.data.signS3;
+    const { signatures } = viewSignS3.data?.signS3;
     const newSignatures = viewSignS3.data?.signS3.signatures;
 
-    if (newSignatures) {
-      imagesAreUploadedToS3 = await Promise.all(
+    if (signatures) {
+      await Promise.all(
         signatures.map(async (signature, signatureIndex: number) => {
-          console.log("WHAT AM I TRYING TO SEND???\n", {
-            signature,
-            signatureIndex,
-            file: new File(
-              [files[signatureIndex].preview],
-              files[signatureIndex].name
-            )
-          });
           return await uploadToS3({
-            file: new File(
-              [files[signatureIndex].preview],
-              files[signatureIndex].name
-            ), // files[signatureIndex].preview
+            file: files[signatureIndex],
             signedRequest: signature.signedRequest
           }).catch(error =>
             console.error(JSON.stringify({ ...error }, null, 2))
           );
         })
       );
-
-      console.log("VIEW UPLOAD RESULTS", {
-        preppedFiles,
-        imagesAreUploadedToS3,
-        newSignatures,
-        signatures
-      });
 
       addMessageMutation({
         variables: {
@@ -458,10 +445,45 @@ async function submitWithFiles({
             invitees: [],
             message: channel_message,
             sentTo: "",
-            images: newSignatures.map(image => image.url)
+            images: newSignatures.map(image => image.uri),
+            files: signatures.map((file, fileIndex) => {
+              return {
+                uri: file.uri,
+                file_type: fileReducer(files[fileIndex].type)
+              };
+            })
           }
+        },
+        update: (cache, { data, errors, context }) => {
+          console.log("LET'S SEE EVERYTHING", { cache, data, errors, context });
         }
       });
     }
   }
+}
+
+function fileReducer(fileType: string) {
+  if (fileType === "text/css") {
+    return FileTypeEnum["Css"];
+  }
+  if (fileType.includes("csv")) {
+    return FileTypeEnum["Csv"];
+  }
+  if (fileType === "text/markdown") {
+    return FileTypeEnum["Md"];
+  }
+  if (fileType.includes("image")) {
+    return FileTypeEnum["Image"];
+  }
+  if (fileType === "application/pdf") {
+    return FileTypeEnum["Pdf"];
+  }
+  if (fileType.includes("svg")) {
+    return FileTypeEnum["Svg"];
+  }
+  if (fileType.includes("docx")) {
+    return FileTypeEnum["Doc"];
+  }
+  console.log("Returning Other");
+  return FileTypeEnum["Other"];
 }
