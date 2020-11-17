@@ -1,7 +1,10 @@
 import React from "react";
 
 import { NextContext } from "../../../typings/NextContext";
-import { getLayout } from "../../../modules/site-layout/grid-layout_v3";
+import {
+  getLayout,
+  FileModalState
+} from "../../../modules/site-layout/grid-layout_v3";
 import redirect from "../../../lib/redirect";
 import { isBrowser } from "../../../lib/isBrowser";
 import {
@@ -22,6 +25,8 @@ interface PageProps extends NextContext {
   meData: MeQuery;
   viewerDispatch: React.Dispatch<ViewerActionType>;
   viewerState: ViewerStateInterface;
+  fileViewerModalState: FileModalState;
+  setFileViewerModalState: React.Dispatch<React.SetStateAction<FileModalState>>;
   selectedDirectMessageInvitees: ({
     __typename?: "User" | undefined;
   } & Pick<User, "id" | "name">)[];
@@ -46,6 +51,8 @@ interface ViewTeamByIdProps {
     teamId,
     clonedChannelId,
     // clonedTeamId,
+    fileViewerModalState,
+    setFileViewerModalState,
     viewerDispatch,
     viewerState,
     meData
@@ -73,11 +80,15 @@ interface ViewTeamByIdProps {
 const ViewTeamById: ViewTeamByIdProps = ({
   meData,
   clonedChannelId,
-  teamId
+  teamId,
+  fileViewerModalState,
+  setFileViewerModalState
 }) => {
   if (meData && meData.me && clonedChannelId !== "channelIdUndefined") {
     return (
       <Messages
+        fileViewerModalState={fileViewerModalState}
+        setFileViewerModalState={setFileViewerModalState}
         dataMe={meData.me}
         channelId={clonedChannelId}
         teamId={teamId}

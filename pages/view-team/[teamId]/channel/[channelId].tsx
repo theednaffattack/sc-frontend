@@ -6,7 +6,8 @@ import { isBrowser } from "../../../../lib/isBrowser";
 import {
   getLayout,
   ViewerActionType,
-  ViewerStateInterface
+  ViewerStateInterface,
+  FileModalState
 } from "../../../../modules/site-layout/grid-layout_v3";
 import {
   User,
@@ -16,6 +17,9 @@ import { Messages } from "../../../../modules/grid-pieces/messages";
 
 interface PageProps extends NextContext {
   clonedChannelId: string;
+
+  fileViewerModalState: FileModalState;
+  setFileViewerModalState: React.Dispatch<React.SetStateAction<FileModalState>>;
   meData: MeQueryResult["data"];
   teamId: string;
   channelId: string;
@@ -54,7 +58,10 @@ interface ViewChannelByIdProps {
     selectedDirectMessageInvitees,
     setSelectedDirectMessageInvitees,
     viewerDispatch,
-    viewerState
+    viewerState,
+
+    fileViewerModalState,
+    setFileViewerModalState
   }: PageProps & ClonedFromGridLayoutProps): JSX.Element;
 
   getInitialProps: ({
@@ -80,7 +87,10 @@ interface ViewChannelByIdProps {
 const ViewChannelById: ViewChannelByIdProps = ({
   clonedChannelId,
   clonedTeamId,
-  meData
+  meData,
+
+  fileViewerModalState,
+  setFileViewerModalState
 }) => {
   if (meData) {
     return (
@@ -88,6 +98,8 @@ const ViewChannelById: ViewChannelByIdProps = ({
         teamId={clonedTeamId}
         dataMe={meData.me}
         channelId={clonedChannelId}
+        fileViewerModalState={fileViewerModalState}
+        setFileViewerModalState={setFileViewerModalState}
       />
     );
   }
