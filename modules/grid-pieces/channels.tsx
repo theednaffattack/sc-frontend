@@ -23,7 +23,7 @@ import {
   ChannelInfoProps,
   ChannelInfoStateUpdate
 } from "../prepare-to-delete/[channelId]";
-import { DirectMessages } from "../team/direct-messages-v2";
+import { DirectMessages } from "./direct-messages-v2";
 
 const textColor = "#958993";
 
