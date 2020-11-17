@@ -71,7 +71,7 @@ export const FileUploadNoClick: React.FC<FileUploadProps> = ({
     <div
       ref={listBottomRef}
       {...getRootProps({
-        style: { minHeight: "100%" }
+        style: { minHeight: "100%", border: "1px transparent solid" }
       })}
     >
       {children}
