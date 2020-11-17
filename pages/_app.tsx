@@ -18,7 +18,7 @@ class MyApp extends App<any> {
       hocLogout,
       hocLoginState,
       syncLogout,
-      token
+      token,
     } = this.props;
     const getLayout = Component.getLayout || ((page: any) => page);
     const title = Component.title || "Fake test title";
