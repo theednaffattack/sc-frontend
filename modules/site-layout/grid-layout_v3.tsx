@@ -29,10 +29,13 @@ import {
   useGetAllTeamMembersLazyQuery,
   LoadDirectMessageThreadsByTeamAndUserQuery,
   LoadChannelsByTeamIdQuery
+  // SignS3MutationResult,
+  // SignS3GetObjectMutation
 } from "../gql-gen/generated/apollo-graphql";
 import Header from "../grid-pieces/header_v2";
 import DirectMessageHeader from "../grid-pieces/direct-message-header";
 import { AddTeamMemberModal } from "../grid-pieces/add-team-member-modal";
+import { FileViewerModal } from "../grid-pieces/message-viewer/file-viewer-modal";
 import { AddChannelModal } from "../grid-pieces/add-channel-modal";
 import { AddDirectMessageModal } from "../grid-pieces/direct-messages/direct-message-modal";
 import { ProfileModal } from "../grid-pieces/profile-modal";
@@ -67,7 +70,31 @@ interface GridLayoutProps {
   >;
 }
 
-export type ModalStatesType = "isOpen" | "isClosed";
+/**State of the modal */
+export type ModalViewStatesType = "isOpen" | "isClosed";
+
+/**State of the modal
+ * @param id {string} the ID
+ * @param uri {string} the uri in S3
+ * @param view {Object} See [[ModalViewStatesType | ("isOpen" or "isClosed")]]
+ *
+ */
+export interface FileModalState {
+  /**ID in the database for this file */
+  id?: string;
+  uri?: string;
+  /**See ModalViewStatesType ("isOpen" | "isClosed"); */
+  view: ModalViewStatesType;
+}
+
+// dataSignS3Object: SignS3MutationResult["data"];
+// dataSignS3Object: SignS3GetObjectMutation | undefined;
+// fileSignature: string | undefined;
+// fileUri: string | undefined;
+
+const initialFileModalState: FileModalState = {
+  view: "isClosed"
+};
 
 export type DirectMessageModalState = "isOpen" | "isClosed";
 
@@ -84,7 +111,7 @@ export interface ViewerStateInterface {
   teamIdShowing: string | null;
   viewerMode?: ViewerShowModes;
   idShowing?: string;
-  modalState?: ModalStatesType;
+  modalState?: ModalViewStatesType;
   activeModalId?: ActiveModalType;
   headerInfo?:
     | LoadChannelsByTeamIdQuery["loadChannelsByTeamId"][0]["name"]
@@ -318,6 +345,37 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
     initialViewerState
   );
 
+  const initialAdminEditUserModalState = "isClosed";
+  const initialProfileModalState = "isClosed";
+  const initialChannelModalState = "isClosed";
+  const initialDirectMessageModalState = "isClosed";
+  const initialTeamMemberModalState = "isClosed";
+  // const initialFileViewerModalState = "isClosed";
+
+  const [profileModalState, setProfileModalState] = useState<
+    ModalViewStatesType
+  >(initialProfileModalState);
+
+  const [adminEditUserModalState, setAdminEditUserModalState] = useState<
+    ModalViewStatesType
+  >(initialAdminEditUserModalState);
+
+  const [channelModalState, setChannelModalState] = useState<
+    ModalViewStatesType
+  >(initialChannelModalState);
+
+  const [directMessageModalState, setDirectMessageModalState] = useState<
+    ModalViewStatesType
+  >(initialDirectMessageModalState);
+
+  const [teamMemberModalState, setTeamMemberModalState] = useState<
+    ModalViewStatesType
+  >(initialTeamMemberModalState);
+
+  const [fileViewerModalState, setFileViewerModalState] = useState<
+    FileModalState
+  >(initialFileModalState);
+
   let { data: dataMeQuery } = useMeQuery();
 
   useEffect(() => {
@@ -408,7 +466,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
     getQueryVariables(router).channelId
   ]);
 
-  let childrentWithMeDataAndMeSetter;
+  let childrenWithMeDataAndMeSetter;
 
   if (
     routerIsReady(router) === true &&
@@ -419,7 +477,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
     // &&
     // channelIdb
   ) {
-    childrentWithMeDataAndMeSetter = React.cloneElement(children, {
+    childrenWithMeDataAndMeSetter = React.cloneElement(children, {
       setMeData: () => console.log,
       clonedChannelId: getQueryVariables(router).channelId,
       clonedTeamId: getQueryVariables(router).teamId,
@@ -429,6 +487,8 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
       setChannelIdb,
       viewerDispatch,
       viewerState,
+      fileViewerModalState,
+      setFileViewerModalState,
       headerInfo: resultUseLoadChannelsByTeamIdQuery.data
     });
   }
@@ -444,7 +504,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
     // &&
     // channelIdb
   ) {
-    childrentWithMeDataAndMeSetter = React.cloneElement(children, {
+    childrenWithMeDataAndMeSetter = React.cloneElement(children, {
       setMeData: () => console.log,
       clonedChannelId:
         resultUseLoadChannelsByTeamIdQuery.data.loadChannelsByTeamId[0].id,
@@ -455,36 +515,11 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
       setChannelIdb,
       viewerDispatch,
       viewerState,
+      fileViewerModalState,
+      setFileViewerModalState,
       headerInfo: resultUseLoadChannelsByTeamIdQuery.data
     });
   }
-
-  const initialAdminEditUserModalState = "isClosed";
-  const initialProfileModalState = "isClosed";
-  const initialChannelModalState = "isClosed";
-  const initialDirectMessageModalState = "isClosed";
-
-  const initialTeamMemberModalState = "isClosed";
-
-  const [profileModalState, setProfileModalState] = useState<ModalStatesType>(
-    initialProfileModalState
-  );
-
-  const [adminEditUserModalState, setAdminEditUserModalState] = useState<
-    ModalStatesType
-  >(initialAdminEditUserModalState);
-
-  const [channelModalState, setChannelModalState] = useState<ModalStatesType>(
-    initialChannelModalState
-  );
-
-  const [directMessageModalState, setDirectMessageModalState] = useState<
-    ModalStatesType
-  >(initialDirectMessageModalState);
-
-  const [teamMemberModalState, setTeamMemberModalState] = useState<
-    ModalStatesType
-  >(initialTeamMemberModalState);
 
   if (dataGetAllTeamsForUserQuery === undefined) {
     return <EmptyGrid>NOTHING TO SEE HERE!!!</EmptyGrid>;
@@ -1010,6 +1045,18 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
         ) : (
           ""
         )}
+
+        {fileViewerModalState.view === "isOpen" &&
+        getQueryVariables(router).teamId !== noQParams.teamId ? (
+          <FileViewerModal
+            teamId={getQueryVariables(router).teamId}
+            // dataGetAllTeamMembers={dataGetAllTeamMembersLazyQuery}
+            fileViewerModalState={fileViewerModalState}
+            setFileViewerModalState={setFileViewerModalState}
+          />
+        ) : (
+          ""
+        )}
         <HeaderWrapper>
           {/* SCENARIO 1 - CHANNEL ROUTE (WE HAVE CHANNEL ID AND TEAM ID FROM A ROUTE) */}
           {getQueryVariables(router).channelId !== noQParams.channelId &&
@@ -1130,7 +1177,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
         ) : (
           ""
         )}
-        {/* {childrentWithMeDataAndMeSetter} */}
+        {/* {childrenWithMeDataAndMeSetter} */}
         {/* <InputContainer> */}
         {/* SCENARIO 1 */}
         {/* NEW FORM SCENARIO 1 - WE'RE ON A DM ROUTE */}
@@ -1160,7 +1207,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
                 : [""]
             }
           >
-            {childrentWithMeDataAndMeSetter}
+            {childrenWithMeDataAndMeSetter}
           </FormikDirectMessageForm>
         ) : (
           ""
@@ -1177,7 +1224,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
               files: []
             }}
           >
-            {childrentWithMeDataAndMeSetter}
+            {childrenWithMeDataAndMeSetter}
           </FormikMessageForm>
         ) : (
           ""
@@ -1201,7 +1248,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
               files: []
             }}
           >
-            {childrentWithMeDataAndMeSetter}
+            {childrenWithMeDataAndMeSetter}
           </FormikMessageForm>
         ) : (
           ""
@@ -1226,7 +1273,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
               files: []
             }}
           >
-            {childrentWithMeDataAndMeSetter}
+            {childrenWithMeDataAndMeSetter}
           </FormikMessageForm>
         ) : (
           ""
