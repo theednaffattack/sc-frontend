@@ -1,8 +1,29 @@
 import React from "react";
 // import styled from "styled-components";
+// import { space, SpaceProps } from "styled-system";
+// import styled from "styled-components";
 // import { space } from "styled-system";
 
-export const FileIcon = () => {
+interface FileIconProps {
+  name: string;
+}
+
+// const G = styled.g``;
+
+// const SVG = styled.svg<SpaceProps>`
+//   ${space}
+
+//   transition: fill 0.25s;
+//   /* width: 48px;
+//   height: 48px; */
+
+//   &:hover {
+//     fill: rebeccapurple;
+//     cursor: pointer;
+//   }
+// `;
+
+export const FileIcon = ({}: FileIconProps) => {
   return (
     <svg
       version="1.1"
