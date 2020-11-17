@@ -6,7 +6,7 @@ import {
   MaterialIconBase,
   StyledListItem
 } from "../primitives/styled-rebass";
-import { ModalStatesType } from "../site-layout/grid-layout_v3";
+import { ModalViewStatesType } from "../site-layout/grid-layout_v3";
 import { User } from "../gql-gen/generated/apollo-graphql";
 
 // interface UserLikeProps {
@@ -32,9 +32,9 @@ export interface TeamMemberListItemProps {
 
   user?: UserLikeProps;
 
-  adminEditUserModalState?: ModalStatesType;
+  adminEditUserModalState?: ModalViewStatesType;
   setAdminEditUserModalState?: React.Dispatch<
-    React.SetStateAction<ModalStatesType>
+    React.SetStateAction<ModalViewStatesType>
   >;
 }
 
