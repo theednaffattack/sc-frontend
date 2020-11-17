@@ -615,8 +615,8 @@ export const HeaderWrapper = styled.div`
 export const MessageWrapper = styled.div`
   grid-column: 3;
   grid-row: 2;
-  /* border: 2px pink solid; */
   overflow-y: auto;
+  /* border: 2px pink solid; */
 `;
 
 export const GridPageContainer = styled.div`
