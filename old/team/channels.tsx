@@ -11,18 +11,18 @@ import {
   Text,
   StyledListItem,
   UnstyledList,
-  MaterialIconBase
-} from "../primitives/styled-rebass";
+  MaterialIconBase,
+} from "../../modules/primitives/styled-rebass";
 import { FakeDirectMessageItemProps } from "./sidebar";
 import {
   useLoadChannelsByTeamIdQuery,
-  Channel as ChannelType
-} from "../gql-gen/generated/apollo-graphql";
+  Channel as ChannelType,
+} from "../../modules/gql-gen/generated/apollo-graphql";
 import {
   ChannelInfoProps,
-  ChannelInfoStateUpdate
-} from "../prepare-to-delete/[channelId]";
-import { DirectMessages } from "../team/direct-messages-v2";
+  ChannelInfoStateUpdate,
+} from "../../modules/prepare-to-delete/[channelId]";
+import { DirectMessages } from "../../modules/grid-pieces/direct-messages-v2";
 
 const textColor = "#958993";
 
@@ -125,7 +125,7 @@ const ChannelIfTeamIdIsDefined: React.FunctionComponent<ChannelProps> = ({
   setChannelModal,
   teamId,
   teamName,
-  username
+  username,
 }) => {
   let initialState = -1;
   // channels && channels[selectedTeamIndex] ? channels[selectedTeamIndex] : -1;
@@ -137,16 +137,16 @@ const ChannelIfTeamIdIsDefined: React.FunctionComponent<ChannelProps> = ({
 
   let { data } = useLoadChannelsByTeamIdQuery({
     variables: {
-      teamId
-    }
+      teamId,
+    },
   });
 
   if (data) {
-    mappedChannels = data.loadChannelsByTeamId.map(item => {
+    mappedChannels = data.loadChannelsByTeamId.map((item) => {
       let returnObj = {
         ...item,
         teamId,
-        applyHightlight: channelInfo.channelId === item.id
+        applyHightlight: channelInfo.channelId === item.id,
       };
       return returnObj;
     });
@@ -200,7 +200,7 @@ const ChannelIfTeamIdIsDefined: React.FunctionComponent<ChannelProps> = ({
                         channelId: channelId,
                         channelIndex: index,
                         channelName: channel.name,
-                        invitees: []
+                        invitees: [],
                       });
                     }}
                   >{`# ${channel.name}`}</StyledListItem>
@@ -245,7 +245,7 @@ const Channel: React.FunctionComponent<ChannelProps> = ({
   teamId,
   teamName,
   username,
-  users
+  users,
 }) => {
   if (teamId && teamId !== "isNull") {
     return (
