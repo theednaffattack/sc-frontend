@@ -1,12 +1,12 @@
 import React from "react";
 
-import { ListItemProps } from "../team/channels";
+import { ListItemProps } from "../../old/team/channels";
 
 import {
   Flex,
   MaterialIconBase,
   StyledListItem,
-  UnstyledList
+  UnstyledList,
 } from "../primitives/styled-rebass";
 import { useGetAllTeamMembersQuery } from "../gql-gen/generated/apollo-graphql";
 
@@ -29,11 +29,11 @@ const UserListItem: React.FunctionComponent<ListItemProps> = (
 );
 
 export const DirectMessages: React.FunctionComponent<DirectMessagesProps> = ({
-  teamId
+  teamId,
 }) => {
   const slackBot = { id: "123", name: "slackbot" };
   const {
-    data: dataTeamMembers
+    data: dataTeamMembers,
     // error: errorTeamMembers,
     // loading: loadingTeamMembers
   } = useGetAllTeamMembersQuery({ variables: { teamId } });
