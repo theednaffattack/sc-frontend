@@ -13,7 +13,7 @@ interface FileUploadProps {
 
 export const FileUpload: React.FC<FileUploadProps> = ({
   children,
-  setFieldValue
+  setFieldValue,
 }) => {
   let listBottomRef = useRef<HTMLDivElement>(null);
 
@@ -31,19 +31,19 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   // }
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const previewFiles = acceptedFiles.map(file => {
+    const previewFiles = acceptedFiles.map((file) => {
       if (file.type.includes("image")) {
         return Object.assign(file, {
-          preview: URL.createObjectURL(file)
+          preview: URL.createObjectURL(file),
         });
       }
       if (file.type.includes("application/pdf")) {
         return Object.assign(file, {
-          preview: "pdf-svg"
+          preview: "pdf-svg",
         });
       } else {
         return Object.assign(file, {
-          preview: "general-file"
+          preview: "general-file",
         });
       }
     });
@@ -69,7 +69,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     <div
       ref={listBottomRef}
       {...getRootProps({
-        style: { minHeight: "100%" }
+        style: { minHeight: "100%" },
       })}
     >
       {children}
