@@ -1,36 +1,13 @@
 import { useRef, useEffect } from "react";
-import { SubscribeToMoreOptions } from "apollo-boost";
 
 import {
-  Text,
-  Flex,
-  // MessageWrapper,
-  StyledListItem,
-  UnstyledList
-} from "../primitives/styled-rebass";
-import { AvatarPlaceholder } from "../profile/avatar-placeholder";
-import {
-  useGetAllChannelMessagesQuery,
-  GetAllChannelMessagesQueryResult,
-  NewMessageSubDocument,
-  GetAllChannelMessagesQuery,
-  NewMessageSubSubscription,
-  NewMessageSubSubscriptionVariables,
-  MeQuery
+  MeQuery,
+  useGetAllChannelMessagesQuery
 } from "../gql-gen/generated/apollo-graphql";
 import { ChannelMessageListItemProps } from "./channel-message-list-item";
 import { EmptyMessagesWrapper } from "./empty-messages-wrapper";
-
-type NewMessageSubType = <
-  TSubscriptionData = NewMessageSubSubscription,
-  TSubscriptionVariables = NewMessageSubSubscriptionVariables
->(
-  options: SubscribeToMoreOptions<
-    GetAllChannelMessagesQuery,
-    TSubscriptionVariables,
-    TSubscriptionData
-  >
-) => () => void;
+import { FileModalState } from "modules/site-layout/grid-layout_v3";
+import { MessageList } from "./messages-list";
 
 interface MessageProps {
   teamId?: string;
@@ -39,128 +16,16 @@ interface MessageProps {
   selectedChannelIndex?: number;
   setSelectedChannelIndex?: React.Dispatch<React.SetStateAction<number>>;
   dataMe: MeQuery["me"];
+
+  fileViewerModalState: FileModalState;
+  setFileViewerModalState: React.Dispatch<React.SetStateAction<FileModalState>>;
 }
-
-interface MessageListProps {
-  channelId: string;
-  teamId: string;
-  data: GetAllChannelMessagesQueryResult["data"];
-  dataMe: MeQuery["me"];
-  subscribeToMoreMessages: NewMessageSubType;
-}
-
-const MessageList: React.FunctionComponent<MessageListProps> = ({
-  channelId,
-  teamId,
-  data,
-  dataMe,
-  subscribeToMoreMessages
-}) => {
-  useEffect(() => {
-    if (subscribeToMoreMessages) {
-      let newMessageArgs: NewMessageSubSubscriptionVariables = {
-        data: {
-          channelId,
-          teamId,
-          message: "",
-          sentTo: ""
-        }
-      };
-      let unsubscribe = subscribeToMoreMessages({
-        document: NewMessageSubDocument,
-        variables: newMessageArgs,
-        updateQuery: (prev, { subscriptionData }) => {
-          if (!subscriptionData.data) return prev;
-
-          const newFeedItem = subscriptionData.data.newMessageSub;
-
-          const newFeed = Object.assign({}, prev, {
-            getAllChannelMessages: [...prev.getAllChannelMessages, newFeedItem]
-          });
-
-          return newFeed;
-        }
-      });
-      return () => {
-        unsubscribe();
-      };
-    }
-  }, [data, channelId, teamId]);
-
-  if (data && dataMe) {
-    return (
-      <UnstyledList p={0}>
-        {data.getAllChannelMessages.map(result => {
-          let { id, images, message, sentBy } = result;
-          let getUserId =
-            dataMe && dataMe.id ? dataMe.id : "unable to determine user";
-          let fromMe =
-            sentBy.id === getUserId ? "isLoggedInUser" : "is_NOT_LoggedInUser";
-
-          return (
-            <StyledListItem
-              p={3}
-              setBackgroundColor="rgba(218, 223, 225, 0.5)"
-              key={id}
-            >
-              <Flex
-                flexDirection="row"
-                // border="2px pink dashed"
-                alignItems="center"
-                justifyContent="center"
-              >
-                {fromMe === "isLoggedInUser" ? (
-                  <Flex flexDirection="column" alignItems="center">
-                    <AvatarPlaceholder size="2em" />
-                    <Text>{sentBy.name}</Text>
-                  </Flex>
-                ) : (
-                  ""
-                )}
-                <Flex
-                  flexDirection="column"
-                  border="lime"
-                  width={[1, 1, 2 / 3, 2 / 3, 2 / 3]}
-                >
-                  {images
-                    ? images.map(image => {
-                        if (image && image.uri) {
-                          return image.uri;
-                        }
-                        return "no-image-uri";
-                      })
-                    : ""}
-                  {message}
-                </Flex>
-                {fromMe === "is_NOT_LoggedInUser" ? (
-                  <Flex
-                    flexDirection="column"
-                    border="crimson"
-                    alignItems="center"
-                  >
-                    <AvatarPlaceholder size="2em" />
-                    <Text> {sentBy.name}</Text>
-                  </Flex>
-                ) : (
-                  ""
-                )}
-              </Flex>
-            </StyledListItem>
-          );
-        })}{" "}
-      </UnstyledList>
-    );
-  }
-  return (
-    <UnstyledList p={0}>
-      <li>no list</li>
-    </UnstyledList>
-  );
-};
 
 export const Messages: React.FunctionComponent<MessageProps> = ({
   channelId,
   dataMe,
+  fileViewerModalState,
+  setFileViewerModalState,
   teamId
 }) => {
   const {
@@ -189,10 +54,12 @@ export const Messages: React.FunctionComponent<MessageProps> = ({
     return (
       <div ref={listBottomRef}>
         <MessageList
-          dataMe={dataMe}
-          subscribeToMoreMessages={subscribeToMore}
           data={data}
           channelId={channelId}
+          dataMe={dataMe}
+          fileViewerModalState={fileViewerModalState}
+          setFileViewerModalState={setFileViewerModalState}
+          subscribeToMoreMessages={subscribeToMore}
           teamId={teamId}
         />
       </div>
