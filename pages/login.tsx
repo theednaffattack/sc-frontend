@@ -25,16 +25,16 @@ interface ILoginPage {
     hocLoginState,
     hocLogout,
     query,
-    referer
+    referer,
   }: LoginProps): JSX.Element;
 
-  getInitialProps: ({
-    query,
-    referer
-  }: NextContext) => Promise<{
-    query: NextContext["query"];
-    referer: NextContext["referer"];
-  }>;
+  // getInitialProps: ({
+  //   query,
+  //   referer,
+  // }: NextContext) => Promise<{
+  //   query: NextContext["query"];
+  //   referer: NextContext["referer"];
+  // }>;
 
   getLayout: (page: any) => JSX.Element;
 
@@ -51,12 +51,9 @@ export interface RenderFlashMessageProps extends FlashProps {
   referer?: string | undefined;
 }
 
-export const RenderFlashMessage: React.FunctionComponent<RenderFlashMessageProps> = ({
-  flashIsOpen,
-  getQuery,
-  referer,
-  setFlashIsOpen
-}) => {
+export const RenderFlashMessage: React.FunctionComponent<
+  RenderFlashMessageProps
+> = ({ flashIsOpen, getQuery, referer, setFlashIsOpen }) => {
   return (
     <FlashMessage flashIsOpen={flashIsOpen} setFlashIsOpen={setFlashIsOpen}>
       <Text color="text">{getQuery}</Text>
@@ -78,7 +75,7 @@ const LoginPage: ILoginPage = ({
   hocLogout,
   authState,
   referer,
-  query
+  query,
 }) => {
   let getQuery: string;
 
@@ -123,10 +120,10 @@ const LoginPage: ILoginPage = ({
   );
 };
 
-LoginPage.getInitialProps = async ({ query, referer }: NextContext) => {
-  let setReferer = referer === undefined ? "/login" : referer;
-  return { referer: setReferer, query };
-};
+// LoginPage.getInitialProps = async ({ query, referer }: NextContext) => {
+//   let setReferer = referer === undefined ? "/login" : referer;
+//   return { referer: setReferer, query };
+// };
 
 LoginPage.getLayout = getLayout;
 LoginPage.title = "Login";
