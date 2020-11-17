@@ -6,9 +6,11 @@ export const ADD_CHANNEL_MEMBER = gql`
       id
       created_at
       message
-      images {
+      created_at
+      files {
         id
         uri
+        file_type
       }
       sentBy {
         id
