@@ -10,6 +10,7 @@ type PathInfo = keyof MaterialIcons;
 let typedPaths: MaterialIcons = paths;
 
 export interface MaterialIconProps {
+  assignHoverColor?: string;
   name: PathInfo;
   size: string;
   fill: string;
@@ -49,6 +50,7 @@ const Path = styled.path`
 `;
 
 const MaterialIcon: React.FunctionComponent<MaterialIconProps> = ({
+  assignHoverColor,
   name = "home",
   size = "1em",
   fill = "currentColor",
@@ -58,6 +60,10 @@ const MaterialIcon: React.FunctionComponent<MaterialIconProps> = ({
   setTranslation,
   ...props
 }) => {
+  const initialHoverColor = "crimson";
+
+  const [, setHoverColor] = React.useState(initialHoverColor);
+
   let iconPaths = typedPaths[name];
 
   let length = iconPaths && iconPaths.length ? iconPaths.length : 0;
@@ -90,8 +96,22 @@ const MaterialIcon: React.FunctionComponent<MaterialIconProps> = ({
         fill={fill}
         data-id={`${name}`}
         viewBox="0 0 24 24"
-        onMouseEnter={() => (setColor ? setColor("crimson") : null)}
-        onMouseLeave={() => (setColor ? setColor("rebeccapurple") : null)}
+        onMouseEnter={() => {
+          if (setColor) {
+            setColor(initialHoverColor);
+          }
+          if (assignHoverColor) {
+            setHoverColor(assignHoverColor);
+          }
+        }}
+        onMouseLeave={() => {
+          if (setColor) {
+            setColor("rebeccapurple");
+          }
+          if (assignHoverColor) {
+            setHoverColor("rebeccapurple");
+          }
+        }}
         transform={setTranslation}
       >
         {/* <path d={iconPaths[0].path} /> */}

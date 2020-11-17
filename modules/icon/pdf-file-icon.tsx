@@ -70,3 +70,5 @@ export const PdfFileIcon = () => {
     </svg>
   );
 };
+
+export default PdfFileIcon;
