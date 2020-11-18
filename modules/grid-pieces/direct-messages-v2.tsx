@@ -1,4 +1,5 @@
 import React from "react";
+// import { UserListItem } from "../grid-pieces/user-list-item";
 
 import { ListItemProps } from "../../old/team/channels";
 
@@ -46,13 +47,15 @@ export const DirectMessages: React.FunctionComponent<DirectMessagesProps> = ({
     );
   }
   if (teamId) {
-    let teamMembers =
-      dataTeamMembers &&
-      dataTeamMembers.getAllTeamMembers &&
-      dataTeamMembers.getAllTeamMembers.length > 0
-        ? dataTeamMembers.getAllTeamMembers
-        : [slackBot];
-    let addSlackBot = [slackBot, ...teamMembers];
+    
+      const transformQuery = dataTeamMembers?.getAllTeamMembers?.map((teamMember)=>{
+        return({
+          id: teamMember.user.id || "",
+          name: teamMember.user.name || ""
+        })
+      }) ?? [];
+    let addSlackBot = [slackBot, ...transformQuery];
+    
     return (
       <UnstyledList p={0} mt={1} mb={3}>
         {addSlackBot.map(UserListItem)}
