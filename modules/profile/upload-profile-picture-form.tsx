@@ -9,7 +9,7 @@ import {
   MaxFlex,
   // Image,
   FlexUserProfileWrap,
-  Avatar
+  Avatar,
   // Card,
   // Icon,
   // AbFlex
@@ -74,11 +74,11 @@ function UploadProfilePictureForm({
   // highlight,
   // handleRemoveIndividualImagePreview,
   // handleClearFilePreview
-  onFilesAdded
+  onFilesAdded,
 }: UploadProfilePictureFormProps) {
   const inititalValuesObj: InititalValuesObjProps = {
     images: [],
-    user: userId
+    user: userId,
   };
   let profileImgUrl =
     dataMe && dataMe.me && dataMe.me.profileImageUri
@@ -98,7 +98,7 @@ function UploadProfilePictureForm({
         setFieldValue,
         touched,
         values,
-        resetForm
+        resetForm,
       }) => {
         let areImagesVisisble = values.images.length > 0;
         return (
@@ -128,7 +128,7 @@ function UploadProfilePictureForm({
                       borderRadius: "50%",
                       fontSize: "16px",
                       cursor: disabled ? "default" : "pointer",
-                      overflow: "hidden"
+                      overflow: "hidden",
                     }}
                     onClick={() => {
                       // const { target, currentTarget } = event;
@@ -144,11 +144,11 @@ function UploadProfilePictureForm({
                         height="300px"
                         width="300px"
                         overflow="hidden"
-                        borderRadius="50%"
+                        // borderRadius="50%"
                         bg="thread_footer"
                         alignItems="center"
                         justifyContent="center"
-                        boxShadow="2px 2px 16px rgba(0, 0, 0, 0.25)"
+                        // boxShadow="2px 2px 16px rgba(0, 0, 0, 0.25)"
                       >
                         <Avatar
                           src={values.images[0].blobUrl}
@@ -161,11 +161,11 @@ function UploadProfilePictureForm({
                         height="300px"
                         width="300px"
                         overflow="hidden"
-                        borderRadius="50%"
+                        // borderRadius="50%"
+                        // boxShadow="2px 2px 16px rgba(0, 0, 0, 0.25)"
                         bg="thread_footer"
                         alignItems="center"
                         justifyContent="center"
-                        boxShadow="2px 2px 16px rgba(0, 0, 0, 0.25)"
                       >
                         <Avatar src={profileImgUrl} width={300} height={300} />
                       </FlexUserProfileWrap>
@@ -186,7 +186,7 @@ function UploadProfilePictureForm({
                             type="file"
                             // onChange={onFilesAdded}
                             // value={field.value}
-                            onChange={event => {
+                            onChange={(event) => {
                               if (
                                 event &&
                                 event.currentTarget &&
@@ -412,7 +412,7 @@ function UploadProfilePictureForm({
                 type="button"
                 onClick={() =>
                   resetForm({
-                    values: { images: [], user: userId }
+                    values: { images: [], user: userId },
                   })
                 }
               >

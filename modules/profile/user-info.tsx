@@ -10,7 +10,7 @@ import {
   EditUserInfoMutationFn,
   MeComponent,
   SignS3Component,
-  AddProfilePictureComponent
+  AddProfilePictureComponent,
 } from "../gql-gen/generated/apollo-graphql";
 import EditUserInfoFormBody from "./edit-user-info-form-body";
 import ButtonRow from "./button-row";
@@ -46,6 +46,8 @@ export interface InitialValuesProps {
   email: string;
   firstName: string;
   lastName: string;
+  teamRoles: never[];
+  teamId: string;
 }
 
 const UserInfo: React.FunctionComponent<UserInfoProps> = ({
@@ -56,7 +58,7 @@ const UserInfo: React.FunctionComponent<UserInfoProps> = ({
   loadingSubmitState,
   setExpanded,
   setLoadingSubmitState,
-  editUserInfo
+  editUserInfo,
   // dataEditUserInfo,
   // errorEditUserInfo,
   // loadingEditUserInfo
@@ -65,11 +67,19 @@ const UserInfo: React.FunctionComponent<UserInfoProps> = ({
     return (
       <div>Error loading user data, {JSON.stringify(errorMe, null, 2)}</div>
     );
-  if (dataMe && dataMe.me) {
+  if (
+    dataMe &&
+    dataMe.me &&
+    dataMe.me.email &&
+    dataMe.me.firstName &&
+    dataMe.me.lastName
+  ) {
     let initialFormValues = {
       email: dataMe.me.email,
       firstName: dataMe.me.firstName,
-      lastName: dataMe.me.lastName
+      lastName: dataMe.me.lastName,
+      teamRoles: [],
+      teamId: "",
     };
     return (
       <Formik
@@ -77,15 +87,19 @@ const UserInfo: React.FunctionComponent<UserInfoProps> = ({
         validateOnChange={false}
         onSubmit={async (data, { setErrors }) => {
           try {
-            await editUserInfo({
-              variables: {
-                data: {
-                  email: data.email,
-                  firstName: data.firstName,
-                  lastName: data.lastName
-                }
-              }
-            });
+            if (data) {
+              await editUserInfo({
+                variables: {
+                  data: {
+                    email: data.email,
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    teamId: data.teamId,
+                    teamRoles: data.teamRoles,
+                  },
+                },
+              });
+            }
           } catch (error) {
             const displayErrors: { [key: string]: string } = {};
 
@@ -130,14 +144,14 @@ const UserInfo: React.FunctionComponent<UserInfoProps> = ({
                       top: 0,
                       left: 0,
                       bottom: 0,
-                      right: 0
+                      right: 0,
                     }}
                   >
                     <MeComponent>
                       {({
                         data: dataMe,
                         error: errorMe,
-                        loading: loadingMe
+                        loading: loadingMe,
                       }) => {
                         return (
                           <SignS3Component>
@@ -146,7 +160,7 @@ const UserInfo: React.FunctionComponent<UserInfoProps> = ({
                               {
                                 data: dataSignS3,
                                 error: errorSignS3,
-                                loading: loadingSignS3
+                                loading: loadingSignS3,
                               }
                             ) => {
                               return (
@@ -157,7 +171,7 @@ const UserInfo: React.FunctionComponent<UserInfoProps> = ({
                                     {
                                       data: dataAddProfilePicture,
                                       error: errorAddProfilePicture,
-                                      loading: loadingAddProfilePicture
+                                      loading: loadingAddProfilePicture,
                                     }
                                   ) => {
                                     return (
@@ -258,7 +272,7 @@ const UserInfoContainer: React.FunctionComponent<UserInfoContainerProps> = ({
   editUserInfo,
   dataEditUserInfo,
   errorEditUserInfo,
-  loadingEditUserInfo
+  loadingEditUserInfo,
 }) => {
   const [expanded, setExpanded] = useState<boolean>(false);
   const [loadingSubmitState, setLoadingSubmitState] = useState<
