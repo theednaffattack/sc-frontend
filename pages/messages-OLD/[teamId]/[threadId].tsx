@@ -8,12 +8,12 @@ import { isBrowser } from "../../../lib/isBrowser";
 
 import {
   User,
-  MeQuery
+  MeQuery,
 } from "../../../modules/gql-gen/generated/apollo-graphql";
 
 import {
   ViewerActionType,
-  ViewerStateInterface
+  ViewerStateInterface,
 } from "../../../modules/site-layout/grid-layout_v2";
 // import { DirectMessages } from "../../modules/team/direct-messages-v2";
 
@@ -51,14 +51,14 @@ interface ViewTeamByIdProps {
     threadId,
     viewerDispatch,
     viewerState,
-    meData
+    meData,
   }: PageProps): JSX.Element;
 
   getInitialProps: ({
     pathname,
     query,
     referer,
-    userAgent
+    userAgent,
   }: NextContext) => Promise<{
     pathname: NextContext["pathname"];
     query: NextContext["query"];
@@ -79,7 +79,7 @@ const ViewTeamById: ViewTeamByIdProps = ({
   viewerDispatch,
   viewerState,
   threadId,
-  teamId
+  teamId,
   // channelName,
   // setChannelName,
   // teamId,
@@ -91,11 +91,11 @@ const ViewTeamById: ViewTeamByIdProps = ({
     viewerDispatch({
       type: "updateViewerModeAndHeaderInfo",
       mode: "directMessage",
-      data: threadId
+      data: threadId,
     });
     viewerDispatch({
       type: "updateTeamId",
-      data: teamId
+      data: teamId,
     });
     // }
   }, [threadId, teamId]);
@@ -105,7 +105,9 @@ const ViewTeamById: ViewTeamByIdProps = ({
     viewerState.idShowing &&
     viewerState.viewerMode === "directMessage"
   ) {
-    return <DirectMessages dataMe={meData.me} threadId={threadId} />;
+    return (
+      <DirectMessages teamId={teamId} dataMe={meData.me} threadId={threadId} />
+    );
   }
   return (
     <div>
@@ -114,7 +116,7 @@ const ViewTeamById: ViewTeamByIdProps = ({
   );
 };
 
-ViewTeamById.getInitialProps = async ctx => {
+ViewTeamById.getInitialProps = async (ctx) => {
   let { pathname, query, referer, userAgent } = ctx;
 
   const { teamId: teamIdBase, threadId: threadIdBase } = query;
@@ -126,7 +128,7 @@ ViewTeamById.getInitialProps = async ctx => {
   if (!ctx.token && !isBrowser) {
     console.log("SSR redirect");
     redirect(ctx, "/login", {
-      asPath: "/login"
+      asPath: "/login",
     });
   }
 
@@ -136,7 +138,7 @@ ViewTeamById.getInitialProps = async ctx => {
     referer,
     userAgent,
     teamId,
-    threadId
+    threadId,
   };
 };
 
