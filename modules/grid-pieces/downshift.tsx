@@ -6,7 +6,7 @@ import {
   Button,
   Flex,
   UnstyledList,
-  StyledListItem
+  StyledListItem,
 } from "../primitives/styled-rebass";
 import { GetAllTeamMembersQuery } from "modules/gql-gen/generated/apollo-graphql";
 import { FieldArrayRenderProps } from "formik";
@@ -42,12 +42,12 @@ export const DownshiftExample: React.FC<DownshiftExampleProps> = ({
   arrayHelpers,
   items,
   onChange,
-  values
+  values,
 }) => {
   return (
     <Downshift
       onChange={onChange}
-      itemToString={item => (item ? item.value : "")}
+      itemToString={(item) => (item ? item.value : "")}
     >
       {({
         getInputProps,
@@ -59,7 +59,7 @@ export const DownshiftExample: React.FC<DownshiftExampleProps> = ({
 
         inputValue,
         selectedItem,
-        getRootProps
+        getRootProps,
       }) => (
         <div>
           <Label {...getLabelProps()}>Enter a name</Label>
@@ -77,41 +77,43 @@ export const DownshiftExample: React.FC<DownshiftExampleProps> = ({
               border: "2px pink solid",
               paddingLeft: "6px",
               paddingTop: "6px",
-              cursor: "pointer"
+              cursor: "pointer",
             }}
           >
             INPUT VALUE: {inputValue ? inputValue : ""}
             {items && items.getAllTeamMembers
               ? items.getAllTeamMembers
                   .filter(
-                    item =>
+                    (item) =>
                       !inputValue ||
-                      (item && item.name && item.name.includes(inputValue))
+                      (item &&
+                        item.user.name &&
+                        item.user.name.includes(inputValue))
                   )
                   .map((item, index) => {
                     console.log("VIEW MAPPING VALUES", {
                       item,
                       highlightedIndex,
-                      selectedItem
+                      selectedItem,
                     });
-                    if (item && item.name) {
+                    if (item && item.user.name) {
                       return (
                         <StyledListItem
                           {...getItemProps({
-                            key: item.name,
+                            key: item.user.name,
                             index,
                             item,
                             style: {
                               backgroundColor: values.invitees.includes(item)
                                 ? "lightgray"
                                 : "white",
-                              fontWeight: "normal"
-                            }
+                              fontWeight: "normal",
+                            },
                           })}
                         >
                           <Flex border="lime">
                             <Flex alignItems="center" border="lime">
-                              {item.name}
+                              {item.user.name}
                             </Flex>
                             {values.invitees.includes(item) ? (
                               <Flex
