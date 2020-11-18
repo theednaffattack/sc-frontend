@@ -18,7 +18,7 @@ interface LoginFormProps {
 
 export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
   hocLogin,
-  referer = `/view-team`
+  referer = `/view-team`,
 }) => {
   // const referIsNotLogin = referer && referer.includes("/login") ? "LOGIN" : "NOT_LOGIN";
 
@@ -34,7 +34,7 @@ export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
 
   return (
     <LoginComponent>
-      {login => (
+      {(login) => (
         <Formik
           validateOnBlur={false}
           validateOnChange={false}
@@ -54,11 +54,11 @@ export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
                     query: ME_QUERY,
                     data: {
                       __typename: "Query",
-                      me: data.login
-                    }
+                      me: data.login,
+                    },
                   });
                   console.log("AFTER WRITEQUERY");
-                }
+                },
               });
               // Router.push("/login");
             } catch (error) {
@@ -87,14 +87,13 @@ export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
 
             if (response && response.data && !response.data.login) {
               setErrors({
-                email: "invalid login"
+                email: "invalid login",
               });
               return;
             }
 
             // let pathname =
             //   referer && referer.length > 0 ? referer : "/welcome";
-            console.log("IS THIS SUBMITTING?", response);
             // if the user comes to login and wants to continue
             // on their intended path...
             if (
@@ -109,7 +108,7 @@ export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
               console.log(`SHOULD BE CUSTOM REFERER '${referer}'`, {
                 response,
                 whenIWantToReturnToARoute,
-                referer
+                referer,
               });
 
               Router.push(whenIWantToReturnToARoute, whenIWantToReturnToARoute);
@@ -130,7 +129,7 @@ export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
               console.log("SHOULD BE DEFAULT '/user/profile'", {
                 response,
                 whenIWantToReturnToARoute,
-                defaultLoginPath
+                defaultLoginPath,
               });
 
               Router.push(defaultLoginPath, defaultLoginPath);
@@ -145,7 +144,7 @@ export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
                   response.data &&
                   response.data.login &&
                   response.data.login.name &&
-                  whenIWantToReturnToARoute !== "use default"
+                  whenIWantToReturnToARoute !== "use default",
               });
               throw Error("unable to login");
             }
@@ -153,7 +152,7 @@ export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
           initialValues={{
             email: "",
             password: "",
-            keepMeSigned: true
+            keepMeSigned: true,
           }}
         >
           {({ handleSubmit }) => (
