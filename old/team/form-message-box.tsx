@@ -2,8 +2,8 @@ import {
   AbFlex,
   Flex,
   Button,
-  MaterialIconBase
-} from "../primitives/styled-rebass";
+  MaterialIconBase,
+} from "../../modules/primitives/styled-rebass";
 
 interface FormMessageBoxProps {
   dismissFunction: React.Dispatch<React.SetStateAction<boolean>>;
@@ -11,7 +11,7 @@ interface FormMessageBoxProps {
 
 export const FormMessageBox: React.FunctionComponent<FormMessageBoxProps> = ({
   children,
-  dismissFunction
+  dismissFunction,
 }) => {
   return (
     <Flex bg="rgba(255, 0, 0, 0.3)" style={{ position: "relative" }}>

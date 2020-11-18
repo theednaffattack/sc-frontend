@@ -1,20 +1,21 @@
+import { TeamWrapper, UnstyledList } from "modules/primitives/styled-rebass";
+import { ModalStates } from "modules/site-layout/grid-layout";
 import React from "react";
 import { QueryResult } from "react-apollo";
-
-import Channels from "./channels";
-import Teams from "./teams";
 import {
   GetAllTeamsForUserQuery,
   GetAllTeamsForUserQueryVariables,
   useMeQuery
-  // useGetAllTeamsForUserQuery
 } from "../gql-gen/generated/apollo-graphql";
-import { AddChannelModal } from "./add-channel-modal";
 import {
   ChannelInfoProps,
   ChannelInfoStateUpdate,
   TeamIdStateUpdate
 } from "../prepare-to-delete/[channelId]";
+import { AddChannelModal } from "./add-channel-modal";
+import Channels from "./channels";
+import { TeamListItem } from "./teams";
+
 
 export interface ViewTeamProps {
   (): JSX.Element;
@@ -91,12 +92,12 @@ interface SidebarProps {
   setChannelInfo: ChannelInfoStateUpdate;
   channelInfo: ChannelInfoProps;
   channelModal: string;
-  setChannelModal: React.Dispatch<React.SetStateAction<string>>;
+  setChannelModal: React.Dispatch<React.SetStateAction<ModalStates>>;
   teamId: string;
   setTeamId: TeamIdStateUpdate;
 }
 
-type GetAllTeamsPropsType = GetAllTeamsForUserQuery["getAllTeamsForUser"];
+
 
 export const Sidebar: React.FC<SidebarProps> = ({
   getAllTeamsForUser,
@@ -107,7 +108,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   channelInfo,
   channelModal,
   setChannelModal,
-  teamId: teamIdProp
+  // teamId: teamIdProp
 }) => {
   let username: string = "";
   // const { subscribeToMore } = getAllTeamsForUser;
@@ -117,61 +118,70 @@ export const Sidebar: React.FC<SidebarProps> = ({
     username = dataMe.me.name;
   }
 
-  let fauxTeam: GetAllTeamsPropsType = [
-    {
-      id: "no_team_id",
-      name: "no_team_name",
-      channels: []
-    }
-  ];
+  // let fauxTeam: GetAllTeamsPropsType = {
+  //   getAllTeamsForUser:[
+  //   {
+  //     channels: [],
+  //     __typename:"Team",
+  //     id: "no_team_id",
+  //     name: "no_team_name",
+  //     userToTeams: [],
+  //     members: []
+  //   }
+  // ]};
 
-  // const { data } = getAllTeamsForUser;
-
-  // const userTeamsToMap = data ? data.getAllTeamsForUser : [fauxTeam];
-
-  const userTeamsToMap = getAllTeamsForUser.data?.getAllTeamsForUser ?? [
-    fauxTeam
-  ];
-
-  console.log("userTeamsToMap".toUpperCase(), userTeamsToMap);
-
+  
   let teamName;
 
-  let teamId = teamIdProp
-    ? teamIdProp
-    : userTeamsToMap && selectedTeamIndex !== -1
-    ? userTeamsToMap[selectedTeamIndex].id
-    : "isNull";
+  let teamId: string = "isNull";
+  let getChannels
 
-  if (userTeamsToMap && selectedTeamIndex !== -1) {
-    teamName = userTeamsToMap[selectedTeamIndex].name;
+  if(selectedTeamIndex && selectedTeamIndex !== -1){
+    teamId = getAllTeamsForUser.data?.getAllTeamsForUser[selectedTeamIndex].id ?? "team ID missing";
+
+    teamName = getAllTeamsForUser.data?.getAllTeamsForUser[selectedTeamIndex].name;
+    getChannels = getAllTeamsForUser.data?.getAllTeamsForUser[selectedTeamIndex].channels
   }
-
+  
+  
   if (selectedTeamIndex === -1) {
     teamName = "select a team";
   }
 
-  let getChannels =
-    userTeamsToMap &&
-    userTeamsToMap[0] &&
-    userTeamsToMap[0].id !== "no_team_id" &&
-    userTeamsToMap[0].channels &&
-    selectedTeamIndex !== -1 &&
-    userTeamsToMap[selectedTeamIndex] &&
-    userTeamsToMap[selectedTeamIndex].channels
-      ? userTeamsToMap[selectedTeamIndex].channels
-      : [noChannel];
+  const renderTeamList = getAllTeamsForUser.data?.getAllTeamsForUser.map(({id, name})=>{
+    return(
+      <TeamListItem
+      selectedTeamIndex={selectedTeamIndex}
+      setChannelId={setChannelId}
+      setChannelInfo={setChannelInfo}
+      setSelectedTeamIndex={setSelectedTeamIndex}
+      id={id}
+      name={name}
+      letter={name.split("")[0]}
+      teamId={teamId} />
+    )
+  })
 
+  
   return (
     <>
-      <Teams
+
+<TeamWrapper>
+<UnstyledList p={0} mt={3}>
+    {
+renderTeamList
+    }
+
+</UnstyledList>
+</TeamWrapper>
+      {/* <Teams
         getAllTeamsForUser={getAllTeamsForUser}
         selectedTeamIndex={selectedTeamIndex}
         setChannelId={setChannelId}
         setChannelInfo={setChannelInfo}
         setSelectedTeamIndex={setSelectedTeamIndex}
         teamId={teamId}
-      />
+      /> */}
       <Channels
         channels={getChannels}
         setChannelId={setChannelId}

@@ -8,11 +8,11 @@ import {
   Card,
   Flex,
   StyledHr,
-  Text
-} from "../primitives/styled-rebass";
+  Text,
+} from "../../modules/primitives/styled-rebass";
 // import { Modal } from "../primitives/modal";
-import { Input, Label } from "../primitives/forms";
-import { useCreateChannelMutation } from "../gql-gen/generated/apollo-graphql";
+import { Input, Label } from "../../modules/primitives/forms";
+import { useCreateChannelMutation } from "../../modules/gql-gen/generated/apollo-graphql";
 import { FormMessageBox } from "./form-message-box";
 
 interface AddChannelModalProps {
@@ -24,7 +24,7 @@ interface AddChannelModalProps {
 export const AddChannelModal: React.FunctionComponent<AddChannelModalProps> = ({
   channelModal,
   setChannelModal,
-  teamId
+  teamId,
 }) => {
   let channelModalFlipper = channelModal === "isOpen" ? "isClosed" : "isOpen";
   let initialMessageBoxState = false;
@@ -33,9 +33,9 @@ export const AddChannelModal: React.FunctionComponent<AddChannelModalProps> = ({
     createChannelMutation,
     {
       data: dataCreateChannelMutation,
-      error: errorCreateChannelMutation
+      error: errorCreateChannelMutation,
       // loading: loadingCreateChannelMutation
-    }
+    },
   ] = useCreateChannelMutation();
 
   console.log("I HAVE TO USE THIS?", messageBox);
@@ -109,8 +109,8 @@ export const AddChannelModal: React.FunctionComponent<AddChannelModalProps> = ({
                     onSubmit={({ name }, { resetForm }) => {
                       createChannelMutation({
                         variables: {
-                          input: { name, teamId }
-                        }
+                          input: { name, teamId },
+                        },
                       });
                       resetForm({ values: { name: "" } });
                     }}
@@ -124,7 +124,7 @@ export const AddChannelModal: React.FunctionComponent<AddChannelModalProps> = ({
                             width: "100%",
                             display: "flex",
                             flexDirection: "column",
-                            alignItems: "center"
+                            alignItems: "center",
                           }}
                         >
                           <Flex my={2} flexDirection="column" width={2 / 3}>

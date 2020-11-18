@@ -65,7 +65,9 @@ const NewUserInfoEdit: React.FunctionComponent<NewUserInfoEditProps> = ({
   let initialFormValues = {
     email: email || "",
     firstName: firstName || "",
-    lastName: lastName || ""
+    lastName: lastName || "",
+    teamRoles: [],
+    teamId: ""
   };
   return (
     <Formik
@@ -76,9 +78,11 @@ const NewUserInfoEdit: React.FunctionComponent<NewUserInfoEditProps> = ({
           await editUserInfo({
             variables: {
               data: {
-                email: data.email || "",
-                firstName: data.firstName || "",
-                lastName: data.lastName || ""
+                email: data.email,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                teamRoles: data.teamRoles,
+                teamId: data.teamId
               }
             }
           });

@@ -6,15 +6,15 @@ import { QueryResult } from "react-apollo";
 import {
   GetAllTeamsForUserQuery,
   GetAllTeamsForUserQueryVariables,
-  useMeQuery
+  useMeQuery,
   // useGetAllTeamsForUserQuery
-} from "../gql-gen/generated/apollo-graphql";
+} from "../../modules/gql-gen/generated/apollo-graphql";
 import { AddChannelModal } from "./add-channel-modal";
 import {
   ChannelInfoProps,
   ChannelInfoStateUpdate,
-  TeamIdStateUpdate
-} from "../prepare-to-delete/[channelId]";
+  TeamIdStateUpdate,
+} from "../../modules/prepare-to-delete/[channelId]";
 
 export interface ViewTeamProps {
   (): JSX.Element;
@@ -58,16 +58,16 @@ export interface FakeDirectMessageItemProps {
 const FakeUsers: FakeListItemProps[] = [
   {
     id: "1",
-    name: "user one"
+    name: "user one",
   },
   {
     id: "2",
-    name: "user two"
+    name: "user two",
   },
   {
     id: "3",
-    name: "user three"
-  }
+    name: "user three",
+  },
 ];
 
 // const FakeTeams: FakeTeamItemProps[] = [
@@ -77,7 +77,7 @@ const FakeUsers: FakeListItemProps[] = [
 
 const FakeDirectMessages: FakeDirectMessageItemProps[] = [
   { id: "1", username: "slackbot", online_status: "online" },
-  { id: "2", username: "user1", online_status: "offline" }
+  { id: "2", username: "user1", online_status: "offline" },
 ];
 
 interface SidebarProps {
@@ -105,11 +105,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   channelInfo,
   channelModal,
   setChannelModal,
-  teamId: teamIdProp
+  teamId: teamIdProp,
 }) => {
   let username: string = "";
   // const { subscribeToMore } = getAllTeamsForUser;
-  const { data: dataMe, loading: loadingMe, error: errorMe } = useMeQuery();
+  const { data: dataMe } = useMeQuery();
 
   if (dataMe && dataMe.me && dataMe.me.name) {
     username = dataMe.me.name;
@@ -136,13 +136,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     teamName = "select a team";
   }
 
-  let getChannels =
-    userTeamsToMap &&
-    selectedTeamIndex !== -1 &&
-    userTeamsToMap[selectedTeamIndex] &&
-    userTeamsToMap[selectedTeamIndex].channels
-      ? userTeamsToMap[selectedTeamIndex].channels
-      : [{}];
+  // let getChannels =
+  //   userTeamsToMap &&
+  //   selectedTeamIndex !== -1 &&
+  //   userTeamsToMap[selectedTeamIndex] &&
+  //   userTeamsToMap[selectedTeamIndex].channels
+  //     ? userTeamsToMap[selectedTeamIndex].channels
+  //     : [{}];
 
   return (
     <>
@@ -155,7 +155,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         teamId={teamId}
       />
       <Channels
-        channels={getChannels}
+        channels={[]}
         setChannelId={setChannelId}
         setChannelInfo={setChannelInfo}
         channelInfo={channelInfo}

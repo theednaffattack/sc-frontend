@@ -1,28 +1,28 @@
+import { SubscribeToMoreOptions } from "apollo-boost";
+import { useEffect, useRef } from "react";
 import styled from "styled-components";
-import { useRef, useEffect } from "react";
-
-import {
-  Text,
-  Flex,
-  StyledListItem,
-  UnstyledList
-} from "../primitives/styled-rebass";
-import { AvatarPlaceholder } from "../profile/avatar-placeholder";
-
 // import { FakeMessageItemProps } from "../../pages/view-team";
 import {
-  useGetAllChannelMessagesQuery,
-  Message as MessageType,
-  GetAllChannelMessagesQueryResult,
-  NewMessageSubDocument,
   GetAllChannelMessagesQuery,
+  GetAllChannelMessagesQueryResult,
+
+  // MeQueryResult,
+  MeQuery,
+  Message as MessageType,
+  NewMessageSubDocument,
+
   // GetAllChannelMessagesQueryVariables,
   NewMessageSubSubscription,
   NewMessageSubSubscriptionVariables,
-  // MeQueryResult,
-  MeQuery
-} from "../gql-gen/generated/apollo-graphql";
-import { SubscribeToMoreOptions } from "apollo-boost";
+  useGetAllChannelMessagesQuery,
+} from "../../modules/gql-gen/generated/apollo-graphql";
+import {
+  Flex,
+  StyledListItem,
+  Text,
+  UnstyledList,
+} from "../../modules/primitives/styled-rebass";
+import { AvatarPlaceholder } from "../../modules/profile/avatar-placeholder";
 
 export const MessageWrapper = styled.div`
   grid-column: 3;
@@ -225,7 +225,7 @@ interface MessageListProps {
 const MessageList: React.FunctionComponent<MessageListProps> = ({
   data,
   dataMe,
-  subscribeToMoreMessages
+  subscribeToMoreMessages,
 }) => {
   useEffect(() => {
     if (subscribeToMoreMessages) {
@@ -237,11 +237,11 @@ const MessageList: React.FunctionComponent<MessageListProps> = ({
           const newFeedItem = subscriptionData.data.newMessageSub;
 
           const newFeed = Object.assign({}, prev, {
-            getAllChannelMessages: [...prev.getAllChannelMessages, newFeedItem]
+            getAllChannelMessages: [...prev.getAllChannelMessages, newFeedItem],
           });
 
           return newFeed;
-        }
+        },
       });
       return () => {
         unsubscribe();
@@ -249,15 +249,13 @@ const MessageList: React.FunctionComponent<MessageListProps> = ({
     }
   }, []);
 
-  if (data && dataMe && dataMe.me) {
+  if (data && dataMe) {
     return (
       <UnstyledList p={0}>
-        {data.getAllChannelMessages.map(result => {
+        {data.getAllChannelMessages.map((result) => {
           let { id, message, sentBy } = result;
           let getUserId =
-            dataMe && dataMe.me && dataMe.me.id
-              ? dataMe.me.id
-              : "unable to determine user";
+            dataMe && dataMe.id ? dataMe.id : "unable to determine user";
           let fromMe =
             sentBy.id === getUserId ? "isLoggedInUser" : "is_NOT_LoggedInUser";
 
@@ -325,14 +323,14 @@ const MessageList: React.FunctionComponent<MessageListProps> = ({
 
 const Message: React.FunctionComponent<MessageProps> = ({
   channelId,
-  dataMe
+  dataMe,
   // messages,
 
   // selectedChannelIndex,
   // setSelectedChannelIndex
 }) => {
   const { data, subscribeToMore } = useGetAllChannelMessagesQuery({
-    variables: { channelId }
+    variables: { channelId, teamId: "" },
   });
   // const [isLoading, setIsLoading] = useState(true);
   let listBottomRef = useRef<HTMLDivElement>(null);

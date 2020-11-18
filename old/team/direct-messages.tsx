@@ -1,10 +1,5 @@
-import {
-  Flex,
-  StyledListItem,
-  UnstyledList
-} from "../primitives/styled-rebass";
-import Icon from "../icon/m-icon";
-import { useGetAllChannelMessagesQuery } from "../gql-gen/generated/apollo-graphql";
+import { useGetAllChannelMessagesQuery } from "../../modules/gql-gen/generated/apollo-graphql";
+import { Flex } from "../../modules/primitives/styled-rebass";
 // import { FakeDirectMessageItemProps } from "../../pages/view-team";
 
 interface MessageProps {
@@ -13,14 +8,14 @@ interface MessageProps {
 }
 
 const GetAllChannelMessages: React.FunctionComponent<MessageProps> = ({
-  channelId
+  channelId,
 }) => {
   const {
     data: dataGetAllChannelMessages,
     error: errorGetAllChannelMessages,
-    loading: loadingGetAllChannelMessages
+    loading: loadingGetAllChannelMessages,
   } = useGetAllChannelMessagesQuery({
-    variables: { channelId }
+    variables: { channelId, teamId: "" },
   });
   if (errorGetAllChannelMessages)
     return <p>Error: {JSON.stringify(errorGetAllChannelMessages, null, 2)}</p>;
@@ -29,7 +24,7 @@ const GetAllChannelMessages: React.FunctionComponent<MessageProps> = ({
     return (
       <ul>
         Channel Message DELETE
-        {dataGetAllChannelMessages.getAllChannelMessages.map(value => (
+        {dataGetAllChannelMessages.getAllChannelMessages.map((value) => (
           <li key={value.id}>{value.message}</li>
         ))}
       </ul>
@@ -58,7 +53,7 @@ const GetAllChannelMessages: React.FunctionComponent<MessageProps> = ({
 // );
 
 const DirectMessages: React.FunctionComponent<MessageProps> = ({
-  channelId
+  channelId,
 }) => {
   return (
     <Flex flexDirection="column">

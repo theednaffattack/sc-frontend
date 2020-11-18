@@ -4,7 +4,7 @@ import {
   Flex,
   Icon,
   FlexUserProfileWrap,
-  Avatar
+  Avatar,
 } from "../primitives/styled-rebass";
 
 export interface IUserProfileImage {
@@ -30,11 +30,11 @@ function UserProfileImage({ user, flexInstruction, isMe }: IUserProfileImage) {
         height="90px"
         width="90px"
         overflow="hidden"
-        borderRadius="50%"
+        // borderRadius="50%"
+        // boxShadow="2px 2px 16px rgba(0, 0, 0, 0.25)"
         bg="thread_footer"
         alignItems="center"
         justifyContent="center"
-        boxShadow="2px 2px 16px rgba(0, 0, 0, 0.25)"
       >
         {user && user.profileImgUrl ? (
           <Avatar src={user.profileImgUrl} width={90} height={90} />

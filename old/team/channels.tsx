@@ -131,9 +131,7 @@ const ChannelIfTeamIdIsDefined: React.FunctionComponent<ChannelProps> = ({
   // channels && channels[selectedTeamIndex] ? channels[selectedTeamIndex] : -1;
   let mappedChannels;
 
-  const [selectedChannelIndex, setSelectedChannelIndex] = useState<number>(
-    initialState
-  );
+  const [, setSelectedChannelIndex] = useState<number>(initialState);
 
   let { data } = useLoadChannelsByTeamIdQuery({
     variables: {

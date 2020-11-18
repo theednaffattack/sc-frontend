@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import { Flex, Heading } from "../primitives/styled-rebass";
+import { Flex, Heading } from "../../modules/primitives/styled-rebass";
 
 interface HeaderProps {
   channelName: string;
@@ -16,7 +16,7 @@ const HeaderWrapper = styled.div`
 
 const Header: React.FunctionComponent<HeaderProps> = ({
   // channelId,
-  channelName
+  channelName,
 }) => {
   return (
     <HeaderWrapper>

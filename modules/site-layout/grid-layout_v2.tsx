@@ -667,7 +667,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({
           <UnstyledList pl={0} my={0} width={1}>
             <UserListItem name="slackbot" />
             {dataGetAllTeamMembersLazyQuery?.getAllTeamMembers.map(
-              UserListItem
+              ({user: {id, name}})=><UserListItem id={id} name={name} isMe={id === dataMeQuery?.me?.id}  />
             ) ??
               Array.from({ length: 7 }).map((_, index) => (
                 <StyledListItem key={index}>
@@ -774,7 +774,11 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({
       viewerState &&
       viewerState.idShowing &&
       viewerState.viewerMode !== "directMessage" ? (
-        <Messages dataMe={dataMeQuery.me} channelId={viewerState.idShowing} />
+        <Messages dataMe={dataMeQuery.me} channelId={viewerState.idShowing} 
+        fileViewerModalState={{id: "",uri:"",view:"isClosed"}}
+        setFileViewerModalState={()=>console.log("SET FILE VIEWER MODAL STATE")
+        }
+         />
       ) : (
         ""
       )}
@@ -791,7 +795,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({
         viewerState.idShowing.length > 0 ? (
           <>
             <FormikDirectMessageForm
-              initialValues={{ direct_message: "" }}
+              initialValues={{ direct_message: "", files: [] }}
               threadId={viewerState.idShowing}
               teamId={viewerState.teamIdShowing ?? ""}
               invitees={
@@ -822,8 +826,10 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({
         viewerState.idShowing.length > 0 ? (
           <FormikMessageForm
             channelId={viewerState.idShowing}
+            teamId={viewerState.idShowing}
             initialValues={{
-              channel_message: ""
+              channel_message: "",
+              files: []
             }}
           />
         ) : (

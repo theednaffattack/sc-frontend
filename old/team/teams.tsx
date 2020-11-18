@@ -12,15 +12,19 @@ import {
   ColorProps,
   FlexboxProps,
   HeightProps,
-  WidthProps
+  WidthProps,
   // fontSize,
   // lineHeight,
   // FontSizeProps,
   // LineHeightProps
 } from "styled-system";
-import { Flex, Text, UnstyledList } from "../primitives/styled-rebass";
-import { GetAllTeamsForUserQueryResult } from "../gql-gen/generated/apollo-graphql";
-import { ChannelInfoStateUpdate } from "../prepare-to-delete/[channelId]";
+import {
+  Flex,
+  Text,
+  UnstyledList,
+} from "../../modules/primitives/styled-rebass";
+import { GetAllTeamsForUserQueryResult } from "../../modules/gql-gen/generated/apollo-graphql";
+import { ChannelInfoStateUpdate } from "../../modules/prepare-to-delete/[channelId]";
 // import { GetAllTeamsForUserQueryTypes } from "../shared-module-typings/types";
 
 const TeamWrapper = styled.div`
@@ -52,7 +56,7 @@ ${color}
   
   border-style: solid;
     border-width: thick;
-    border-color: ${props => (props.highlight ? "#767676" : "transparent")};
+    border-color: ${(props) => (props.highlight ? "#767676" : "transparent")};
   :hover{
     border-style: solid;
     border-width: thick;
@@ -100,7 +104,7 @@ const TeamListItem: React.FunctionComponent<TeamDetailProps> = (
     selectedTeamIndex,
     setChannelId,
     setChannelInfo,
-    teamId
+    teamId,
   },
   index: number
 ) => {
@@ -134,7 +138,7 @@ const TeamListItem: React.FunctionComponent<TeamDetailProps> = (
               channelId: "",
               channelIndex: -1,
               channelName: "",
-              invitees: []
+              invitees: [],
             });
           }
         }}
@@ -153,7 +157,7 @@ const Teams: React.FunctionComponent<TeamProps> = ({
   setSelectedTeamIndex,
   setChannelId,
   setChannelInfo,
-  teamId
+  teamId,
 }) => {
   const userTeamsToMap =
     getAllTeamsForUser &&
@@ -161,14 +165,14 @@ const Teams: React.FunctionComponent<TeamProps> = ({
     getAllTeamsForUser.data.getAllTeamsForUser;
   let newMapWithSetter;
   if (userTeamsToMap) {
-    newMapWithSetter = userTeamsToMap.map(item => {
+    newMapWithSetter = userTeamsToMap.map((item) => {
       let newItems = {
         ...item,
         setSelectedTeamIndex,
         selectedTeamIndex,
         setChannelId,
         setChannelInfo,
-        teamId
+        teamId,
       };
       return newItems;
     });

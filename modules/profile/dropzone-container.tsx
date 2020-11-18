@@ -13,7 +13,8 @@ import {
   SignedS3SubPayload,
   AddProfilePictureMutationResult,
   MeQueryResult,
-  MeQuery
+  MeQuery,
+  S3SignatureAction,
 } from "../gql-gen/generated/apollo-graphql";
 import { ME_QUERY } from "../gql-gen/query-documents/user/queries/Me";
 
@@ -53,11 +54,11 @@ export interface ProfileDropzoneContainerState {
 type SignedS3 =
   | ({
       __typename?: "SignedS3SubPayload" | undefined;
-    } & Pick<SignedS3SubPayload, "url" | "signedRequest">)[]
+    } & Pick<SignedS3SubPayload, "signedRequest" | "__typename" | "uri">)[]
   | undefined;
 
 export const inputStyles = {
-  display: "none"
+  display: "none",
 };
 
 const initialState = {
@@ -66,7 +67,7 @@ const initialState = {
   fileInputKey: Date.now().toString(),
   fileNames: [],
   highlight: false,
-  previewSource: null
+  previewSource: null,
 };
 
 export default class DropZoneContainer extends Component<
@@ -100,18 +101,18 @@ export default class DropZoneContainer extends Component<
       files: [],
       name: "",
       disabled: false,
-      fileInputKey: initialState.fileInputKey
+      fileInputKey: initialState.fileInputKey,
     };
   }
 
   handleRemoveIndividualImagePreview(index: number) {
-    this.setState(prevState => {
+    this.setState((prevState) => {
       // @ts-ignore
       let newFiles = prevState.files.filter(function(file, fileIndex) {
         return fileIndex !== index;
       });
       return {
-        files: newFiles
+        files: newFiles,
       };
     });
   }
@@ -124,7 +125,7 @@ export default class DropZoneContainer extends Component<
 
     if (imagesAreUploadedToS3) {
       let [successfullyUploadedFiles] = imagesAreUploadedToS3.map(
-        image => image.url
+        (image) => image.uri
       );
 
       try {
@@ -132,15 +133,15 @@ export default class DropZoneContainer extends Component<
           variables: {
             data: {
               user: submissionData.user,
-              image: successfullyUploadedFiles
-            }
+              image: successfullyUploadedFiles,
+            },
           },
           update: (cache, { data }) => {
             if (!data || !data.addProfilePicture) {
               return;
             }
             let fromCache = cache.readQuery<MeQuery>({
-              query: ME_QUERY
+              query: ME_QUERY,
             });
 
             let id = (fromCache && fromCache.me && fromCache.me.id) || "";
@@ -163,11 +164,11 @@ export default class DropZoneContainer extends Component<
                   email,
                   profileImageUri:
                     data.addProfilePicture &&
-                    data.addProfilePicture.profileImgUrl
-                }
-              }
+                    data.addProfilePicture.profileImgUrl,
+                },
+              },
             });
-          }
+          },
 
           // {
           //   data: {
@@ -196,11 +197,11 @@ export default class DropZoneContainer extends Component<
       text: "",
       title: "",
       user: this.props.dataMe,
-      images: []
+      images: [],
     });
     this.setState({
       fileInputKey: Date.now().toString(),
-      files: []
+      files: [],
     });
     this.handleClearFilePreview();
   }
@@ -233,7 +234,7 @@ export default class DropZoneContainer extends Component<
 
   handleClearFilePreview() {
     this.setState({
-      files: []
+      files: [],
     });
   }
 
@@ -256,13 +257,13 @@ export default class DropZoneContainer extends Component<
     const self = this;
 
     return await Promise.all(
-      self.state.files.map(async myFile => {
+      self.state.files.map(async (myFile) => {
         return await fetch(myFile)
-          .then(r => r.blob())
+          .then((r) => r.blob())
           .then(
-            blobFile =>
+            (blobFile) =>
               new File([blobFile], uuidv4(), {
-                type: "image/png"
+                type: "image/png",
               })
           );
       })
@@ -271,14 +272,14 @@ export default class DropZoneContainer extends Component<
 
   async makeBlobUrlsFromReference(myFile: any) {
     return await fetch(myFile)
-      .then(r => r.blob())
-      .then(blobFile => {
+      .then((r) => r.blob())
+      .then((blobFile) => {
         const getFileName = this.state.files
-          .filter(aFile => aFile.blobUrl === myFile)
-          .map(theFile => theFile.name)[0];
+          .filter((aFile) => aFile.blobUrl === myFile)
+          .map((theFile) => theFile.name)[0];
 
         return new File([blobFile], getFileName, {
-          type: myFile.type
+          type: myFile.type,
         });
       });
   }
@@ -286,15 +287,15 @@ export default class DropZoneContainer extends Component<
   uploadToS3 = async ({ file, signedRequest }: any) => {
     const options = {
       headers: {
-        "Content-Type": "image/png"
-      }
+        "Content-Type": "image/png",
+      },
     };
 
     const theFile = await this.makeBlobUrlsFromReference(file);
 
     let s3ReturnInfo = await axios
       .put(signedRequest, theFile, options)
-      .catch(error => console.error({ error }));
+      .catch((error) => console.error({ error }));
 
     return s3ReturnInfo;
   };
@@ -330,16 +331,28 @@ export default class DropZoneContainer extends Component<
     const { files } = this.state;
     const { mutateSignS3 } = this.props;
 
-    const preppedFiles = files.map(file => {
-      return { filename: file.name, filetype: file.type };
-    });
+    // const preppedFiles = files.map((file) => {
+    //   return { filename: file.name, filetype: file.type };
+    // });
 
     if (!files || !files[0]) return;
 
     const response = await mutateSignS3({
       variables: {
-        files: [...preppedFiles]
-      }
+        action: S3SignatureAction.PutObject,
+        files: [
+          {
+            lastModified: 10,
+            lastModifiedDate: "",
+            name: "",
+            path: "",
+            size: 5,
+            type: "",
+            webkitRelativePath: "",
+          },
+        ],
+        // files: [...preppedFiles],
+      },
     });
 
     if (response && response.data && response.data.signS3) {
@@ -349,8 +362,8 @@ export default class DropZoneContainer extends Component<
         signatures.map(async (signature: any, signatureIndex: number) => {
           return await this.uploadToS3({
             file: files[signatureIndex].blobUrl,
-            signedRequest: signature.signedRequest
-          }).catch(error =>
+            signedRequest: signature.signedRequest,
+          }).catch((error) =>
             console.error(JSON.stringify({ ...error }, null, 2))
           );
         })
@@ -369,7 +382,7 @@ export default class DropZoneContainer extends Component<
 
         size,
         type,
-        webkitRelativePath
+        webkitRelativePath,
       } = file;
 
       return {
@@ -379,7 +392,7 @@ export default class DropZoneContainer extends Component<
         name: this.formatFilename(file),
         size,
         type,
-        webkitRelativePath
+        webkitRelativePath,
       };
     });
   }
@@ -394,7 +407,7 @@ export default class DropZoneContainer extends Component<
       array = this.fileListToArray(evt.target.files);
       const previewFiles = this.makeObjectUrls(array);
       this.setState({
-        files: [...previewFiles]
+        files: [...previewFiles],
       });
       return previewFiles;
     } else {
@@ -402,7 +415,7 @@ export default class DropZoneContainer extends Component<
       const previewFiles = this.makeObjectUrls(array);
 
       this.setState({
-        files: [...previewFiles]
+        files: [...previewFiles],
       });
       return previewFiles;
     }
@@ -413,7 +426,7 @@ export default class DropZoneContainer extends Component<
       dataAddProfilePicture,
       errorAddProfilePicture,
       loadingAddProfilePicture,
-      dataMe
+      dataMe,
     } = this.props;
     return (
       <SignS3Component>

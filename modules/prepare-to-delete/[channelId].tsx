@@ -5,22 +5,22 @@ import {
   GetAllTeamsForUserComponent,
   User,
   useMeQuery,
-  useAddMessageToChannelMutation
+  useAddMessageToChannelMutation,
 } from "../gql-gen/generated/apollo-graphql";
 import { getLayout } from "../site-layout/grid-layout";
-import GridLayout from "../team/grid-page-container";
+import GridLayout from "../../old/team/grid-page-container";
 // import Channels from "../../../../modules/team/channels";
 // import Teams from "../../../../modules/team/teams";
-import Header from "../team/header";
-import Messages from "../team/messages";
-import { Sidebar } from "../team/sidebar";
-import InputContainer from "../team/input-container";
+import Header from "../../old/team/header";
+import Messages from "../../old/team/messages";
+import { Sidebar } from "../../old/team/sidebar";
+import InputContainer from "../../old/team/input-container";
 // import SendMessage from "../../../../modules/team/input";
 import { Input, StyledForm } from "../primitives/forms";
 import { NextContext } from "../../typings/NextContext";
 import { isBrowser } from "../../lib/isBrowser";
 import redirect from "../../lib/redirect";
-import { EmptyMessagesWrapper } from "../team/empty-messages-wrapper";
+import { EmptyMessagesWrapper } from "../../old/team/empty-messages-wrapper";
 import { Label } from "../primitives/styled-rebass";
 
 const FakeChannelName = "fake channel name";
@@ -50,14 +50,14 @@ interface ViewTeamProps {
     referer,
     userAgent,
     channelId,
-    teamId
+    teamId,
   }: PageProps): JSX.Element;
 
   getInitialProps: ({
     pathname,
     query,
     referer,
-    userAgent
+    userAgent,
   }: NextContext) => Promise<{
     pathname: NextContext["pathname"];
     query: NextContext["query"];
@@ -88,14 +88,14 @@ export type TeamIdStateUpdate = React.Dispatch<React.SetStateAction<string>>;
 const Grid: React.FunctionComponent<GridProps> = ({
   channelId: channelIdProp,
   query,
-  teamId: teamIdProp
+  teamId: teamIdProp,
 }) => {
   let initialSelectedTeamIndexState = -1;
   let initialChannelInfoState: ChannelInfoProps = {
     channelIndex: query.channelId ? -3 : -1,
     channelId: channelIdProp,
     channelName: "",
-    invitees: []
+    invitees: [],
   };
 
   let initialChannelState = -1;
@@ -106,7 +106,7 @@ const Grid: React.FunctionComponent<GridProps> = ({
     OPEN: "isOpen",
     CLOSED: "isClosed",
     IS_OPENING: "isOpening",
-    IS_CLOSING: "isClosing"
+    IS_CLOSING: "isClosing",
   };
 
   let initialChannelModalState = channelModalStates.CLOSED;
@@ -129,7 +129,7 @@ const Grid: React.FunctionComponent<GridProps> = ({
 
   const { data: dataMe } = useMeQuery();
   const [
-    addMessageMutation
+    addMessageMutation,
 
     // {
     //   data: dataAddMessageToChannel,
@@ -139,7 +139,7 @@ const Grid: React.FunctionComponent<GridProps> = ({
   ] = useAddMessageToChannelMutation();
   return (
     <GetAllTeamsForUserComponent>
-      {getAllTeamsForUser => {
+      {(getAllTeamsForUser) => {
         return (
           <GridLayout>
             <Sidebar
@@ -163,9 +163,9 @@ const Grid: React.FunctionComponent<GridProps> = ({
               }
             />
 
-            {channelId ? (
+            {channelId && dataMe ? (
               <Messages
-                dataMe={dataMe}
+                dataMe={dataMe.me}
                 // messages={FakeMessages}
                 // setIsLoading={setIsLoading}
                 channelId={channelId}
@@ -188,7 +188,7 @@ const Grid: React.FunctionComponent<GridProps> = ({
                     channelInfo.invitees &&
                     channelInfo.invitees.length > 0
                       ? channelInfo.invitees.map(
-                          invitee => (invitee && invitee.id ? invitee.id : "")
+                          (invitee) => (invitee && invitee.id ? invitee.id : "")
                           // invitee => invitee.id
                         )
                       : [""];
@@ -198,9 +198,10 @@ const Grid: React.FunctionComponent<GridProps> = ({
                         channelId,
                         invitees: getInvitees,
                         message: channel_message,
-                        sentTo: ""
-                      }
-                    }
+                        sentTo: "",
+                        teamId,
+                      },
+                    },
                   });
                   resetForm({ values: { channel_message: "" } });
                 }}
@@ -222,7 +223,9 @@ const Grid: React.FunctionComponent<GridProps> = ({
                         type="text"
                         component={Input}
                       />
-                      <Label htmlFor="file">Upload</Label>
+                      <Label bg="hotpink" htmlFor="file">
+                        Upload
+                      </Label>
                       <Field
                         disabled={channelInfo.channelId ? false : true}
                         label="channel message"
@@ -253,7 +256,7 @@ const ViewTeam: ViewTeamProps = ({ channelId, teamId, query }) => {
   return <Grid channelId={channelId} teamId={teamId} query={query} />;
 };
 
-ViewTeam.getInitialProps = async ctx => {
+ViewTeam.getInitialProps = async (ctx) => {
   let { pathname, query, referer, userAgent } = ctx;
 
   const { channelId: channelIdBase, teamId: teamIdBase } = query;
@@ -265,7 +268,7 @@ ViewTeam.getInitialProps = async ctx => {
   if (!ctx.token && !isBrowser) {
     console.log("SSR redirect");
     redirect(ctx, "/login", {
-      asPath: "/login"
+      asPath: "/login",
     });
   }
 
@@ -275,7 +278,7 @@ ViewTeam.getInitialProps = async ctx => {
     referer,
     userAgent,
     channelId,
-    teamId
+    teamId,
   };
 };
 

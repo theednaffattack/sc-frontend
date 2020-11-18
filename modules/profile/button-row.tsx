@@ -17,6 +17,8 @@ interface ButtonRowProps {
             email: string;
             firstName: string;
             lastName: string;
+            teamRoles: never[];
+            teamId: string;
           }>
         >
       | undefined
@@ -35,7 +37,7 @@ const ButtonRow: React.FunctionComponent<ButtonRowProps> = ({
   loadingSubmitState,
   resetForm,
   setExpanded,
-  setLoadingSubmitState
+  setLoadingSubmitState,
 }) => {
   return (
     <>

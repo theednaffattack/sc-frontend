@@ -316,7 +316,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
 
           <UnstyledList pl={0} my={0} width={1}>
             <UserListItem name="slackbot" />
-            {dataGetAllTeamMembers?.getAllTeamMembers.map(UserListItem) ??
+            {dataGetAllTeamMembers?.getAllTeamMembers.map(({ user})=><UserListItem name={user.name} id={user.id} isMe={user.id === dataMeQuery?.me?.id}  />) ??
               "NO TEAM MEMBERS?"}
           </UnstyledList>
         </Flex>
@@ -367,15 +367,16 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
         ) : null}
       </HeaderWrapper>
       {/* DIRECT MESSAGES QUERY */}
-      {dataMeQuery && threadId ? (
-        <DirectMessages dataMe={dataMeQuery.me} threadId={threadId} />
+      {dataMeQuery && threadId && teamId ? (
+        <DirectMessages teamId={teamId} dataMe={dataMeQuery.me} threadId={threadId} />
       ) : (
         ""
       )}
 
       {/* DISPLAY MESSAGES */}
       {dataMeQuery && channelId && !threadId ? (
-        <Messages dataMe={dataMeQuery.me} channelId={channelId} />
+        <Messages setFileViewerModalState={()=>console.log("SET FILE VIEWER MODAL STATE FROM DISPLAY MESSAGES")
+        } fileViewerModalState={{view: "isClosed", uri: "", id: ""}} dataMe={dataMeQuery.me} channelId={channelId} />
       ) : (
         ""
       )}
@@ -386,7 +387,7 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
         dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser ? (
           <>
             <FormikDirectMessageForm
-              initialValues={{ direct_message: "" }}
+              initialValues={{ direct_message: "", files: [] }}
               threadId={threadId}
               teamId={teamId ?? ""}
               invitees={dataLoadDirectMessageThreadsByTeamAndUserLazyQuery.loadDirectMessageThreadsByTeamAndUser
@@ -404,12 +405,14 @@ const GridLayout: React.FunctionComponent<GridLayoutProps> = ({ children }) => {
         ) : (
           ""
         )}
-        {channelId ? (
+        {channelId && teamId ? (
           <>
             <FormikMessageForm
               channelId={channelId}
+              teamId={teamId}
               initialValues={{
-                channel_message: ""
+                channel_message: "",
+                files: []
               }}
             />{" "}
           </>
