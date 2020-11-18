@@ -24,6 +24,7 @@ import {
   ChannelInfoStateUpdate
 } from "../prepare-to-delete/[channelId]";
 import { DirectMessages } from "./direct-messages-v2";
+import { ModalStates } from "../site-layout/grid-layout";
 
 const textColor = "#958993";
 
@@ -42,7 +43,7 @@ export interface ChannelProps {
   setChannelInfo: ChannelInfoStateUpdate;
   channelInfo: ChannelInfoProps;
   channelModal: string;
-  setChannelModal: React.Dispatch<React.SetStateAction<string>>;
+  setChannelModal: React.Dispatch<React.SetStateAction<ModalStates>>;
 }
 
 export interface ListItemProps {
@@ -137,7 +138,7 @@ const ChannelIfTeamIdIsDefined: React.FunctionComponent<ChannelProps> = ({
   //   channels && channels[selectedChannelIndex]
   //     ? channels[selectedChannelIndex].id
   //     : "";
-  let modalToggle = channelModal === "isOpen" ? "isClosed" : "isOpen";
+  let modalToggle: ModalStates = channelModal === "isOpen" ? "isClosed" : "isOpen";
   return (
     <ChannelWrapper>
       <Heading ml={2} fontFamily="text" as="h1" color="white">
